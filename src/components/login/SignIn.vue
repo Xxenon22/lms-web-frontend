@@ -54,7 +54,7 @@ const handleLogin = async () => {
   <div class="flex flex-col items-center bg-cover bg-center justify-center min-h-screen space-y-4 p-6">
     <div
       class="card w-full max-w-6xl min-h-[490px] bg-cover bg-center  p-4 rounded-md space-y-4 relative flex flex-col justify-center"
-      style="background-image: url(/src/assets/school_bg.png);">
+      style="background-image: url(/public/images/bg_school.png);">
 
       <div class="flex flex-row justify-center pt-20">
         <div class="flex ">
