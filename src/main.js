@@ -51,7 +51,7 @@ app.use(PrimeVue, {
 });
 
 router.beforeEach((to, from, next) => {
-    const defaultTitle = 'E Learning Metland School'
+    const defaultTitle = 'Metschoo Integrated Learning System'
     document.title = to.meta.title || defaultTitle
     next()
 })

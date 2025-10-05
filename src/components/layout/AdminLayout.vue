@@ -1,33 +1,3 @@
-<!-- <script setup>
-import { useConfirm } from "primevue/useconfirm";
-import { onMounted, ref } from "vue";
-import { supabase } from "../../supabase/supabase";
-import { useToast, Toast } from "primevue";
-import { useRouter } from "vue-router";
-
-const visible = ref(false); //untuk Dialog
-const loading = ref(false);
-
-const router = useRouter();
-const confirm = useConfirm();
-const requireConfirmation = (event) => {
-    confirm.require({
-        target: event.currentTarget,
-        group: "headless",
-        message: "Are you sure you want to Sign Out of this account?",
-    });
-};
-const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-        console.error("Logout error:", error.message);
-        return;
-    }
-    router.push({ name: "SignIn" });
-};
-
-</script> -->
-
 <script setup>
 import { useConfirm } from "primevue/useconfirm";
 import { useRouter } from "vue-router";
@@ -56,10 +26,9 @@ const requireConfirmation = (event) => {
         <nav class="navbar fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
             <div class="flex items-center space-x-5">
                 <img src="../../assets/LOGO_SMK_METLAND.png" alt="Logo" width="65" />
-                <h2>
-                    E-Learning <br />
-                    METLAND SCHOOL
-                </h2>
+                <h1>
+                    <b>MILS</b> <br /> <b>M</b>etschoo <b>I</b>ntegrated <b>L</b>earning <b>S</b>ystem
+                </h1>
             </div>
             <div class="flex items-center space-x-4">
 
@@ -136,12 +105,12 @@ const requireConfirmation = (event) => {
                         <Icon class="icon" icon="uis:schedule" /><span class="nav-item">Timetable</span>
                     </li>
                 </RouterLink>
-                <!-- <RouterLink to="#">
+                <RouterLink to="/add-teacher-account">
                     <li>
-                        <Icon class="icon" icon="qlementine-icons:sort-ranking-desc-16" /><span class="nav-item">Rank
-                            Up</span>
+                        <Icon class="icon" icon="mdi:account-multiple-add-outline" /><span class="nav-item">Add Teacher
+                            Account</span>
                     </li>
-                </RouterLink> -->
+                </RouterLink>
             </ul>
         </aside>
 

@@ -114,7 +114,7 @@ const deleteTeacher = (id) => {
         rejectLabel: 'Cancel',
         accept: async () => {
             try {
-                await api.delete(`/guru/${id}`)
+                await api.delete(`/teacher/${id}`)
                 toast.add({ severity: 'success', summary: 'Deleted', detail: 'Teacher deleted successfully', life: 3000 })
                 fetchDataTeacher()
             } catch (err) {
@@ -178,7 +178,7 @@ const updateSubject = async () => {
 
 const updateTeacher = async () => {
     try {
-        await api.put(`/guru/${editTeacherData.value.id}`, {
+        await api.put(`/teacher/${editTeacherData.value.id}`, {
             name: editTeacherData.value.name
         })
         toast.add({ severity: 'success', summary: 'Updated', detail: 'Teacher updated successfully', life: 3000 })

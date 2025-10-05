@@ -65,7 +65,7 @@ const handleRegister = async () => {
               <label for="email">Email</label>
             </FloatLabel>
             <FloatLabel variant="in">
-              <Password toggleMask class="w-full" input-class="w-full" :feedback="false" v-model="password" />
+              <Password toggleMask class="w-full" input-class="w-full" v-model="password" />
               <label for="password">Password</label>
             </FloatLabel>
 

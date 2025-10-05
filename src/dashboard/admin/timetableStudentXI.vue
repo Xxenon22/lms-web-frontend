@@ -61,7 +61,7 @@ const fetchFiles = async () => {
         files.value = res.data.map((file) => ({
             id: file.id,
             name: file.file_name,
-            url: `${import.meta.env.VITE_API_URL}/api/uploads/timetables-grade-xi/${file.file_name}`,
+            url: `${import.meta.env.VITE_API_URL}/uploads/timetables-grade-xi/${file.file_name}`,
         }));
     } catch (err) {
         toast.add({ severity: "error", summary: "Error", detail: err.message, life: 3000 });

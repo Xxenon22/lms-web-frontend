@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import api from '../../services/api' // axios instance
+import api from '../../services/api'
 import { useToast } from 'primevue'
 
 const route = useRoute()
@@ -12,35 +12,27 @@ const isSubmitting = ref(false)
 const hasChanges = ref(false)
 const initialNilai = ref(null)
 
-// Ambil params dari URL
 const userId = route.params.userId
 const assignmentId = route.params.assignmentId
 
-// State jawaban
+// State data
 const loading = ref(true)
 const errorMessage = ref(null)
 const jawabanPilgan = ref([])
 const jawabanEssai = ref([])
 const jawabanRefleksi = ref(null)
 const nilai = ref(null)
+const fileJawabanSiswa = ref([])
 
-// Helper untuk URL gambar (backend Express)
 function getImageUrl(filename) {
     if (!filename) return null
     return `${import.meta.env.VITE_API_URL}/uploads/gambar-soal/${filename}`
 }
 
-// Ambil jawaban siswa by userId + assignmentId
 const fetchJawabanSiswa = async () => {
-    if (!userId || !assignmentId) {
-        errorMessage.value = 'Parameter userId atau assignmentId tidak ditemukan.'
-        loading.value = false
-        return
-    }
-
     try {
         const res = await api.get('/jawaban-siswa/all-with-soal', {
-            params: { bank_soal_id: assignmentId }
+            params: { bank_soal_id: assignmentId },
         })
 
         const data = res.data.filter(item => item.user_id === Number(userId))
@@ -64,9 +56,9 @@ const fetchJawabanSiswa = async () => {
                     pg_d: item.pg_d,
                     pg_e: item.pg_e,
                     kunci_jawaban: item.kunci_jawaban,
-                    gambar: getImageUrl(item.gambar)
-                }
-            }));
+                    gambar: getImageUrl(item.gambar),
+                },
+            }))
 
         jawabanEssai.value = data
             .filter(item => item.pertanyaan_essai)
@@ -77,30 +69,24 @@ const fetchJawabanSiswa = async () => {
                 refleksi_siswa: item.refleksi_siswa,
                 soal: {
                     pertanyaan_essai: item.pertanyaan_essai,
-                    gambar_soal_essai: getImageUrl(item.gambar_soal_essai)
-                }
-            }));
+                    gambar_soal_essai: getImageUrl(item.gambar_soal_essai),
+                },
+            }))
 
-        jawabanRefleksi.value = data[0]?.refleksi_siswa || null;
-
+        jawabanRefleksi.value = data[0]?.refleksi_siswa || null
     } catch (err) {
-        console.error("Error fetch jawaban siswa:", err)
+        console.error('Error fetch jawaban siswa:', err)
         errorMessage.value = 'Gagal mengambil data jawaban.'
     }
     loading.value = false
 }
 
-// Ambil nilai
 const fetchNilai = async () => {
     try {
         const res = await api.get('/jawaban-siswa/all-with-soal', {
-            params: { bank_soal_id: assignmentId }
+            params: { bank_soal_id: assignmentId },
         })
-
-        // Ambil jawaban siswa untuk user ini
         const data = res.data.filter(item => item.user_id === Number(userId))
-
-        // Ambil nilai, ambil nilai pertama yang ada
         const itemWithNilai = data.find(d => d.nilai !== null)
         nilai.value = itemWithNilai?.nilai ?? null
         initialNilai.value = itemWithNilai?.nilai ?? null
@@ -109,13 +95,10 @@ const fetchNilai = async () => {
     }
 }
 
-
-// Watch perubahan nilai untuk aktifkan button
 watch(nilai, () => {
     hasChanges.value = nilai.value !== initialNilai.value
 })
 
-// Submit nilai
 const submitNilai = async () => {
     if (isSubmitting.value || !hasChanges.value) return
 
@@ -125,12 +108,11 @@ const submitNilai = async () => {
     }
 
     isSubmitting.value = true
-
     try {
         await api.put('/jawaban-siswa/nilai', {
             user_id: userId,
             bank_soal_id: assignmentId,
-            nilai: nilai.value
+            nilai: nilai.value,
         })
         toast.add({ severity: 'success', detail: 'Score submitted', life: 3000 })
         initialNilai.value = nilai.value
@@ -142,14 +124,56 @@ const submitNilai = async () => {
     isSubmitting.value = false
 }
 
+function getFileUrl(filename) {
+    if (!filename) return null
+    return `${import.meta.env.VITE_API_URL}/uploads/file-jawaban-siswa/${filename}`
+}
+
+const fetchFileJawabanSiswa = async () => {
+    try {
+        const res = await api.get(`/jawaban-siswa/file/${assignmentId}`, {
+            params: { user_id: userId },
+            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        })
+
+        fileJawabanSiswa.value = res.data
+            .filter(file => file.nama_file)
+            .map(file => ({
+                ...file,
+                url: getFileUrl(file.nama_file),
+                isPdf: file.nama_file.endsWith('.pdf'),
+            }))
+    } catch (err) {
+        console.error('Error fetch file jawaban siswa:', err)
+    }
+}
+
+// Pisahkan file menjadi gambar dan pdf
+const imageFiles = computed(() => fileJawabanSiswa.value.filter(f => !f.isPdf))
+const pdfFiles = computed(() => fileJawabanSiswa.value.filter(f => f.isPdf))
+
+// Buat data untuk Galleria
+const galleriaItems = computed(() =>
+    imageFiles.value.map(file => ({
+        itemImageSrc: file.url,
+        thumbnailImageSrc: file.url,
+        alt: file.nama_file,
+    }))
+)
+
+const responsiveOptions = ref([
+    { breakpoint: '1300px', numVisible: 4 },
+    { breakpoint: '575px', numVisible: 1 },
+])
+
 const back = () => router.back()
 
 onMounted(async () => {
     await fetchJawabanSiswa()
     await fetchNilai()
+    await fetchFileJawabanSiswa()
 })
 
-// Option helper
 function optionClass(item, option) {
     if (item.jawaban?.toUpperCase() === option) {
         return item.benar ? 'bg-green-200 p-1 rounded' : 'bg-red-200 p-1 rounded'
@@ -181,15 +205,13 @@ const summaryPilgan = computed(() => {
     <div v-else-if="errorMessage" class="text-red-500">{{ errorMessage }}</div>
 
     <div v-else class="space-y-4">
-        <!-- Multiple Choice -->
+        <!-- Soal pilihan ganda -->
         <Card v-for="item in jawabanPilgan" :key="item.nomor">
             <template #content>
-                <div class="mb-5">
-                    <Tag value="Multiple Choice" severity="success" />
-                </div>
-                <div class="mb-2 flex items-center space-x-2">
+                <Tag value="Multiple Choice" severity="success" class="mb-3" />
+                <div class="flex items-center space-x-2 mb-2">
                     <Tag :value="`${item.nomor}`" severity="info" />
-                    <span class="font-bold overflow-auto break-all" v-html="item.soal.pertanyaan"></span>
+                    <span class="font-bold" v-html="item.soal.pertanyaan"></span>
                 </div>
 
                 <div v-if="item.soal.gambar" class="mb-3 flex justify-center">
@@ -204,12 +226,9 @@ const summaryPilgan = computed(() => {
                     <li :class="optionClass(item, 'E')">E. {{ item.soal.pg_e }}</li>
                 </ul>
 
-                <!-- Jawaban benar hanya muncul kalau siswa salah -->
                 <div v-if="!item.benar" class="mt-2 p-2 bg-green-100 rounded">
                     <Tag severity="success" value="Correct Answer" />
-                    <p class="font-bold">
-                        {{ getCorrectAnswerText(item) }}
-                    </p>
+                    <p class="font-bold">{{ getCorrectAnswerText(item) }}</p>
                 </div>
             </template>
         </Card>
@@ -217,41 +236,83 @@ const summaryPilgan = computed(() => {
         <!-- Essay -->
         <Card v-for="essai in jawabanEssai" :key="essai.nomor">
             <template #content>
-                <div class="mb-5">
-                    <Tag value="Essay" severity="success" />
-                </div>
-                <div class="mb-2 flex items-center space-x-2">
+                <Tag value="Essay" severity="info" class="mb-3" />
+                <div class="flex items-center space-x-2 mb-2">
                     <Tag :value="`${essai.nomor}`" severity="info" />
-                    <span class="font-bold overflow-auto break-all" v-html="essai.soal.pertanyaan_essai"></span>
+                    <span class="font-bold" v-html="essai.soal.pertanyaan_essai"></span>
                 </div>
                 <div v-if="essai.soal.gambar_soal_essai" class="mb-3 flex justify-center">
                     <Image :src="essai.soal.gambar_soal_essai" alt="Gambar Soal" image-class="w-64 h-auto rounded" />
                 </div>
-                <div>
-                    <p>{{ essai.jawaban_essai }}</p>
-                </div>
+                <p>{{ essai.jawaban_essai }}</p>
             </template>
         </Card>
 
         <!-- Reflection -->
         <Card v-if="jawabanRefleksi">
             <template #header>
-                <div class="m-5">
-                    <h1 class="font-bold">Student Reflection</h1>
-                </div>
+                <h1 class="font-bold m-5">Student Reflection</h1>
             </template>
             <template #content>
-                <div class="m-5">
-                    <p>{{ jawabanRefleksi }}</p>
+                <p class="m-5">{{ jawabanRefleksi }}</p>
+            </template>
+        </Card>
+
+        <!-- Gallery untuk gambar -->
+        <Card v-if="imageFiles.length">
+            <template #header>
+                <div class="m-5 flex justify-between items-center">
+                    <h1 class="font-bold text-lg">Student Image Submissions</h1>
+                </div>
+            </template>
+
+            <template #content>
+                <div class="card flex justify-center">
+                    <Galleria :value="galleriaItems" :responsiveOptions="responsiveOptions" :numVisible="4"
+                        containerStyle="max-width: 640px; margin: auto" showThumbnails showIndicators circular autoPlay
+                        transitionInterval="4000">
+                        <template #item="slotProps">
+                            <img :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt"
+                                style="width: 100%; height: 300px; object-fit: cover;" />
+                        </template>
+                        <template #thumbnail="slotProps">
+                            <img :src="slotProps.item.thumbnailImageSrc" :alt="slotProps.item.alt"
+                                style="width: 80px; height: 60px; object-fit: cover;" />
+                        </template>
+                    </Galleria>
                 </div>
             </template>
         </Card>
 
+        <!-- PDF Files -->
+        <Card v-if="pdfFiles.length">
+            <template #header>
+                <div class="m-5 flex justify-between items-center">
+                    <h1 class="font-bold text-lg">Student PDF Submissions</h1>
+                </div>
+            </template>
+
+            <template #content>
+                <!-- <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"> -->
+                <div v-for="file in pdfFiles" :key="file.id" class="p-3 border shadow-sm hover:shadow-md transition">
+                    <!-- <p class="font-semibold mb-2">{{ file.nama_file }}</p> -->
+                    <iframe :src="file.url" class="w-full h-[800px] rounded border mb-3" allow="fullscreen"
+                        allowfullscreen></iframe>
+                    <div class="flex justify-between items-center">
+                        <small class="text-gray-500">{{ new Date(file.created_at).toLocaleString() }}</small>
+                        <Button label="Download" icon="pi pi-download" class="p-button-sm p-button-info"
+                            @click="window.open(file.url, '_blank')" />
+                    </div>
+                </div>
+                <!-- </div> -->
+            </template>
+        </Card>
+
+        <!-- Summary dan nilai -->
         <div v-if="jawabanPilgan.length" class="mb-5 p-3 bg-blue-100 rounded text-center font-bold">
             Correct {{ summaryPilgan.benar }} out of {{ summaryPilgan.total }} Questions
         </div>
 
-        <!-- Score input -->
         <div class="mt-10 space-y-2">
             <FloatLabel>
                 <InputNumber v-model="nilai" />

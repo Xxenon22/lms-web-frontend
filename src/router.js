@@ -8,7 +8,7 @@ const routes = [
         component: Signin,
         name: "SignIn",
         meta: {
-            title: 'Sign in - E Learning Metland School'
+            title: 'Sign in - Metschoo Integrated Learning System'
         }
     },
     {
@@ -16,7 +16,7 @@ const routes = [
         component: () => import("./components/login/SignUp.vue"),
         name: "SignUp",
         meta: {
-            title: 'Sign up - E Learning Metland School'
+            title: 'Sign up - Metschoo Integrated Learning System'
         }
     },
     {
@@ -26,7 +26,7 @@ const routes = [
             requiresAuth: true,
             role: "admin",
             layout: "admin",
-            title: 'Admin - E Learning Metland School'
+            title: 'Admin - Metschoo Integrated Learning System'
         },
     },
     {
@@ -36,7 +36,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: 'Home - E Learning Metland School'
+            title: 'Home - Metschoo Integrated Learning System'
         },
     },
     {
@@ -46,7 +46,7 @@ const routes = [
             requiresAuth: true,
             role: "student",
             layout: "student",
-            title: 'Home - E Learning Metland School'
+            title: 'Home - Metschoo Integrated Learning System'
         },
     },
     {
@@ -57,7 +57,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: "Classroom - E Learning Metland School"
+            title: "Classroom - Metschoo Integrated Learning System"
         }
     },
     {
@@ -68,7 +68,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: "Assignment - E Learning Metland School"
+            title: "Assignment - Metschoo Integrated Learning System"
         }
     },
     {
@@ -79,7 +79,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: 'Develope Course Content - E Learning Metland School'
+            title: 'Develope Course Content - Metschoo Integrated Learning System'
         }
     },
     {
@@ -90,7 +90,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: "Classroom Management - E Learning Metland School"
+            title: "Classroom Management - Metschoo Integrated Learning System"
         }
     },
     {
@@ -101,7 +101,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: "Detailed Learning Materials - E Learning Metland School"
+            title: "Detailed Learning Materials - Metschoo Integrated Learning System"
         }
     },
     {
@@ -112,7 +112,7 @@ const routes = [
             requiresAuth: true,
             role: "student",
             layout: "student",
-            title: 'Join Classroom - E Learning Metland School'
+            title: 'Join Classroom - Metschoo Integrated Learning System'
         }
     },
     {
@@ -123,7 +123,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: "Edit Assignment - E Learning Metland School"
+            title: "Edit Assignment - Metschoo Integrated Learning System"
         }
     },
     {
@@ -134,7 +134,7 @@ const routes = [
             requiresAuth: true,
             role: "admin",
             layout: "admin",
-            title: "Admin - E Learning Metland School"
+            title: "Admin - Metschoo Integrated Learning System"
         }
     },
     {
@@ -145,7 +145,7 @@ const routes = [
             requiresAuth: true,
             role: "student",
             layout: "student",
-            title: "Student Profile - E Learning Metland School"
+            title: "Student Profile - Metschoo Integrated Learning System"
         }
     },
     {
@@ -156,7 +156,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: "Teacher Profile - E Learning Metland School"
+            title: "Teacher Profile - Metschoo Integrated Learning System"
         }
     },
     {
@@ -167,7 +167,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: "Class Learning Plan -  E Learning Metland School"
+            title: "Class Learning Plan -  Metschoo Integrated Learning System"
         }
     },
     {
@@ -178,7 +178,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: "Learning Reflection - E Learning Metland School"
+            title: "Learning Reflection - Metschoo Integrated Learning System"
         }
     },
     {
@@ -189,7 +189,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: "Update Class Learning Plan - E Learning Metland School"
+            title: "Update Class Learning Plan - Metschoo Integrated Learning System"
         }
     },
     {
@@ -200,7 +200,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: 'Class Learning Plan - E Learning Metland School'
+            title: 'Class Learning Plan - Metschoo Integrated Learning System'
         }
     },
     {
@@ -211,7 +211,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: "Interactive Forum - E Learning Metland School"
+            title: "Interactive Forum - Metschoo Integrated Learning System"
         }
     },
     {
@@ -222,7 +222,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: "Assignment List - E Learning Metland School"
+            title: "Assignment List - Metschoo Integrated Learning System"
         }
     },
     {
@@ -233,7 +233,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: 'View Student Answer - E Learning Metland School'
+            title: 'View Student Answer - Metschoo Integrated Learning System'
         }
     },
     {
@@ -244,7 +244,7 @@ const routes = [
             requiresAuth: true,
             role: "admin",
             layout: "admin",
-            title: 'Add New Timetable - E Learning Metland School'
+            title: 'Add New Timetable - Metschoo Integrated Learning System'
         }
     },
     {
@@ -255,7 +255,7 @@ const routes = [
             requiresAuth: true,
             role: "student",
             layout: "student",
-            title: 'Timetable - E Learning Metland School'
+            title: 'Timetable - Metschoo Integrated Learning System'
         }
     },
     {
@@ -266,7 +266,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: 'Timetable - E Learning Metland School'
+            title: 'Timetable - Metschoo Integrated Learning System'
         }
     },
     {
@@ -277,7 +277,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: 'Assignment Review - E Learning Metland School'
+            title: 'Assignment Review - Metschoo Integrated Learning System'
         }
     },
     {
@@ -288,7 +288,7 @@ const routes = [
             requiresAuth: true,
             role: "student",
             layout: "student",
-            title: 'Assignment List - E Learning Metland School'
+            title: 'Assignment List - Metschoo Integrated Learning System'
         }
     },
     {
@@ -299,7 +299,7 @@ const routes = [
             requiresAuth: true,
             role: "admin",
             layout: "admin",
-            title: 'Database - E Learning Metland School'
+            title: 'Database - Metschoo Integrated Learning System'
         }
     },
     {
@@ -310,7 +310,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: 'Reflection Class Learning Plan - E Learning Metland School'
+            title: 'Reflection Class Learning Plan - Metschoo Integrated Learning System'
         }
     },
     {
@@ -321,7 +321,7 @@ const routes = [
             requiresAuth: true,
             role: "teacher",
             layout: "teacher",
-            title: "Update Learning Reflection - E Learning Metland School"
+            title: "Update Learning Reflection - Metschoo Integrated Learning System"
         }
     },
     {
@@ -332,7 +332,7 @@ const routes = [
             requiresAuth: true,
             role: "admin",
             layout: "admin",
-            title: 'Class Learning Plan - E Learning Metland School'
+            title: 'Class Learning Plan - Metschoo Integrated Learning System'
         }
     },
     {
@@ -343,7 +343,7 @@ const routes = [
             requiresAuth: true,
             role: "admin",
             layout: "admin",
-            title: 'Learning Reflection - E Learning Metland School'
+            title: 'Learning Reflection - Metschoo Integrated Learning System'
         }
     },
     {
@@ -354,7 +354,7 @@ const routes = [
             requiresAuth: true,
             role: "admin",
             layout: "admin",
-            title: 'Class Learning Plan - E Learning Metland School'
+            title: 'Class Learning Plan - Metschoo Integrated Learning System'
         }
     },
     {
@@ -365,7 +365,7 @@ const routes = [
             requiresAuth: true,
             role: "admin",
             layout: "admin",
-            title: 'Learning Reflection- E Learning Metland School'
+            title: 'Learning Reflection- Metschoo Integrated Learning System'
         }
     },
     {
@@ -376,7 +376,7 @@ const routes = [
             requiresAuth: true,
             role: "admin",
             layout: "admin",
-            title: 'Class Learning Plan - E Learning Metland School'
+            title: 'Class Learning Plan - Metschoo Integrated Learning System'
         }
     },
     {
@@ -387,7 +387,7 @@ const routes = [
             requiresAuth: true,
             role: "admin",
             layout: "admin",
-            title: 'Class Learning Plan - E Learning Metland School'
+            title: 'Class Learning Plan - Metschoo Integrated Learning System'
         }
     },
 
@@ -395,6 +395,17 @@ const routes = [
         path: "/mobile-unavailable",
         name: "Mobile-Unavailable",
         component: () => import("./views/MobileUnavailable.vue")
+    },
+    {
+        path: "/add-teacher-account",
+        name: "Add-Teacher-Account",
+        component: () => import("./dashboard/admin/AddTeacherAcc.vue"),
+        meta: {
+            requiresAuth: true,
+            role: "admin",
+            layout: "admin",
+            title: 'Add Teacher Account - Metschoo Integrated Learning System'
+        }
     }
 ]
 

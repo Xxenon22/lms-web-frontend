@@ -44,10 +44,9 @@ onMounted(async () => {
         <nav class="navbar fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
             <div class="flex items-center space-x-5">
                 <img src="../../assets/LOGO_SMK_METLAND.png" alt="Logo" width="65" />
-                <h2>
-                    E-Learning <br />
-                    METLAND SCHOOL
-                </h2>
+                <h1>
+                    <b>MILS</b> <br /> <b>M</b>etschoo <b>I</b>ntegrated <b>L</b>earning <b>S</b>ystem
+                </h1>
             </div>
             <div class="flex">
                 <ConfirmPopup group="headless">
