@@ -13,7 +13,7 @@ const password = ref("");
 
 const handleRegister = async () => {
   try {
-    const res = await axios.post("/api/auth/register", {
+    const res = await axios.post("/auth/register", {
       username: username.value,
       email: email.value,
       password: password.value,
