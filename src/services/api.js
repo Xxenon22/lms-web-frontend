@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "https://metschoo-ils.my.id/api",
+    baseURL: "/api",
 });
 
 api.interceptors.request.use((config) => {
