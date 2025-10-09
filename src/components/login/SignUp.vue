@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from "vue";
-import axios from "axios";
+import api from "../../services/api";
 import { useToast } from "primevue/usetoast";
 import bg from "../../assets/bg.vue";
 import { useRouter } from "vue-router";
@@ -13,7 +13,7 @@ const password = ref("");
 
 const handleRegister = async () => {
   try {
-    const res = await axios.post("/api/auth/register", {
+    const res = await api.post("/api/auth/register", {
       username: username.value,
       email: email.value,
       password: password.value,
