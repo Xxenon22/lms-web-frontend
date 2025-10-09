@@ -1,11 +1,11 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
-import { useToast } from 'primevue/usetoast';
-import api from "../../services/api"; // axios instance yg udah ada
+import { onMounted, ref, watch } from "vue";
+import { useToast } from "primevue/usetoast";
+import api from "../../services/api"; // Axios instance sudah ada
 
-const src = ref(null);
-const imageFile = ref(null);
-const error = ref(null);
+const src = ref(null); // preview image
+const imageFile = ref(null); // file upload
+const error = ref(null); // error message
 const toast = useToast();
 
 const nama = ref("");
@@ -17,7 +17,7 @@ const initialData = ref({});
 const isSubmitting = ref(false);
 const hasChanges = ref(false);
 
-// Fetch user profile
+// ==================== FETCH PROFILE ====================
 const fetchProfile = async () => {
     try {
         const res = await api.get("/auth/profile");
@@ -27,9 +27,12 @@ const fetchProfile = async () => {
         subject.value = data.teacher_subject;
         noTelp.value = data.phone_number;
         photoProfile.value = data.photo_profiles_user;
+
+        // preview image
         src.value = data.photo_profiles_user
             ? `${import.meta.env.VITE_API_URL}${data.photo_profiles_user}`
             : null;
+
         initialData.value = {
             username: data.username,
             teacher_subject: data.teacher_subject,
@@ -38,10 +41,11 @@ const fetchProfile = async () => {
         };
     } catch (err) {
         console.error("fetchProfile error:", err);
+        toast.add({ severity: "error", summary: "Error", detail: "Failed to fetch profile", life: 3000 });
     }
 };
 
-// Detect perubahan
+// ==================== WATCH FOR CHANGES ====================
 watch([nama, subject, noTelp, imageFile], () => {
     hasChanges.value =
         nama.value !== initialData.value.username ||
@@ -50,48 +54,60 @@ watch([nama, subject, noTelp, imageFile], () => {
         imageFile.value !== null;
 });
 
-// Handle file select (sama kaya punyamu)
+// ==================== HANDLE FILE SELECT ====================
 function onFileSelect(event) {
     const file = event.files[0];
     if (!file) return;
 
-    const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    const validTypes = ["image/jpeg", "image/png", "image/jpg"];
     if (!validTypes.includes(file.type)) {
-        error.value = 'Only JPG, JPEG, or PNG files are allowed.';
+        error.value = "Only JPG, JPEG, or PNG files are allowed.";
         src.value = null;
+        imageFile.value = null;
         return;
     }
 
     imageFile.value = file;
+    error.value = null;
 
     const reader = new FileReader();
     reader.onload = (e) => {
         src.value = e.target.result;
-        error.value = null;
     };
     reader.readAsDataURL(file);
 }
 
-// TODO: ganti ini dengan upload ke server kamu (Express multer)
+// ==================== UPLOAD PHOTO ====================
 const uploadPhoto = async () => {
-    if (!imageFile.value) return photoProfile.value;
+    if (!imageFile.value) return photoProfile.value; // jika tidak ada perubahan photo
 
-    const formData = new FormData();
-    formData.append("profile", imageFile.value);
+    try {
+        const formData = new FormData();
+        formData.append("profile", imageFile.value);
 
-    const res = await api.post("/uploads/photo-profile", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-    });
+        const res = await api.post("/uploads/photo-profile", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
 
-    return res.data.imageUrl;
+        return res.data.imageUrl; // ini path relatif untuk frontend
+    } catch (err) {
+        console.error("Upload photo error:", err);
+        toast.add({ severity: "error", summary: "Error", detail: "Failed to upload photo", life: 3000 });
+        return null;
+    }
 };
 
-// Submit profile
+// ==================== SUBMIT PROFILE ====================
 const submitProfile = async () => {
     if (!hasChanges.value) return;
 
     isSubmitting.value = true;
-    const photoUrl = await uploadPhoto();
+
+    const photoUrl = await uploadPhoto(); // upload image dan dapat URL
+    if (!photoUrl && imageFile.value) {
+        isSubmitting.value = false;
+        return; // gagal upload
+    }
 
     const updateData = {
         username: nama.value,
@@ -100,19 +116,30 @@ const submitProfile = async () => {
         photo_profiles_user: photoUrl,
     };
 
-    await api.put("/auth/profile", updateData);
+    try {
+        await api.put("/auth/profile", updateData);
 
-    toast.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Profile updated successfully',
-        life: 3000
-    });
+        toast.add({
+            severity: "success",
+            summary: "Success",
+            detail: "Profile updated successfully",
+            life: 3000,
+        });
 
-    imageFile.value = null;
-    hasChanges.value = false;
-    isSubmitting.value = false;
-    await fetchProfile();
+        imageFile.value = null;
+        hasChanges.value = false;
+        await fetchProfile(); // refresh data
+    } catch (err) {
+        console.error("Update profile error:", err);
+        toast.add({
+            severity: "error",
+            summary: "Error",
+            detail: "Failed to update profile",
+            life: 3000,
+        });
+    } finally {
+        isSubmitting.value = false;
+    }
 };
 
 onMounted(fetchProfile);
@@ -128,6 +155,7 @@ onMounted(fetchProfile);
 
         <template #content>
             <div class="flex flex-col space-y-5">
+                <!-- Photo Profile -->
                 <div class="flex flex-col items-center">
                     <h2 class="mb-4 text-lg font-semibold">Photo Profile</h2>
 
@@ -142,6 +170,7 @@ onMounted(fetchProfile);
                     <p v-if="error" class="text-red-500 mt-2 text-sm">{{ error }}</p>
                 </div>
 
+                <!-- Info Profile -->
                 <div class="space-y-5">
                     <div>
                         <h2 class="mb-2 font-semibold">Name</h2>
@@ -150,7 +179,7 @@ onMounted(fetchProfile);
 
                     <div>
                         <h2 class="mb-2 font-semibold">Teacher's Subject</h2>
-                        <InputText v-model="subject" class="w-full" placeholder="Enter your name" />
+                        <InputText v-model="subject" class="w-full" placeholder="Enter your subject" />
                     </div>
 
                     <div>
