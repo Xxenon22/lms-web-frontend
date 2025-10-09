@@ -18,6 +18,7 @@ const isSubmitting = ref(false);
 const hasChanges = ref(false);
 
 // ==================== FETCH PROFILE ====================
+// ==================== FETCH PROFILE ====================
 const fetchProfile = async () => {
     try {
         const res = await api.get("/auth/profile");
@@ -28,9 +29,8 @@ const fetchProfile = async () => {
         noTelp.value = data.phone_number;
         photoProfile.value = data.photo_profiles_user;
 
-        // preview image
         src.value = data.photo_profiles_user
-            ? `${import.meta.env.VITE_API_URL}${data.photo_profiles_user}`
+            ? `${import.meta.env.VITE_API_URL}/uploads/photo-profile/${data.photo_profiles_user}`
             : null;
 
         initialData.value = {
@@ -42,6 +42,26 @@ const fetchProfile = async () => {
     } catch (err) {
         console.error("fetchProfile error:", err);
         toast.add({ severity: "error", summary: "Error", detail: "Failed to fetch profile", life: 3000 });
+    }
+};
+
+// ==================== UPLOAD PHOTO ====================
+const uploadPhoto = async () => {
+    if (!imageFile.value) return photoProfile.value;
+
+    try {
+        const formData = new FormData();
+        formData.append("profile", imageFile.value);
+
+        const res = await api.post("/uploads/photo-profile", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        return `${import.meta.env.VITE_API_URL}/uploads/photo-profile/${res.data.imageUrl}`;
+    } catch (err) {
+        console.error("Upload photo error:", err);
+        toast.add({ severity: "error", summary: "Error", detail: "Failed to upload photo", life: 3000 });
+        return null;
     }
 };
 
@@ -76,26 +96,6 @@ function onFileSelect(event) {
     };
     reader.readAsDataURL(file);
 }
-
-// ==================== UPLOAD PHOTO ====================
-const uploadPhoto = async () => {
-    if (!imageFile.value) return photoProfile.value; // jika tidak ada perubahan photo
-
-    try {
-        const formData = new FormData();
-        formData.append("profile", imageFile.value);
-
-        const res = await api.post("/uploads/photo-profile", formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-        });
-
-        return res.data.imageUrl; // ini path relatif untuk frontend
-    } catch (err) {
-        console.error("Upload photo error:", err);
-        toast.add({ severity: "error", summary: "Error", detail: "Failed to upload photo", life: 3000 });
-        return null;
-    }
-};
 
 // ==================== SUBMIT PROFILE ====================
 const submitProfile = async () => {
