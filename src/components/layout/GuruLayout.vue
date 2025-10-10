@@ -209,7 +209,7 @@ onMounted(async () => {
         </RouterLink>
         <RouterLink to="/class-learning-plan">
           <li>
-            <Icon class="icon" icon="marketeq:diagram-bar-3" /><span class="nav-item">Class Learning Plan</span>
+            <Icon class="icon" icon="marketeq:diagram-bar-3" /><span class="nav-item">Learning Plan</span>
           </li>
         </RouterLink>
         <RouterLink to="/class-learning-reflection">

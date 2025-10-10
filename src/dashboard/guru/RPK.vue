@@ -251,7 +251,7 @@ onMounted(() => {
 <template>
     <Card>
         <template #header>
-            <h1 class="m-5">Class Learning Plan</h1>
+            <h1 class="m-5">Learning Plan</h1>
         </template>
 
         <template #content>

@@ -11,7 +11,7 @@ import LearningReflectionManagement from "../../components/itemGuru/LearningRefl
             <Tab value="0">Class Management</Tab>
             <Tab value="1">Material Management</Tab>
             <Tab value="2">Assignment Management</Tab>
-            <Tab value="3">CLP Management</Tab>
+            <Tab value="3">Learning Plan Management</Tab>
             <Tab value="4">Learning Reflection Management</Tab>
         </TabList>
         <TabPanels class="overflow-hidden">

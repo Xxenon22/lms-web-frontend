@@ -20,7 +20,6 @@ const fetchRpk = async () => {
     try {
         const res = await api.get(`/rpk/all-rpk/${userId.value}`)
         allRpk.value = res.data
-        console.log("Data", allRpk)
     } catch (error) {
         console.error("Error fetch RPK :", error)
     }
