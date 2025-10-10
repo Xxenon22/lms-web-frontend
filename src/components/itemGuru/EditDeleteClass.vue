@@ -2,6 +2,8 @@
 import { useToast } from "primevue/usetoast";
 import { ref, onMounted, watch } from "vue";
 import api from "../../services/api";
+import Swal from "sweetalert2";
+
 
 const isLoading = ref(true);
 const toast = useToast();
@@ -118,29 +120,41 @@ const openEditDialog = (kelas) => {
     visible.value = true;
 };
 
-
-// Hapus Kelas
+// Hapus Kelas 
 const deleteKelas = async (id) => {
+    const confirm = await Swal.fire({
+        title: "Are you sure?",
+        text: "If you delete this class, all related data (like discussions, assignments, etc.) will also be deleted!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it",
+        cancelButtonText: "Cancel",
+    });
+
+    if (!confirm.isConfirmed) return;
+
     try {
         await api.delete(`/kelas/${id}`);
-        toast.add({
-            severity: "success",
-            summary: "Successfully Deleted",
-            detail: "Class has been successfully deleted",
-            life: 2000,
+        Swal.fire({
+            icon: "success",
+            title: "Deleted!",
+            text: "The class and its related data have been deleted.",
+            timer: 2000,
+            showConfirmButton: false,
         });
+
         await fetchDataKelas();
     } catch (err) {
         console.error("Failed to delete:", err);
-        toast.add({
-            severity: "error",
-            summary: "Failed to Delete",
-            detail: err.response?.data?.error || "Server error",
-            life: 2000,
+        Swal.fire({
+            icon: "error",
+            title: "Failed!",
+            text: err.response?.data?.error || "Server error occurred.",
         });
     }
 };
-
 </script>
 
 <template>
