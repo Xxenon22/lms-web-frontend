@@ -76,6 +76,11 @@ onMounted(async () => {
     isLoading.value = false;
 });
 
+watch(activeIndex, (newIndex) => {
+    selectedKelas.value.link_wallpaper_kelas = images.value[newIndex].itemImageSrc;
+});
+
+
 // Simpan perubahan
 const updateKelas = async () => {
     try {
@@ -116,28 +121,26 @@ const openEditDialog = (kelas) => {
 
 // Hapus Kelas
 const deleteKelas = async (id) => {
-    console.log("id yang dikirim:", id);
-    const { error } = await api.delete(`/kelas/${id}`)
-    if (error) {
-        toast.add({
-            severity: "error",
-            summary: "Failed to Delete class",
-            detail: error.message,
-            //   life: 3000,
-        });
-    } else {
+    try {
+        await api.delete(`/kelas/${id}`);
         toast.add({
             severity: "success",
             summary: "Successfully Deleted",
             detail: "Class has been successfully deleted",
             life: 2000,
         });
-
-        // Refresh data
-        const data = await fetchDataKelas();
-        if (data) dataKelas.value = data;
+        await fetchDataKelas();
+    } catch (err) {
+        console.error("Failed to delete:", err);
+        toast.add({
+            severity: "error",
+            summary: "Failed to Delete",
+            detail: err.response?.data?.error || "Server error",
+            life: 2000,
+        });
     }
 };
+
 </script>
 
 <template>
