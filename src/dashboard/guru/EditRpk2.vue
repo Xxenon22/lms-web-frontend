@@ -137,7 +137,7 @@ const back = () => {
     </div>
     <Card>
         <template #header>
-            <h1 class="m-5">Learning Reflection</h1>
+            <h1 class="m-5">Edit Learning Reflection</h1>
         </template>
 
         <template #content>

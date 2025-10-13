@@ -37,6 +37,17 @@ const exportPDF = () => {
     const data = rpk.value;
     const doc = new jsPDF();
 
+    // === Format tanggal (untuk PDF) ===
+    const formatDateForPDF = (hari_tanggal) => {
+        if (!hari_tanggal) return "Date not available";
+        return new Intl.DateTimeFormat("id-ID", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            timeZone: "Asia/Jakarta",
+        }).format(new Date(hari_tanggal));
+    };
+
     // Judul
     doc.setFontSize(16);
     doc.text("Learning Plan", 105, 15, { align: "center" });
@@ -56,7 +67,7 @@ const exportPDF = () => {
             ["Teacher", data.teacher_name || ""],
             ["Instructor", data.instructor_name || ""],
             ["Tutor", data.tutor || ""],
-            ["Day / Date", data.hari_tanggal || ""],
+            ["Day / Date", formatDateForPDF(data.hari_tanggal)], // formatted date
             ["Time", data.waktu || ""],
         ],
     });
@@ -130,7 +141,6 @@ const exportPDF = () => {
             ],
         ],
     });
-    console.log("Export PDF clicked")
 
     doc.save("RPK.pdf");
 };

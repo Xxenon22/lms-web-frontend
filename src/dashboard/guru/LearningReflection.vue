@@ -181,7 +181,7 @@ onMounted(async () => {
                                 <div class="flex flex-col space-y-2">
                                     <Label> Day / Date</Label>
                                     <DatePicker v-model="tanggal" showIcon fluid iconDisplay="input"
-                                        placeholder="Example: Monday, 14 July 2025" class="w-full" />
+                                        placeholder="-- Day / Date --" class="w-full" />
                                 </div>
                                 <div class="flex flex-col space-y-2">
                                     <Label> Instructor</Label>

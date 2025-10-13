@@ -128,8 +128,7 @@ const fetchExistingRPK = async () => {
         rombel.value = data.rombel_id
         namaGuru.value = data.instructor ? String(data.instructor) : null
         tutor.value = data.tutor
-        tanggal.value = data.hari_tanggal
-        subject.value = data.mapel_id
+        tanggal.value = data.hari_tanggal ? new Date(data.hari_tanggal) : null
         fase.value = data.phase_id
         studyTime.value = data.waktu
         tujuanPemb.value = data.tujuan_pembelajaran
@@ -179,7 +178,7 @@ const updateRPK = async () => {
             rombel_id: rombel.value,
             instructor: namaGuru.value,
             tutor: tutor.value,
-            hari_tanggal: tanggal.value,
+            hari_tanggal: tanggal.value ? tanggal.value.toISOString().split("T")[0] : null,
             mapel_id: subject.value,
             phase_id: fase.value,
             waktu: studyTime.value,
@@ -255,7 +254,7 @@ const back = () => {
     </div>
     <Card>
         <template #header>
-            <h1 class="m-5">Edit Class Learning Plan</h1>
+            <h1 class="m-5">Edit Learning Plan</h1>
         </template>
 
         <template #content>

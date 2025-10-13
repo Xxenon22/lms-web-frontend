@@ -31,6 +31,9 @@ const exportPDF = () => {
     doc.setFontSize(16);
     doc.text("Learning Reflection", 105, 15, { align: "center" });
 
+    // Format tanggal pakai formatDate()
+    const formattedDate = formatDate(data.hari_tanggal);
+
     // Data utama dalam bentuk tabel
     autoTable(doc, {
         startY: 30,
@@ -41,7 +44,7 @@ const exportPDF = () => {
             ["Teacher", data.teacher_name || ""],
             ["Instructor", data.instructor_name || ""],
             ["Grade", `${data.name_grade || ""} ${data.name_rombel || ""}`],
-            ["Day / Date", data.hari_tanggal || ""],
+            ["Day / Date", formattedDate], // ✅ tanggal diformat
             ["Time", data.waktu || ""],
             ["Student's Reflection", data.refleksi_siswa || ""],
             ["Teacher's Reflection", data.refleksi_guru || ""],
