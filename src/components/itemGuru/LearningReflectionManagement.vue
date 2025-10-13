@@ -35,6 +35,17 @@ const deleteLr = async (id) => {
     }
 }
 
+const formatDate = (hari_tanggal) => {
+    if (!hari_tanggal) return "Date not available";
+    return new Intl.DateTimeFormat("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        timeZone: "Asia/Jakarta",
+    }).format(new Date(hari_tanggal));
+};
+
+
 onMounted(async () => {
     await fetchUserId()
     await fetchLr()
@@ -52,7 +63,7 @@ onMounted(async () => {
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
                                     <div>
                                         <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{
-                                            lr.hari_tanggal }}</span>
+                                            formatDate(lr.hari_tanggal) }}</span>
                                         <div class="text-lg font-medium mt-2"><span>{{ lr.name_grade
                                         }} {{
                                                     lr.name_rombel }}</span></div>

@@ -145,6 +145,17 @@ const getPrinsip = (obj) => {
     return prinsip.join(", ");
 };
 
+const formatDate = (hari_tanggal) => {
+    if (!hari_tanggal) return "Date not available";
+    return new Intl.DateTimeFormat("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        timeZone: "Asia/Jakarta",
+    }).format(new Date(hari_tanggal));
+};
+
+
 onMounted(async () => {
     await fetchRpk()
 })
@@ -189,7 +200,7 @@ onMounted(async () => {
                         <h1 class="font-bold">Tutor :</h1> <span>{{ rpk.tutor }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <h1 class="font-bold">Day / Date :</h1> <span>{{ rpk.hari_tanggal }}</span>
+                        <h1 class="font-bold">Day / Date :</h1> <span>{{ formatDate(rpk.hari_tanggal) }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
                         <h1 class="font-bold">Time :</h1> <span>{{ rpk.waktu }}</span>

@@ -70,6 +70,16 @@ const back = () => {
     router.back()
 }
 
+const formatDate = (hari_tanggal) => {
+    if (!hari_tanggal) return "Date not available";
+    return new Intl.DateTimeFormat("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        timeZone: "Asia/Jakarta",
+    }).format(new Date(hari_tanggal));
+};
+
 onMounted(async () => {
     await fetchRpkReflection()
 })
@@ -152,7 +162,7 @@ onMounted(async () => {
                 </div>
                 <div class="w-2/3 space-y-5 m-4">
                     <div class="flex items-center space-x-2">
-                        <span>{{ clpRefleksi.hari_tanggal }}</span>
+                        <span>{{ formatDate(clpRefleksi.hari_tanggal) }}</span>
                     </div>
                 </div>
             </div>

@@ -15,7 +15,7 @@ const fetchUserId = async () => {
 };
 
 const formatDate = (created_at) => {
-    if (!created_at) return "Tanggal tidak tersedia";
+    if (!created_at) return "Date not available";
     return new Intl.DateTimeFormat("id-ID", {
         year: "numeric",
         month: "long",

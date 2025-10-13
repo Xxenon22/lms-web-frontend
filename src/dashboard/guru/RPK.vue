@@ -270,7 +270,7 @@ onMounted(() => {
                                 <div class="flex flex-col space-y-2">
                                     <Label> Day / Date</Label>
                                     <DatePicker v-model="tanggal" showIcon fluid iconDisplay="input"
-                                        placeholder="Example: Monday, 14 July 2025" class="w-full" />
+                                        placeholder="-- Day / Date --" class="w-full" />
                                 </div>
                                 <div class="flex flex-col space-y-2">
                                     <Label> Subject </Label>
@@ -280,7 +280,7 @@ onMounted(() => {
                                 <div class="flex flex-col space-y-2">
                                     <Label> Study Time</Label>
                                     <DatePicker v-model="studyTime" showIcon fluid iconDisplay="input" timeOnly
-                                        placeholder="Example: 07:00 - 09:30 WIB" class="w-full">
+                                        placeholder="-- Study time --" class="w-full">
                                         <template #inputicon="slotProps">
                                             <i class="pi pi-clock" @click="slotProps.clickCallback" />
                                         </template>
