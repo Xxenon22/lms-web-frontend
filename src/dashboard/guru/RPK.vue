@@ -279,12 +279,8 @@ onMounted(() => {
                                 </div>
                                 <div class="flex flex-col space-y-2">
                                     <Label> Study Time</Label>
-                                    <DatePicker v-model="studyTime" showIcon fluid iconDisplay="input" timeOnly
-                                        placeholder="-- Study time --" class="w-full">
-                                        <template #inputicon="slotProps">
-                                            <i class="pi pi-clock" @click="slotProps.clickCallback" />
-                                        </template>
-                                    </DatePicker>
+                                    <InputText v-model="studyTime" placeholder="Example: 07:00 - 09:30 WIB"
+                                        class="w-full" />
                                 </div>
                             </div>
                             <div class="w-1/2 space-y-5">
@@ -302,10 +298,6 @@ onMounted(() => {
                                     <Select v-model="fase" :options="selectedFase" option-label="phase"
                                         option-value="id" placeholder="-- Select Learning Phase --" class="w-full" />
                                 </div>
-                                <!-- <div class="flex flex-col space-y-2">
-                                    <Label> Instructor (optional)</Label>
-                                    <InputText v-model="instructor" class="w-full" />
-                                </div> -->
                             </div>
                         </div>
                     </div>

@@ -155,20 +155,6 @@ const formatDate = (hari_tanggal) => {
     }).format(new Date(hari_tanggal));
 };
 
-const formatTime = (waktu) => {
-    if (!waktu) return "-";
-    const date = new Date(waktu);
-    return date.toLocaleString("id-ID", {
-        timeZone: "Asia/Jakarta",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false
-    }) + " WIB";
-};
-
-
-
 onMounted(async () => {
     await fetchRpk()
 })
@@ -216,7 +202,7 @@ onMounted(async () => {
                         <h1 class="font-bold">Day / Date :</h1> <span>{{ formatDate(rpk.hari_tanggal) }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <h1 class="font-bold">Time :</h1> <span>{{ formatTime(rpk.waktu) }}</span>
+                        <h1 class="font-bold">Time :</h1> <span>{{ rpk.waktu }}</span>
                     </div>
                 </div>
             </div>
