@@ -138,13 +138,17 @@ function onFileSelect(event) {
 
 // Upload photo ke Supabase Storage
 const uploadPhoto = async () => {
-    if (!imageFile.value) return photoProfile.value;
+    if (!imageFile.value) return photoProfile.value; // tidak upload baru
 
     const formData = new FormData();
     formData.append("profile", imageFile.value);
+    if (photoProfile.value) {
+        // kirim path lama supaya bisa dihapus backend
+        formData.append("oldImagePath", photoProfile.value);
+    }
 
-    const res = await api.post("/uploads/photo-profile", formData, {
-        headers: { "Content-Type": "multipart/form-data" }
+    const res = await api.put("/uploads/photo-profile", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
     });
 
     return res.data.imageUrl;

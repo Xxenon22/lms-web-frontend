@@ -90,7 +90,6 @@ const uploadPhoto = async () => {
     return res.data.imageUrl;
 };
 
-
 // Submit profile
 const submitProfile = async () => {
     if (!hasChanges.value) return;
