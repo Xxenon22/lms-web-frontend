@@ -5,6 +5,7 @@ import Components from 'unplugin-vue-components/vite'
 import { PrimeVueResolver } from '@primevue/auto-import-resolver'
 
 export default defineConfig({
+  base: './',
   plugins: [
     vue(),
     tailwindcss(),
@@ -14,11 +15,11 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      "/api": {
-        target: "https://metschoo-ils.my.id", // backend API
+      '/api': {
+        target: 'https://metschoo-ils.my.id',
         changeOrigin: true,
-        secure: false,
-      },
-    },
-  },
+        secure: false
+      }
+    }
+  }
 })
