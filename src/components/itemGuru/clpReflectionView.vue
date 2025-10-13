@@ -80,6 +80,19 @@ const formatDate = (hari_tanggal) => {
     }).format(new Date(hari_tanggal));
 };
 
+const formatTime = (waktu) => {
+    if (!waktu) return "-";
+    const date = new Date(waktu);
+    return date.toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+    }) + " WIB";
+};
+
+
 onMounted(async () => {
     await fetchRpkReflection()
 })
@@ -176,7 +189,7 @@ onMounted(async () => {
                 </div>
                 <div class="w-2/3 space-y-5 m-4">
                     <div class="flex items-center space-x-2">
-                        <span>{{ clpRefleksi.waktu }}</span>
+                        <span>{{ formatTime(clpRefleksi.waktu) }}</span>
                     </div>
                 </div>
             </div>
