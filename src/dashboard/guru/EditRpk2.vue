@@ -167,8 +167,8 @@ const back = () => {
                             <div class="w-1/2 space-y-5">
                                 <div class="flex flex-col space-y-2">
                                     <Label> Day / Date</Label>
-                                    <InputText v-model="tanggal" placeholder="Example: Monday, 14 July 2025"
-                                        class="w-full" />
+                                    <DatePicker v-model="tanggal" showIcon fluid iconDisplay="input"
+                                        placeholder="-- Day / Date --" class="w-full" />
                                 </div>
                                 <div class="flex flex-col space-y-2">
                                     <Label> Instructor</Label>
