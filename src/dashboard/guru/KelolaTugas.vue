@@ -79,6 +79,19 @@ const onFileSelect = (event, index) => {
     const file = event.files?.[0];
     if (!file) return;
 
+    // 🔹 Batas ukuran file 50MB (dalam byte)
+    const maxSize = 50 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+        toast.add({
+            severity: "warn",
+            summary: "File too large",
+            detail: "Maximum file size allowed is 50MB.",
+            life: 3000,
+        });
+        return;
+    }
+
     listSoal.value[index].gambar = file;
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -87,9 +100,23 @@ const onFileSelect = (event, index) => {
     reader.readAsDataURL(file);
 };
 
+
 const onFileSelectEssai = (event, index) => {
     const file = event.files?.[0];
     if (!file) return;
+
+    // 🔹 Batas ukuran file 50MB (dalam byte)
+    const maxSize = 50 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+        toast.add({
+            severity: "warn",
+            summary: "File too large",
+            detail: "Maximum file size allowed is 50MB.",
+            life: 3000,
+        });
+        return;
+    }
 
     listSoalEssai.value[index].gambar_soal_essai = file;
     const reader = new FileReader();
@@ -121,12 +148,12 @@ const uploadGambar = async (file) => {
 // Submit semua soal
 const submitSemuaSoal = async () => {
     if (!judulBaru.value.trim()) {
-        toast.add({ severity: "warn", summary: "Judul kosong", life: 2000 });
+        toast.add({ severity: "warn", summary: "Title cannot be empty", life: 2000 });
         return;
     }
 
     if (!guruId.value) {
-        toast.add({ severity: "error", summary: "Gagal", detail: "Guru ID tidak ditemukan" });
+        toast.add({ severity: "error", summary: "Failed", detail: "Teacher ID not found" });
         return;
     }
 
@@ -163,8 +190,8 @@ const submitSemuaSoal = async () => {
     if (!adaPGValid && !adaEssaiValid) {
         toast.add({
             severity: "warn",
-            summary: "Belum ada soal",
-            detail: "Minimal isi salah satu: Soal Pilihan Ganda atau Soal Essai.",
+            summary: "No questions available",
+            detail: "Please fill in at least one: Multiple Choice Question or Essay Question.",
             life: 3000,
         });
         return;
@@ -175,15 +202,15 @@ const submitSemuaSoal = async () => {
         for (let i = 0; i < listSoal.value.length; i++) {
             const soal = listSoal.value[i];
             if (!soal.pertanyaan.trim()) {
-                toast.add({ severity: "warn", summary: `Soal PG ${i + 1}`, detail: "Pertanyaan wajib diisi", life: 2500 });
+                toast.add({ severity: "warn", summary: `Multiple Choice Question Number ${i + 1}`, detail: "Question is required", life: 2500 });
                 return;
             }
             if (!soal.jawaban.a.trim() || !soal.jawaban.b.trim() || !soal.jawaban.c.trim() || !soal.jawaban.d.trim() || !soal.jawaban.e.trim()) {
-                toast.add({ severity: "warn", summary: `Soal PG ${i + 1}`, detail: "Semua opsi A–E wajib diisi", life: 2500 });
+                toast.add({ severity: "warn", summary: `Multiple Choice Question Number ${i + 1}`, detail: "All options A–E are required", life: 2500 });
                 return;
             }
             if (!soal.kunci) {
-                toast.add({ severity: "warn", summary: `Soal PG ${i + 1}`, detail: "Kunci jawaban wajib diisi", life: 2500 });
+                toast.add({ severity: "warn", summary: `Multiple Choice Question Number ${i + 1}`, detail: "Answer key is required", life: 2500 });
                 return;
             }
         }
@@ -194,7 +221,7 @@ const submitSemuaSoal = async () => {
         for (let i = 0; i < listSoalEssai.value.length; i++) {
             const soal = listSoalEssai.value[i];
             if (!soal.pertanyaan_essai.trim()) {
-                toast.add({ severity: "warn", summary: `Soal Essai ${i + 1}`, detail: "Pertanyaan wajib diisi", life: 2500 });
+                toast.add({ severity: "warn", summary: `Essay Question Number ${i + 1}`, detail: "Question is required", life: 2500 });
                 return;
             }
         }
@@ -253,7 +280,7 @@ const submitSemuaSoal = async () => {
         toast.add({
             severity: "success",
             summary: "Success!",
-            detail: "Semua soal berhasil disimpan.",
+            detail: "All questions saved successfully.",
             life: 3000,
         });
 
