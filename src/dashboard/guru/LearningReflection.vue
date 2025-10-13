@@ -172,15 +172,19 @@ onMounted(async () => {
                                 </div>
                                 <div class="flex flex-col space-y-2">
                                     <Label> Study Time</Label>
-                                    <InputText v-model="studyTime" placeholder="Example: 07:00 - 09:30 WIB"
-                                        class="w-full" />
+                                    <DatePicker v-model="studyTime" showIcon fluid iconDisplay="input" timeOnly
+                                        placeholder="Example: 07:00 - 09:30 WIB" class="w-full">
+                                        <template #inputicon="slotProps">
+                                            <i class="pi pi-clock" @click="slotProps.clickCallback" />
+                                        </template>
+                                    </DatePicker>
                                 </div>
                             </div>
                             <div class="w-1/2 space-y-5">
                                 <div class="flex flex-col space-y-2">
                                     <Label> Day / Date</Label>
-                                    <InputText v-model="tanggal" placeholder="Example: Monday, 14 July 2025"
-                                        class="w-full" />
+                                    <DatePicker v-model="tanggal" showIcon fluid iconDisplay="input"
+                                        placeholder="Example: Monday, 14 July 2025" class="w-full" />
                                 </div>
                                 <div class="flex flex-col space-y-2">
                                     <Label> Instructor</Label>
