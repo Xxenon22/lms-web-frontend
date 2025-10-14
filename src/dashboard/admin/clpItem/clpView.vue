@@ -1,5 +1,5 @@
 <script setup>
-import api from '../../services/api';
+import api from '../../../services/api';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import jsPDF from "jspdf";
