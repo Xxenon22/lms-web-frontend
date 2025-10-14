@@ -98,7 +98,7 @@ onMounted(async () => {
 
         <div>
             <div class="flex justify-center m-5">
-                <span class="text-3xl">Class Learning Reflection</span>
+                <span class="text-3xl">Learning Reflection</span>
             </div>
 
             <!-- SUBJECT -->

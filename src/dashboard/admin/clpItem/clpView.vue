@@ -178,7 +178,7 @@ onMounted(async () => {
         </div>
         <div class="">
             <div class="flex justify-center m-5">
-                <span class="text-3xl">Deep Learning Lesson Plan</span>
+                <span class="text-3xl">Learning Plan</span>
             </div>
 
             <!-- IDENTITAS -->
