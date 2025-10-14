@@ -44,7 +44,7 @@ const exportPDF = () => {
             ["Teacher", data.teacher_name || ""],
             ["Instructor", data.instructor_name || ""],
             ["Grade", `${data.name_grade || ""} ${data.name_rombel || ""}`],
-            ["Day / Date", formattedDate], // ✅ tanggal diformat
+            ["Day / Date", formattedDate], // tanggal diformat
             ["Time", data.waktu || ""],
             ["Student's Reflection", data.refleksi_siswa || ""],
             ["Teacher's Reflection", data.refleksi_guru || ""],

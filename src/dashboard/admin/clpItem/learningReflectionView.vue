@@ -1,5 +1,5 @@
 <script setup>
-import api from '../../../services/api';
+import api from '../../services/api';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import jsPDF from "jspdf";
@@ -14,6 +14,7 @@ const fetchRpkReflection = async () => {
     try {
         const res = await api.get(`/rpk-refleksi/${id}`)
         clpRefleksi.value = res.data
+        console.log("data", clpRefleksi)
     } catch (error) {
         console.error("Error Fetch RPK Reflection :", error)
     }
@@ -30,6 +31,9 @@ const exportPDF = () => {
     doc.setFontSize(16);
     doc.text("Learning Reflection", 105, 15, { align: "center" });
 
+    // Format tanggal pakai formatDate()
+    const formattedDate = formatDate(data.hari_tanggal);
+
     // Data utama dalam bentuk tabel
     autoTable(doc, {
         startY: 30,
@@ -40,7 +44,7 @@ const exportPDF = () => {
             ["Teacher", data.teacher_name || ""],
             ["Instructor", data.instructor_name || ""],
             ["Grade", `${data.name_grade || ""} ${data.name_rombel || ""}`],
-            ["Day / Date", data.hari_tanggal || ""],
+            ["Day / Date", formattedDate], // tanggal diformat
             ["Time", data.waktu || ""],
             ["Student's Reflection", data.refleksi_siswa || ""],
             ["Teacher's Reflection", data.refleksi_guru || ""],
@@ -68,6 +72,17 @@ const exportPDF = () => {
 const back = () => {
     router.back()
 }
+
+const formatDate = (hari_tanggal) => {
+    if (!hari_tanggal) return "Date not available";
+    return new Intl.DateTimeFormat("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        timeZone: "Asia/Jakarta",
+    }).format(new Date(hari_tanggal));
+};
+
 
 onMounted(async () => {
     await fetchRpkReflection()
@@ -151,7 +166,7 @@ onMounted(async () => {
                 </div>
                 <div class="w-2/3 space-y-5 m-4">
                     <div class="flex items-center space-x-2">
-                        <span>{{ clpRefleksi.hari_tanggal }}</span>
+                        <span>{{ formatDate(clpRefleksi.hari_tanggal) }}</span>
                     </div>
                 </div>
             </div>

@@ -50,6 +50,16 @@ const back = () => {
     router.back()
 }
 
+const formatDate = (hari_tanggal) => {
+    if (!hari_tanggal) return "Date not available";
+    return new Intl.DateTimeFormat("id-ID", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        timeZone: "Asia/Jakarta",
+    }).format(new Date(hari_tanggal));
+};
+
 onMounted(async () => {
     await fetchlearningReflection()
     isLoading.value = false;
@@ -80,7 +90,7 @@ onMounted(async () => {
                     <span>{{ rpk.kelas }}</span>
                 </div>
                 <div class="m-5">
-                    <p>{{ rpk.hari_tanggal }}</p>
+                    <p>{{ formatDate(rpk.hari_tanggal) }}</p>
                 </div>
             </template>
             <template #content>
