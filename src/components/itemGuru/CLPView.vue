@@ -15,6 +15,7 @@ const fetchRpk = async () => {
         const res = await api.get(`/rpk/${id}`) // ambil sesuai ID
         const item = res.data
 
+        console.log("data rpk :", res.data)
         // convert string "true"/"false" ke boolean
         for (let i = 1; i <= 8; i++) {
             const key = `dpl_${i}`;
