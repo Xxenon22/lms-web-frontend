@@ -12,7 +12,6 @@ const router = useRouter()
 
 const namaGuru = ref("")
 const tanggal = ref("")
-const subject = ref("")
 const rombel = ref("")
 const studyTime = ref("")
 const refleksiSiswa = ref("")
@@ -25,16 +24,15 @@ const notes = ref("")
 
 const selectedRombel = ref([])
 const selectedInstructor = ref([])
-const selectedSubject = ref([])
 
 const fetchSelectedRombel = async () => {
     try {
-        const res = await api.get("/rombel", {
+        const res = await api.get("/kelas", {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
         selectedRombel.value = res.data.map(b => ({
-            id: b.id,
-            name: `${b.grade_name || ''} ${b.name_rombel}`
+            id: b.rombel_id,
+            name: `${b.grade_lvl || ''} ${b.name_rombel} - ${b.nama_mapel}`
         }));
     } catch (error) {
         console.error("fetch rombel :", error)
@@ -61,26 +59,13 @@ const fetchSelectedInstructor = async (order = "asc") => {
     }
 }
 
-const fetchSelectedSubject = async () => {
-    try {
-        const res = await api.get("/mapel")
-        selectedSubject.value = res.data.map(s => ({
-            id: s.id,
-            nama_mapel: s.nama_mapel || "No Subject"
-        }))
-    } catch (error) {
-        console.error("Fetch subject :", error)
-    }
-}
-
 const fetchExistingLr = async () => {
     try {
         const res = await api.get(`/rpk-refleksi/${id}`);
         const data = res.data;
 
-        subject.value = data.mapel_id
         rombel.value = data.rombel_id
-        tanggal.value = data.hari_tanggal
+        tanggal.value = data.hari_tanggal ? new Date(data.hari_tanggal) : null
         namaGuru.value = String(data.instructor)
         studyTime.value = data.waktu
         refleksiSiswa.value = data.refleksi_siswa
@@ -99,9 +84,12 @@ const fetchExistingLr = async () => {
 const updateLr = async () => {
     try {
         await api.put(`/rpk-refleksi/${id}`, {
-            mapel_id: subject.value,
             rombel_id: rombel.value,
-            hari_tanggal: tanggal.value,
+            hari_tanggal: tanggal.value
+                ? new Date(tanggal.value.getTime() - tanggal.value.getTimezoneOffset() * 60000)
+                    .toISOString()
+                    .split('T')[0]
+                : null,
             instructor: namaGuru.value,
             waktu: studyTime.value,
             refleksi_siswa: refleksiSiswa.value,
@@ -111,17 +99,27 @@ const updateLr = async () => {
             follow_up: followUp.value,
             pendampingan_siswa: pendampinganSiswa.value,
             keterangan: notes.value
-        })
-        toast.add({ severity: 'success', summary: 'Success', detail: 'Plan updated successfully.', life: 3000 })
+        }, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+        });
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Plan updated successfully.',
+            life: 3000
+        });
+
     } catch (error) {
-        console.error("failed to update rpk refleksi :", error)
+        console.error("failed to update rpk refleksi :", error);
+        toast.add({ severity: 'error', summary: 'Failed', detail: 'Failed to update plan.', life: 3000 });
     }
-}
+};
+
 onMounted(async () => {
     await fetchSelectedRombel()
     await fetchExistingLr()
     await fetchSelectedInstructor("asc")
-    await fetchSelectedSubject()
 })
 
 const back = () => {
@@ -148,11 +146,6 @@ const back = () => {
                         <h1>Identity</h1>
                         <div class="flex flex-row space-x-5">
                             <div class="w-1/2 space-y-5">
-                                <div class="flex flex-col space-y-2">
-                                    <Label> Subject </Label>
-                                    <Select v-model="subject" :options="selectedSubject" option-label="nama_mapel"
-                                        option-value="id" placeholder="-- Select Subject--" class="w-full" />
-                                </div>
                                 <div class="flex flex-col space-y-2">
                                     <Label> Class </Label>
                                     <Select v-model="rombel" rombel :options="selectedRombel" option-label="name"

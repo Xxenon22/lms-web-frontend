@@ -6,186 +6,209 @@ import { useRoute, useRouter } from 'vue-router';
 
 const toast = useToast();
 const route = useRoute();
-const id = route.params.id
-const router = useRouter()
+const id = route.params.id;
+const router = useRouter();
 
 // Form fields
-const rombel = ref("")
-const namaGuru = ref("")
-const tutor = ref("")
-const tanggal = ref("")
-const subject = ref("")
-const fase = ref("")
-const studyTime = ref("")
-const tujuanPemb = ref("")
-const lintasDis = ref("")
-const pemanfaatan = ref("")
-const materiPemb = ref("")
-const kemitraanPemb = ref("")
-const dpl1 = ref(false)
-const dpl2 = ref(false)
-const dpl3 = ref(false)
-const dpl4 = ref(false)
-const dpl5 = ref(false)
-const dpl6 = ref(false)
-const dpl7 = ref(false)
-const dpl8 = ref(false)
+const rombel = ref("");
+const namaGuru = ref("");
+const tutor = ref("");
+const tanggal = ref("");
+const fase = ref("");
+const studyTime = ref("");
+const tujuanPemb = ref("");
+const lintasDis = ref("");
+const pemanfaatan = ref("");
+const kemitraanPemb = ref("");
+const dpl1 = ref(false);
+const dpl2 = ref(false);
+const dpl3 = ref(false);
+const dpl4 = ref(false);
+const dpl5 = ref(false);
+const dpl6 = ref(false);
+const dpl7 = ref(false);
+const dpl8 = ref(false);
 
 // Pengalaman belajar
-const memahami = ref("")
-const mengaplikasikan = ref("")
-const merefleksi = ref("")
+const memahami = ref("");
+const mengaplikasikan = ref("");
+const merefleksi = ref("");
 
 // Prinsip pembelajaran
-const berkesadaranMemahami = ref(false)
-const bermaknaMemahami = ref(false)
-const menggembirakanMemahami = ref(false)
+const berkesadaranMemahami = ref(false);
+const bermaknaMemahami = ref(false);
+const menggembirakanMemahami = ref(false);
 
-const berkesadaranMengaplikasikan = ref(false)
-const bermaknaMengaplikasikan = ref(false)
-const menggembirakanMengaplikasikan = ref(false)
+const berkesadaranMengaplikasikan = ref(false);
+const bermaknaMengaplikasikan = ref(false);
+const menggembirakanMengaplikasikan = ref(false);
 
-const berkesadaranMerefleksi = ref(false)
-const bermaknaMerefleksi = ref(false)
-const menggembirakanMerefleksi = ref(false)
+const berkesadaranMerefleksi = ref(false);
+const bermaknaMerefleksi = ref(false);
+const menggembirakanMerefleksi = ref(false);
 
 // Asesmen
-const asesmenMemahami = ref("")
-const asesmenMengaplikasikan = ref("")
-const asesmenMerefleksi = ref("")
+const asesmenMemahami = ref("");
+const asesmenMengaplikasikan = ref("");
+const asesmenMerefleksi = ref("");
 
 // Options
-const selectedFase = ref([])
-const selectedRombel = ref([])
-const selectedInstructor = ref([])
-const selectedSubject = ref([])
+const selectedFase = ref([]);
+const selectedRombel = ref([]);
+const selectedInstructor = ref([]);
 
-const currentMemahamiId = ref("")
-const currentMengaplikasikanId = ref("")
-const currentMerefleksiId = ref("")
+// child-table IDs
+const currentMemahamiId = ref(null);
+const currentMengaplikasikanId = ref(null);
+const currentMerefleksiId = ref(null);
 
+// ================== FETCH SECTION ===================
 
 const fetchSelectedFase = async () => {
     try {
-        const res = await api.get("/phase")
-        selectedFase.value = res.data
+        const res = await api.get("/phase");
+        selectedFase.value = res.data;
     } catch (error) {
-        console.error("fetch Phase :", error)
+        console.error("fetch Phase :", error);
     }
-}
-
+};
 const fetchSelectedRombel = async () => {
     try {
-        const res = await api.get("/rombel", {
+        const res = await api.get("/kelas", {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
         selectedRombel.value = res.data.map(b => ({
-            id: b.id,
-            name: `${b.grade_name || ''} ${b.name_rombel}`
-        }))
+            id: b.rombel_id,
+            name: `${b.grade_lvl || ''} ${b.name_rombel} - ${b.nama_mapel}`
+        }));
     } catch (error) {
-        console.error("fetch rombel :", error)
+        console.error("fetch rombel :", error);
     }
-}
+};
 
 const fetchSelectedInstructor = async (order = "asc") => {
     try {
-        const res = await api.get("/teacher")
-        selectedInstructor.value = res.data.map(t => ({
-            id: t.id,
-            name: t.name || "No Name"
-        }))
-            .sort((a, b) => {
-                if (order === "asc") {
-                    return a.name.localeCompare(b.name) // A-Z
-                } else {
-                    return b.name.localeCompare(a.name) // Z-A
-                }
-            })
+        const res = await api.get("/teacher");
+        selectedInstructor.value = res.data
+            .map(t => ({
+                id: t.id,
+                name: t.name || "No Name"
+            }))
+            .sort((a, b) => order === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
     } catch (error) {
-        console.error("fetch instructor :", error)
+        console.error("fetch instructor :", error);
     }
-}
+};
 
-
-const fetchSelectedSubject = async () => {
-    try {
-        const res = await api.get("/mapel")
-        selectedSubject.value = res.data.map(s => ({
-            id: s.id,
-            nama_mapel: s.nama_mapel || "No Subject"
-        }))
-    } catch (error) {
-        console.error("Fetch subject :", error)
-    }
-}
-
+// ================== MAIN FIX SECTION ===================
 const fetchExistingRPK = async () => {
     try {
         const res = await api.get(`/rpk/${id}`);
         const data = res.data;
 
-        rombel.value = data.rombel_id
-        namaGuru.value = data.instructor ? String(data.instructor) : null
-        tutor.value = data.tutor
-        tanggal.value = data.hari_tanggal ? new Date(data.hari_tanggal) : null
-        fase.value = data.phase_id
-        studyTime.value = data.waktu
-        tujuanPemb.value = data.tujuan_pembelajaran
-        lintasDis.value = data.lintas_disiplin_ilmu
-        pemanfaatan.value = data.pemanfaatan_digital
-        materiPemb.value = data.materi_pembelajaran
-        kemitraanPemb.value = data.kemitraan_pembelajaran
+        // === Parent table ===
+        rombel.value = data.rombel_id;
+        namaGuru.value = data.instructor ? String(data.instructor) : null,
+            tutor.value = data.tutor;
+        tanggal.value = data.hari_tanggal ? new Date(data.hari_tanggal) : null;
+        fase.value = data.phase_id;
+        studyTime.value = data.waktu;
+        tujuanPemb.value = data.tujuan_pembelajaran;
+        lintasDis.value = data.lintas_disiplin_ilmu;
+        pemanfaatan.value = data.pemanfaatan_digital;
+        kemitraanPemb.value = data.kemitraan_pembelajaran;
 
-        dpl1.value = data.dpl_1
-        dpl2.value = data.dpl_2
-        dpl3.value = data.dpl_3
-        dpl4.value = data.dpl_4
-        dpl5.value = data.dpl_5
-        dpl6.value = data.dpl_6
-        dpl7.value = data.dpl_7
-        dpl8.value = data.dpl_8
+        dpl1.value = data.dpl_1;
+        dpl2.value = data.dpl_2;
+        dpl3.value = data.dpl_3;
+        dpl4.value = data.dpl_4;
+        dpl5.value = data.dpl_5;
+        dpl6.value = data.dpl_6;
+        dpl7.value = data.dpl_7;
+        dpl8.value = data.dpl_8;
 
-        // child table
-        // currentMemahamiId.value = data.rpk_memahami?.id
-        memahami.value = data.memahami || ""
-        berkesadaranMemahami.value = data.memahami_berkesadaran
-        bermaknaMemahami.value = data.memahami_bermakna
-        menggembirakanMemahami.value = data.memahami_menggembirakan
-        asesmenMemahami.value = data.asesmen_memahami
+        // === Child relation IDs ===
+        currentMemahamiId.value = data.memahami_id;
+        currentMengaplikasikanId.value = data.mengaplikasikan_id;
+        currentMerefleksiId.value = data.merefleksi_id;
 
-        // currentMengaplikasikanId.value = data.rpk_mengaplikasikan?.id
-        mengaplikasikan.value = data.mengaplikasikan || ""
-        berkesadaranMengaplikasikan.value = data.mengaplikasikan_berkesadaran
-        bermaknaMengaplikasikan.value = data.mengaplikasikan_bermakna
-        menggembirakanMengaplikasikan.value = data.mengaplikasikan_menggembirakan
-        asesmenMengaplikasikan.value = data.asesmen_mengaplikasikan
+        // === Fetch child contents (langsung dari data utama) ===
+        memahami.value = data.memahami || "";
+        berkesadaranMemahami.value = data.memahami_berkesadaran || false;
+        bermaknaMemahami.value = data.memahami_bermakna || false;
+        menggembirakanMemahami.value = data.memahami_menggembirakan || false;
+        asesmenMemahami.value = data.asesmen_memahami || "";
 
-        // currentMerefleksiId.value = data.rpk_merefleksi?.id
-        merefleksi.value = data.merefleksi || ""
-        berkesadaranMerefleksi.value = data.merefleksi_berkesadaran
-        bermaknaMerefleksi.value = data.merefleksi_bermakna
-        menggembirakanMerefleksi.value = data.merefleksi_menggembirakan
-        asesmenMerefleksi.value = data.asesmen_merefleksi
+        mengaplikasikan.value = data.mengaplikasikan || "";
+        berkesadaranMengaplikasikan.value = data.mengaplikasikan_berkesadaran || false;
+        bermaknaMengaplikasikan.value = data.mengaplikasikan_bermakna || false;
+        menggembirakanMengaplikasikan.value = data.mengaplikasikan_menggembirakan || false;
+        asesmenMengaplikasikan.value = data.asesmen_mengaplikasikan || "";
+
+        merefleksi.value = data.merefleksi || "";
+        berkesadaranMerefleksi.value = data.merefleksi_berkesadaran || false;
+        bermaknaMerefleksi.value = data.merefleksi_bermakna || false;
+        menggembirakanMerefleksi.value = data.merefleksi_menggembirakan || false;
+        asesmenMerefleksi.value = data.asesmen_merefleksi || "";
     } catch (err) {
-        toast.add({ severity: 'error', summary: 'Failed', detail: 'Failed to load data.', life: 3000 })
+        toast.add({ severity: 'error', summary: 'Failed', detail: 'Failed to load RPK data.', life: 3000 });
+        console.error(err);
     }
-}
+};
+// =======================================================
 
 const updateRPK = async () => {
     try {
+        const postOrPut = async (path, id, payload) => {
+            if (id) {
+                await api.put(`/${path}/${id}`, payload);
+                return id;
+            } else {
+                const res = await api.post(`/${path}`, payload);
+                return res.data.id;
+            }
+        };
+
+        const memahamiId = await postOrPut("rpk-memahami", currentMemahamiId.value, {
+            memahami: memahami.value,
+            berkesadaran: berkesadaranMemahami.value,
+            bermakna: bermaknaMemahami.value,
+            menggembirakan: menggembirakanMemahami.value,
+            asesmen_memahami: asesmenMemahami.value,
+        });
+
+        const mengaplikasikanId = await postOrPut("rpk-mengaplikasikan", currentMengaplikasikanId.value, {
+            mengaplikasikan: mengaplikasikan.value,
+            berkesadaran: berkesadaranMengaplikasikan.value,
+            bermakna: bermaknaMengaplikasikan.value,
+            menggembirakan: menggembirakanMengaplikasikan.value,
+            asesmen_mengaplikasikan: asesmenMengaplikasikan.value,
+        });
+
+        const merefleksiId = await postOrPut("rpk-merefleksi", currentMerefleksiId.value, {
+            merefleksi: merefleksi.value,
+            berkesadaran: berkesadaranMerefleksi.value,
+            bermakna: bermaknaMerefleksi.value,
+            menggembirakan: menggembirakanMerefleksi.value,
+            asesmen_merefleksi: asesmenMerefleksi.value,
+        });
+
+        const adjustedDate = tanggal.value
+            ? new Date(tanggal.value.getTime() - tanggal.value.getTimezoneOffset() * 60000)
+                .toISOString()
+                .split("T")[0]
+            : null;
+
         await api.put(`/rpk/${id}`, {
             rombel_id: rombel.value,
             instructor: namaGuru.value,
             tutor: tutor.value,
-            hari_tanggal: tanggal.value ? tanggal.value.toISOString().split("T")[0] : null,
-            mapel_id: subject.value,
+            hari_tanggal: adjustedDate,
             phase_id: fase.value,
             waktu: studyTime.value,
             tujuan_pembelajaran: tujuanPemb.value,
             lintas_disiplin_ilmu: lintasDis.value,
             pemanfaatan_digital: pemanfaatan.value,
-            materi_pembelajaran: materiPemb.value,
             kemitraan_pembelajaran: kemitraanPemb.value,
             dpl_1: dpl1.value,
             dpl_2: dpl2.value,
@@ -195,58 +218,37 @@ const updateRPK = async () => {
             dpl_6: dpl6.value,
             dpl_7: dpl7.value,
             dpl_8: dpl8.value,
-
-            memahami: memahami.value,
-            berkesadaranMemahami: berkesadaranMemahami.value,
-            bermaknaMemahami: bermaknaMemahami.value,
-            menggembirakanMemahami: menggembirakanMemahami.value,
-            asesmenMemahami: asesmenMemahami.value,
-
-            mengaplikasikan: mengaplikasikan.value,
-            berkesadaranMengaplikasikan: berkesadaranMengaplikasikan.value,
-            bermaknaMengaplikasikan: bermaknaMengaplikasikan.value,
-            menggembirakanMengaplikasikan: menggembirakanMengaplikasikan.value,
-            asesmenMengaplikasikan: asesmenMengaplikasikan.value,
-
-            merefleksi: merefleksi.value,
-            berkesadaranMerefleksi: berkesadaranMerefleksi.value,
-            bermaknaMerefleksi: bermaknaMerefleksi.value,
-            menggembirakanMerefleksi: menggembirakanMerefleksi.value,
-            asesmenMerefleksi: asesmenMerefleksi.value,
-
-            currentMemahamiId: currentMemahamiId.value,
-            currentMengaplikasikanId: currentMengaplikasikanId.value,
-            currentMerefleksiId: currentMerefleksiId.value
+            memahami_id: memahamiId,
+            mengaplikasikan_id: mengaplikasikanId,
+            merefleksi_id: merefleksiId,
         });
-        toast.add({ severity: 'success', summary: 'Success', detail: 'Plan updated successfully.', life: 3000 })
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'RPK updated successfully.',
+            life: 3000
+        });
     } catch (err) {
-        toast.add({ severity: 'error', summary: 'Update Failed', detail: err.message, life: 3000 })
+        toast.add({
+            severity: 'error',
+            summary: 'Update Failed',
+            detail: err.message,
+            life: 3000
+        });
+        console.error(err);
     }
-}
-
-const formatDate = (hari_tanggal) => {
-    if (!hari_tanggal) return "Date not available";
-    return new Intl.DateTimeFormat("id-ID", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        timeZone: "Asia/Jakarta",
-    }).format(new Date(hari_tanggal));
 };
-
-
 onMounted(async () => {
-    await fetchSelectedFase()
-    await fetchSelectedRombel()
-    await fetchSelectedInstructor("asc")
-    await fetchSelectedSubject()
-    await fetchExistingRPK()
-})
+    await fetchSelectedFase();
+    await fetchSelectedRombel();
+    await fetchSelectedInstructor("asc");
+    await fetchExistingRPK();
+});
 
-const back = () => {
-    router.back()
-}
+const back = () => router.back();
 </script>
+
 
 <template>
     <div class="m-5">
@@ -274,11 +276,6 @@ const back = () => {
                                     <Label>Day / Date</Label>
                                     <DatePicker v-model="tanggal" showIcon fluid iconDisplay="input"
                                         placeholder="-- Day / Date --" class="w-full" />
-                                </div>
-                                <div class="flex flex-col space-y-2">
-                                    <Label>Subject</Label>
-                                    <Select v-model="subject" :options="selectedSubject" option-label="nama_mapel"
-                                        option-value="id" placeholder="-- Select Subject --" class="w-full" />
                                 </div>
                                 <div class="flex flex-col space-y-2">
                                     <Label>Study Time</Label>

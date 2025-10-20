@@ -10,6 +10,16 @@ const route = useRoute()
 const router = useRouter()
 const id = route.params.id
 
+const DPL_LABELS = {
+    1: "Keimanan dan ketakwaan terhadap Tuhan Yang Maha Esa",
+    2: "Akhlak mulia",
+    3: "Penalaran kritis",
+    4: "Kreativitas",
+    5: "Gotong royong",
+    6: "Mandiri",
+    7: "Kebhinekaan global",
+    8: "Kolaborasi",
+};
 
 
 // === FETCH RPK ===
@@ -39,10 +49,9 @@ const fetchRpk = async () => {
         }
 
         rpk.value = item;
-        console.log("✅ Data berhasil diambil:", rpk.value);
 
     } catch (error) {
-        console.error("❌ Error fetch RPK:", error);
+        console.error("Error fetch RPK:", error);
         console.error("response status:", error.response?.status, "data:", error.response?.data);
         rpk.value = {}; // Set object kosong agar template tidak crash
     }
@@ -116,7 +125,7 @@ const exportPDF = () => {
     const dplList = [];
     for (let i = 1; i <= 8; i++) {
         if (data[`dpl_${i}`]) {
-            dplList.push(`DPL ${i}`);
+            dplList.push([`DPL ${i}: ${DPL_LABELS[i]}`]);
         }
     }
 
@@ -125,7 +134,7 @@ const exportPDF = () => {
         startY: doc.lastAutoTable.finalY + 15,
         theme: "grid",
         head: [["DPL"]],
-        body: dplList.length ? dplList.map((d) => [d]) : [["No DPL Selected"]],
+        body: dplList.length ? dplList : [["No DPL Selected"]],
     });
 
     // === Pengalaman Belajar ===
@@ -278,13 +287,13 @@ onMounted(async () => {
                     <div class="flex flex-col gap-2 w-1/2">
                         <div v-for="i in 4" :key="'dpl-left-' + i" class="flex items-center gap-2">
                             <Checkbox v-model="rpk[`dpl_${i}`]" :binary="true" :inputId="`dpl${i}`" disabled />
-                            <label :for="`dpl${i}`"><b>DPL {{ i }}:</b></label>
+                            <label :for="`dpl${i}`"><b>DPL {{ i }}:</b>{{ DPL_LABELS[i] }}</label>
                         </div>
                     </div>
                     <div class="flex flex-col gap-2 w-1/2">
                         <div v-for="i in [5, 6, 7, 8]" :key="'dpl-right-' + i" class="flex items-center gap-2">
                             <Checkbox v-model="rpk[`dpl_${i}`]" :binary="true" :inputId="`dpl${i}`" disabled />
-                            <label :for="`dpl${i}`"><b>DPL {{ i }}:</b></label>
+                            <label :for="`dpl${i}`"><b>DPL {{ i }}:</b>{{ DPL_LABELS[i] }}</label>
                         </div>
                     </div>
                 </div>

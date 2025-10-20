@@ -11,19 +11,16 @@ const fetchUserId = async () => {
     try {
         const res = await api.get("/auth/profile")
         userId.value = res.data.id
-        console.log("✅ userId didapat:", userId.value)
     } catch (error) {
         console.error("error fetch user ID:", error)
     }
 };
 
 const fetchRpk = async () => {
-    console.log("🚀 fetchRpk dipanggil dengan userId:", userId.value)
-    if (!userId.value) return console.warn("⚠️ userId kosong, tidak fetch data")
+    if (!userId.value) return console.warn("userId kosong, tidak fetch data")
     try {
         const res = await api.get(`/rpk/all-rpk/${userId.value}`)
         allRpk.value = res.data
-        console.log("📦 data RPK:", res.data)
     } catch (error) {
         console.error("Error fetch RPK :", error)
     }
