@@ -9,11 +9,14 @@ const rombel = ref("")
 const namaGuru = ref("")
 const tutor = ref("")
 const tanggal = ref("")
+const subject = ref("")
 const fase = ref("")
+// const instructor = ref("")
 const studyTime = ref("")
 const tujuanPemb = ref("")
 const lintasDis = ref("")
 const pemanfaatan = ref("")
+// const materiPemb = ref("")
 const kemitraanPemb = ref("")
 const dpl1 = ref(false)
 const dpl2 = ref(false)
@@ -45,6 +48,7 @@ const asesmenMerefleksi = ref("")
 const selectedFase = ref([])
 const selectedRombel = ref([])
 const selectedInstructor = ref([])
+const selectedSubject = ref([])
 
 
 // fungsi resetForm
@@ -53,7 +57,9 @@ const resetForm = () => {
     namaGuru.value = ""
     tutor.value = ""
     tanggal.value = ""
+    subject.value = ""
     fase.value = ""
+    // instructor.value = ""
     studyTime.value = ""
     tujuanPemb.value = ""
     lintasDis.value = ""
@@ -113,7 +119,7 @@ const fetchSelectedRombel = async () => {
         });
         selectedRombel.value = res.data.map(b => ({
             id: b.rombel_id,
-            name: `${b.grade_lvl || ''} ${b.name_rombel} - ${b.nama_mapel}`
+            name: `${b.grade_lvl || ''} ${b.name_rombel}`
         }));
     } catch (error) {
         console.error("fetch rombel :", error)
@@ -136,6 +142,15 @@ const fetchSelectedInstructor = async (order = "asc") => {
             })
     } catch (error) {
         console.error("fetch instructor :", error)
+    }
+}
+
+const fetchSelectedSubject = async () => {
+    try {
+        const res = await api.get('/mapel')
+        selectedSubject.value = res.data
+    } catch (error) {
+        console.error("Fetch subject :", error)
     }
 }
 
@@ -177,6 +192,7 @@ const submitRPK = async () => {
             rombel_id: rombel.value,
             tutor: tutor.value,
             hari_tanggal: tanggal.value,
+            mapel_id: subject.value,
             phase_id: fase.value,
             instructor: namaGuru.value,
             waktu: studyTime.value,
@@ -228,6 +244,7 @@ onMounted(() => {
     fetchSelectedFase("asc")
     fetchSelectedRombel()
     fetchSelectedInstructor("asc")
+    fetchSelectedSubject()
 })
 </script>
 
@@ -255,11 +272,11 @@ onMounted(() => {
                                     <DatePicker v-model="tanggal" showIcon fluid iconDisplay="input"
                                         placeholder="-- Day / Date --" class="w-full" />
                                 </div>
-                                <!-- <div class="flex flex-col space-y-2">
+                                <div class="flex flex-col space-y-2">
                                     <Label> Subject </Label>
                                     <Select v-model="subject" :options="selectedSubject" option-label="nama_mapel"
                                         option-value="id" placeholder="-- Select Subject --" class="w-full" />
-                                </div> -->
+                                </div>
                                 <div class="flex flex-col space-y-2">
                                     <Label> Study Time</Label>
                                     <InputText v-model="studyTime" placeholder="Example: 07:00 - 09:30 WIB"
