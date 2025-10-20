@@ -9,7 +9,6 @@ const rombel = ref("")
 const namaGuru = ref("")
 const tutor = ref("")
 const tanggal = ref("")
-const subject = ref("")
 const fase = ref("")
 // const instructor = ref("")
 const studyTime = ref("")
@@ -57,7 +56,6 @@ const resetForm = () => {
     namaGuru.value = ""
     tutor.value = ""
     tanggal.value = ""
-    subject.value = ""
     fase.value = ""
     // instructor.value = ""
     studyTime.value = ""
@@ -119,7 +117,7 @@ const fetchSelectedRombel = async () => {
         });
         selectedRombel.value = res.data.map(b => ({
             id: b.rombel_id,
-            name: `${b.grade_lvl || ''} ${b.name_rombel}`
+            name: `${b.grade_lvl || ''} ${b.name_rombel} - ${b.nama_mapel}`
         }));
     } catch (error) {
         console.error("fetch rombel :", error)
@@ -142,15 +140,6 @@ const fetchSelectedInstructor = async (order = "asc") => {
             })
     } catch (error) {
         console.error("fetch instructor :", error)
-    }
-}
-
-const fetchSelectedSubject = async () => {
-    try {
-        const res = await api.get('/mapel')
-        selectedSubject.value = res.data
-    } catch (error) {
-        console.error("Fetch subject :", error)
     }
 }
 
@@ -192,7 +181,6 @@ const submitRPK = async () => {
             rombel_id: rombel.value,
             tutor: tutor.value,
             hari_tanggal: tanggal.value,
-            mapel_id: subject.value,
             phase_id: fase.value,
             instructor: namaGuru.value,
             waktu: studyTime.value,
@@ -244,7 +232,6 @@ onMounted(() => {
     fetchSelectedFase("asc")
     fetchSelectedRombel()
     fetchSelectedInstructor("asc")
-    fetchSelectedSubject()
 })
 </script>
 
@@ -271,11 +258,6 @@ onMounted(() => {
                                     <Label> Day / Date</Label>
                                     <DatePicker v-model="tanggal" showIcon fluid iconDisplay="input"
                                         placeholder="-- Day / Date --" class="w-full" />
-                                </div>
-                                <div class="flex flex-col space-y-2">
-                                    <Label> Subject </Label>
-                                    <Select v-model="subject" :options="selectedSubject" option-label="nama_mapel"
-                                        option-value="id" placeholder="-- Select Subject --" class="w-full" />
                                 </div>
                                 <div class="flex flex-col space-y-2">
                                     <Label> Study Time</Label>

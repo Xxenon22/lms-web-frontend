@@ -10,12 +10,11 @@ const route = useRoute()
 const router = useRouter()
 const id = route.params.id
 
+
+
 // === FETCH RPK ===
 const fetchRpk = async () => {
     try {
-        console.log("fetchRpk -> id:", id);
-        console.log("fetchRpk -> url:", `/rpk/${id}`);
-
         const res = await api.get(`/rpk/${id}`);
 
         if (!res || !res.data) {
@@ -87,8 +86,7 @@ const exportPDF = () => {
         theme: "grid",
         head: [["Field", "Value"]],
         body: [
-            ["Class", data.name_rombel || ""],
-            ["Subject", data.nama_mapel || ""],
+            ["Class & Subject", `${data.name_rombel || ""} - ${data.nama_mapel || ""}`],
             ["Phase", data.phase || ""],
             ["Grade", data.grade_lvl || ""],
             ["Teacher", data.teacher_name || ""],
@@ -97,6 +95,7 @@ const exportPDF = () => {
             ["Day / Date", formatDateForPDF(data.hari_tanggal)],
             ["Time", data.waktu || ""],
         ],
+
     });
 
     // === Instructional Design ===
@@ -209,22 +208,52 @@ onMounted(async () => {
 
         <!-- ========== BAGIAN IDENTITAS ========== -->
         <div class="flex border-2">
+            <!-- Kolom Kiri -->
             <div class="w-1/5 flex justify-center items-center bg-gray-100">
-                <div class="text-3xl">Identity</div>
+                <div class="text-3xl font-semibold text-center">Identity</div>
             </div>
-            <div class="w-4/5 space-y-5 m-4">
-                <div v-for="(val, key) in {
-                    'Class': rpk.name_rombel,
-                    'Subject': rpk.nama_mapel,
-                    'Phase': rpk.phase,
-                    'Grade': rpk.grade_lvl,
-                    'Teacher': rpk.teacher_name,
-                    'Instructor': rpk.instructor_name,
-                    'Tutor': rpk.tutor,
-                    'Day / Date': formatDate(rpk.hari_tanggal),
-                    'Time': rpk.waktu
-                }" :key="key" class="flex items-center space-x-2">
-                    <h1 class="font-bold">{{ key }} :</h1> <span>{{ val }}</span>
+
+            <!-- Kolom Kanan -->
+            <div class="w-4/5 grid grid-cols-2 gap-x-4 gap-y-2 p-4">
+                <div class="col-span-1 flex">
+                    <span class="font-bold w-32">Class :</span>
+                    <span>{{ rpk.name_rombel || '-' }}</span>
+                </div>
+                <div class="col-span-1 flex">
+                    <span class="font-bold w-32">Subject :</span>
+                    <span>{{ rpk.subject || '-' }}</span>
+                </div>
+
+                <div class="col-span-1 flex">
+                    <span class="font-bold w-32">Phase :</span>
+                    <span>{{ rpk.phase || '-' }}</span>
+                </div>
+                <div class="col-span-1 flex">
+                    <span class="font-bold w-32">Grade :</span>
+                    <span>{{ rpk.grade_lvl || '-' }}</span>
+                </div>
+
+                <div class="col-span-1 flex">
+                    <span class="font-bold w-32">Teacher :</span>
+                    <span>{{ rpk.teacher_name || '-' }}</span>
+                </div>
+                <div class="col-span-1 flex">
+                    <span class="font-bold w-32">Instructor :</span>
+                    <span>{{ rpk.instructor_name || '-' }}</span>
+                </div>
+
+                <div class="col-span-1 flex">
+                    <span class="font-bold w-32">Tutor :</span>
+                    <span>{{ rpk.tutor || '-' }}</span>
+                </div>
+                <div class="col-span-1 flex">
+                    <span class="font-bold w-32">Day / Date :</span>
+                    <span>{{ formatDate(rpk.hari_tanggal) }}</span>
+                </div>
+
+                <div class="col-span-2 flex">
+                    <span class="font-bold w-32">Time :</span>
+                    <span>{{ rpk.waktu || '-' }}</span>
                 </div>
             </div>
         </div>
