@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const clpRefleksi = ref([])
+const clpRefleksi = ref({})
 const route = useRoute()
 const router = useRouter()
 const id = route.params.id
