@@ -191,31 +191,31 @@ onMounted(async () => {
                 </div>
                 <div class="w-4/5 space-y-5 m-4">
                     <div class="flex items-center space-x-2">
-                        <h1 class="font-bold">Class :</h1> <span>{{ rpk.name_rombel }}</span>
+                        <h1 class="font-bold">Class :</h1> <span>{{ rpk?.name_rombel }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <h1 class="font-bold">Subject :</h1> <span>{{ rpk.nama_mapel }}</span>
+                        <h1 class="font-bold">Subject :</h1> <span>{{ rpk?.nama_mapel }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <h1 class="font-bold">Phase :</h1> <span>{{ rpk.phase }}</span>
+                        <h1 class="font-bold">Phase :</h1> <span>{{ rpk?.phase }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <h1 class="font-bold">Grade :</h1> <span>{{ rpk.grade_lvl }}</span>
+                        <h1 class="font-bold">Grade :</h1> <span>{{ rpk?.grade_lvl }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <h1 class="font-bold">Teacher :</h1> <span>{{ rpk.teacher_name }}</span>
+                        <h1 class="font-bold">Teacher :</h1> <span>{{ rpk?.teacher_name }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <h1 class="font-bold">Instructor :</h1> <span>{{ rpk.instructor_name }}</span>
+                        <h1 class="font-bold">Instructor :</h1> <span>{{ rpk?.instructor_name }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <h1 class="font-bold">Tutor :</h1> <span>{{ rpk.tutor }}</span>
+                        <h1 class="font-bold">Tutor :</h1> <span>{{ rpk?.tutor }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <h1 class="font-bold">Day / Date :</h1> <span>{{ formatDate(rpk.hari_tanggal) }}</span>
+                        <h1 class="font-bold">Day / Date :</h1> <span>{{ formatDate(rpk?.hari_tanggal) }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <h1 class="font-bold">Time :</h1> <span>{{ rpk.waktu }}</span>
+                        <h1 class="font-bold">Time :</h1> <span>{{ rpk?.waktu }}</span>
                     </div>
                 </div>
             </div>
@@ -227,54 +227,54 @@ onMounted(async () => {
                 </div>
                 <div class="w-4/5 space-y-5 m-4">
                     <div class="flex items-center space-x-2">
-                        <h1 class="font-bold">Learning Objective :</h1> <span>{{ rpk.tujuan_pembelajaran }}</span>
+                        <h1 class="font-bold">Learning Objective :</h1> <span>{{ rpk?.tujuan_pembelajaran }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <h1 class="font-bold">Interdisciplinery :</h1> <span>{{ rpk.lintas_disiplin_ilmu }}</span>
+                        <h1 class="font-bold">Interdisciplinery :</h1> <span>{{ rpk?.lintas_disiplin_ilmu }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
                         <h1 class="font-bold">Learning Partnership :</h1> <span>{{
-                            rpk.kemitraan_pembelajaran }}</span>
+                            rpk?.kemitraan_pembelajaran }}</span>
                     </div>
                     <div class="flex items-center space-x-2">
                         <h1 class="font-bold">Digital Utilization :</h1> <span>{{
-                            rpk.pemanfaatan_digital }}</span>
+                            rpk?.pemanfaatan_digital }}</span>
                     </div>
                     <h1 class="font-bold">Dimensi Profil Lulusan :</h1>
                     <div class="flex felx-col gap-4">
                         <div class="w-1/2">
                             <div class="flex items-center gap-2">
-                                <Checkbox v-model="rpk.dpl_1" :binary="true" inputId="gpd1" disabled />
+                                <Checkbox v-model="rpk?.dpl_1" :binary="true" inputId="gpd1" disabled />
                                 <label for="gpd1"><b>DPL 1:</b> Keimanan dan ketakwaan Terhadap Tuhan YME</label>
                             </div>
                             <div class="flex items-center gap-2">
-                                <Checkbox v-model="rpk.dpl_2" :binary="true" inputId="gpd2" disabled />
+                                <Checkbox v-model="rpk?.dpl_2" :binary="true" inputId="gpd2" disabled />
                                 <label for="gpd2"><b>DPL 2:</b> Kewargaan</label>
                             </div>
                             <div class="flex items-center gap-2">
-                                <Checkbox v-model="rpk.dpl_3" :binary="true" inputId="gpd3" disabled />
+                                <Checkbox v-model="rpk?.dpl_3" :binary="true" inputId="gpd3" disabled />
                                 <label for="gpd3"><b>DPL 3:</b> Penalaran Kritis</label>
                             </div>
                             <div class="flex items-center gap-2">
-                                <Checkbox v-model="rpk.dpl_4" :binary="true" inputId="gpd4" disabled />
+                                <Checkbox v-model="rpk?.dpl_4" :binary="true" inputId="gpd4" disabled />
                                 <label for="gpd4"><b>DPL 4:</b> Kreativitas</label>
                             </div>
                         </div>
                         <div class="w-1/2">
                             <div class="flex items-center gap-2">
-                                <Checkbox v-model="rpk.dpl_5" :binary="true" inputId="gpd5" disabled />
+                                <Checkbox v-model="rpk?.dpl_5" :binary="true" inputId="gpd5" disabled />
                                 <label for="gpd5"><b>DPL 5:</b> Kolaborasi</label>
                             </div>
                             <div class="flex items-center gap-2">
-                                <Checkbox v-model="rpk.dpl_6" :binary="true" inputId="gpd6" disabled />
+                                <Checkbox v-model="rpk?.dpl_6" :binary="true" inputId="gpd6" disabled />
                                 <label for="gpd6"><b>DPL 6:</b> Kemandirian</label>
                             </div>
                             <div class="flex items-center gap-2">
-                                <Checkbox v-model="rpk.dpl_7" :binary="true" inputId="gpd7" disabled />
+                                <Checkbox v-model="rpk?.dpl_7" :binary="true" inputId="gpd7" disabled />
                                 <label for="gpd7"><b>DPL 7:</b> Kesehatan</label>
                             </div>
                             <div class="flex items-center gap-2">
-                                <Checkbox v-model="rpk.dpl_8" :binary="true" inputId="gpd8" disabled />
+                                <Checkbox v-model="rpk?.dpl_8" :binary="true" inputId="gpd8" disabled />
                                 <label for="gpd8"><b>DPL 8:</b> Komunikasi</label>
                             </div>
                         </div>
@@ -297,15 +297,15 @@ onMounted(async () => {
                         <tr>
                             <td class="border px-4 py-2 align-top">
                                 <span class="font-bold">Memahami:</span>
-                                {{ rpk.memahami }}
+                                {{ rpk?.memahami }}
                             </td>
                             <td class="border px-4 py-2 align-top">
-                                <div><span v-if="rpk.memahami_berkesadaran">√</span> Berkesadaran</div>
-                                <div><span v-if="rpk.memahami_bermakna">√</span> Bermakna</div>
-                                <div><span v-if="rpk.memahami_menggembirakan">√</span> Menggembirakan</div>
+                                <div><span v-if="rpk?.memahami_berkesadaran">√</span> Berkesadaran</div>
+                                <div><span v-if="rpk?.memahami_bermakna">√</span> Bermakna</div>
+                                <div><span v-if="rpk?.memahami_menggembirakan">√</span> Menggembirakan</div>
                             </td>
                             <td class="border px-4 py-2 align-top">
-                                {{ rpk.asesmen_memahami }}
+                                {{ rpk?.asesmen_memahami }}
                             </td>
                         </tr>
 
@@ -313,16 +313,16 @@ onMounted(async () => {
                         <tr>
                             <td class="border px-4 py-2 align-top">
                                 <span class="font-bold">Mengaplikasikan:</span>
-                                {{ rpk.mengaplikasikan }}
+                                {{ rpk?.mengaplikasikan }}
                             </td>
                             <td class="border px-4 py-2 align-top">
-                                <div><span v-if="rpk.mengaplikasikan_berkesadaran">√</span> Berkesadaran</div>
-                                <div><span v-if="rpk.mengaplikasikan_bermakna">√</span> Bermakna</div>
-                                <div><span v-if="rpk.mengaplikasikan_menggembirakan">√</span> Menggembirakan
+                                <div><span v-if="rpk?.mengaplikasikan_berkesadaran">√</span> Berkesadaran</div>
+                                <div><span v-if="rpk?.mengaplikasikan_bermakna">√</span> Bermakna</div>
+                                <div><span v-if="rpk?.mengaplikasikan_menggembirakan">√</span> Menggembirakan
                                 </div>
                             </td>
                             <td class="border px-4 py-2 align-top">
-                                {{ rpk.asesmen_mengaplikasikan }}
+                                {{ rpk?.asesmen_mengaplikasikan }}
                             </td>
                         </tr>
 
@@ -330,15 +330,15 @@ onMounted(async () => {
                         <tr>
                             <td class="border px-4 py-2 align-top">
                                 <span class="font-bold">Merefleksi:</span>
-                                {{ rpk.merefleksi }}
+                                {{ rpk?.merefleksi }}
                             </td>
                             <td class="border px-4 py-2 align-top">
-                                <div><span v-if="rpk.merefleksi_berkesadaran">√</span> Berkesadaran</div>
-                                <div><span v-if="rpk.merefleksi_bermakna">√</span> Bermakna</div>
-                                <div><span v-if="rpk.merefleksi_menggembirakan">√</span> Menggembirakan</div>
+                                <div><span v-if="rpk?.merefleksi_berkesadaran">√</span> Berkesadaran</div>
+                                <div><span v-if="rpk?.merefleksi_bermakna">√</span> Bermakna</div>
+                                <div><span v-if="rpk?.merefleksi_menggembirakan">√</span> Menggembirakan</div>
                             </td>
                             <td class="border px-4 py-2 align-top">
-                                {{ rpk.asesmen_merefleksi }}
+                                {{ rpk?.asesmen_merefleksi }}
                             </td>
                         </tr>
                     </tbody>
