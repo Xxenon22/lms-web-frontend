@@ -40,10 +40,10 @@ const exportPDF = () => {
         theme: "grid",
         head: [["Field", "Value"]],
         body: [
-            ["Subject", data.nama_mapel || ""],
+            ["Subject", data.subject || ""],
             ["Teacher", data.teacher_name || ""],
             ["Instructor", data.instructor_name || ""],
-            ["Grade", `${data.name_grade || ""} ${data.subject || ""}`],
+            ["Grade", `${data.name_grade || ""} ${data.name_rombel || ""}`],
             ["Day / Date", formattedDate], // tanggal diformat
             ["Time", data.waktu || ""],
             ["Student's Reflection", data.refleksi_siswa || ""],
