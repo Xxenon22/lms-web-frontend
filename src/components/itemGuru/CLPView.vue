@@ -86,7 +86,7 @@ const exportPDF = () => {
         theme: "grid",
         head: [["Field", "Value"]],
         body: [
-            ["Class & Subject", `${data.name_rombel || ""} - ${data.nama_mapel || ""}`],
+            ["Class & Subject", `${data.name_rombel || ""} - ${data.subject || ""}`],
             ["Phase", data.phase || ""],
             ["Grade", data.grade_lvl || ""],
             ["Teacher", data.teacher_name || ""],
