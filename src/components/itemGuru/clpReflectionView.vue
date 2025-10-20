@@ -110,7 +110,7 @@ onMounted(async () => {
                 </div>
                 <div class="w-2/3 space-y-5 m-4">
                     <div class="flex items-center space-x-2">
-                        <span>{{ clpRefleksi.nama_mapel }}</span>
+                        <span>{{ clpRefleksi.subject }}</span>
                     </div>
                 </div>
             </div>

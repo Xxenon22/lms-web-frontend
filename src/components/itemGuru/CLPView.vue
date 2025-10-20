@@ -261,7 +261,7 @@ onMounted(async () => {
         <!-- ========== DESAIN PEMBELAJARAN ========== -->
         <div class="flex border-2 mt-5">
             <div class="w-1/5 flex justify-center items-center bg-gray-100">
-                <div class="text-3xl">Instructional Design</div>
+                <div class="text-3xl font-semibold text-center">Instructional Design</div>
             </div>
             <div class="w-4/5 space-y-5 m-4">
                 <div v-for="(val, key) in {

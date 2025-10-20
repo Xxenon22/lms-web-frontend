@@ -7,7 +7,6 @@ const toast = useToast();
 
 const namaGuru = ref("")
 const tanggal = ref("")
-const subject = ref("")
 const rombel = ref("")
 const studyTime = ref("")
 const refleksiSiswa = ref("")
@@ -20,14 +19,13 @@ const notes = ref("")
 
 const selectedRombel = ref([])
 const selectedInstructor = ref([])
-const selectedSubject = ref([])
 
 const fetchSelectedRombel = async () => {
     try {
         const res = await api.get("/kelas");
         selectedRombel.value = res.data.map(b => ({
             id: b.rombel_id,
-            name: `${b.grade_lvl || ''} ${b.name_rombel}`
+            name: `${b.grade_lvl || ''} ${b.name_rombel} - ${b.nama_mapel}`
         }));
     } catch (error) {
         console.error("fetch rombel :", error)
@@ -53,22 +51,12 @@ const fetchSelectedInstructor = async (order = "asc") => {
     }
 }
 
-const fetchSelectedSubject = async () => {
-    try {
-        const res = await api.get('/mapel')
-        selectedSubject.value = res.data
-    } catch (error) {
-        console.error("Fetch subject :", error)
-    }
-}
-
 const submitRPK = async () => {
     try {
         const selectedRombelStudent = selectedRombel.value.find(b => b.id === rombel.value);
         const selectedInstructorRpk = selectedInstructor.value.find(b => b.id === namaGuru.value);
-        const selectedSubjectRpk = selectedSubject.value.find(b => b.id === subject.value);
 
-        if (!selectedRombelStudent || !selectedInstructorRpk || !selectedSubjectRpk) {
+        if (!selectedRombelStudent || !selectedInstructorRpk) {
             toast.add({ severity: 'error', summary: 'Invalid Selection', detail: 'Please fill out all fields correctly.', life: 3000 });
             return;
         }
@@ -100,7 +88,6 @@ const submitRPK = async () => {
 
         // Data yang akan dikirim ke backend
         const insertData = {
-            mapel_id: selectedSubjectRpk.id,
             rombel_id: selectedRombelStudent.id,
             hari_tanggal: tanggal.value,
             instructor: selectedInstructorRpk.id,
@@ -131,7 +118,6 @@ const submitRPK = async () => {
         notes.value = "";
         rombel.value = "";
         namaGuru.value = "";
-        subject.value = "";
 
     } catch (err) {
         console.error("Submit RPK error:", err);
@@ -141,7 +127,6 @@ const submitRPK = async () => {
 
 onMounted(async () => {
     await fetchSelectedRombel()
-    await fetchSelectedSubject()
     await fetchSelectedInstructor("asc")
 })
 </script>
@@ -160,11 +145,6 @@ onMounted(async () => {
                         <h1>Identity</h1>
                         <div class="flex flex-row space-x-5">
                             <div class="w-1/2 space-y-5">
-                                <div class="flex flex-col space-y-2">
-                                    <Label> Subject </Label>
-                                    <Select v-model="subject" :options="selectedSubject" option-label="nama_mapel"
-                                        option-value="id" placeholder="-- Select Grade --" class="w-full" />
-                                </div>
                                 <div class="flex flex-col space-y-2">
                                     <Label> Class </Label>
                                     <Select v-model="rombel" :options="selectedRombel" option-label="name"
