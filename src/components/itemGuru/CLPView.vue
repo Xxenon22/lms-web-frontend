@@ -12,10 +12,11 @@ const id = route.params.id
 
 const fetchRpk = async () => {
     try {
+        console.log("fetchRpk -> id:", id);
+        console.log("fetchRpk -> url:", `/rpk/${id}`);
         const res = await api.get(`/rpk/${id}`) // ambil sesuai ID
         const item = res.data
 
-        console.log("data rpk :", res.data)
         // convert string "true"/"false" ke boolean
         for (let i = 1; i <= 8; i++) {
             const key = `dpl_${i}`;
@@ -24,6 +25,7 @@ const fetchRpk = async () => {
         rpk.value = item
     } catch (error) {
         console.error('fetching rpk :', error)
+        console.error('response status:', error.response?.status, 'data:', error.response?.data);
     }
 }
 
@@ -179,7 +181,7 @@ onMounted(async () => {
         </div>
         <div class="">
             <div class="flex justify-center m-5">
-                <span class="text-3xl">Deep Learning Lesson Plan</span>
+                <span class="text-3xl">Learning Plan</span>
             </div>
 
             <!-- IDENTITAS -->
