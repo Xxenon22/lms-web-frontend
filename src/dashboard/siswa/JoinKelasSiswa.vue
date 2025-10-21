@@ -125,10 +125,10 @@ const kirimSemuaData = async (materiId) => {
             selesaiMateri.value.push(numericId);
         }
 
-        toast.add({ severity: 'success', summary: 'Jawaban berhasil disimpan!', life: 3000 });
+        toast.add({ severity: 'success', summary: 'The answer has been successfully saved!', life: 3000 });
         // console.log("selesaiMateri setelah kirimSemuaData:", selesaiMateri.value);
     } catch (err) {
-        console.error('kirimSemuaData', err);
+        console.error('All Data', err);
         toast.add({
             severity: 'error',
             summary: 'Failed to save answer',
@@ -298,7 +298,7 @@ const simpanProgress = async (materiId) => {
         });
 
     } catch (err) {
-        console.error("simpanProgress", err);
+        console.error("Saved progress", err);
         toast.add({
             severity: "error",
             summary: "Failed to save progress",
@@ -518,11 +518,11 @@ const onAdvancedUpload = async (event, materiId) => {
         });
 
         console.log("Upload success:", data);
-        toast.add({ severity: "success", summary: "Upload berhasil", life: 3000 });
+        toast.add({ severity: "success", summary: "Upload successful!", life: 3000 });
 
     } catch (err) {
         console.error("Upload error:", err);
-        toast.add({ severity: "error", summary: "Upload gagal", detail: err.message, life: 3000 });
+        toast.add({ severity: "error", summary: "Upload failed!", detail: err.message, life: 3000 });
     }
 };
 

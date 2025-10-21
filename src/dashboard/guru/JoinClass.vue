@@ -31,7 +31,7 @@ const fetchGuruProfile = async () => {
 // ✅ ambil materi guru berdasarkan guruId & kelasId
 const fetchMateriGuru = async () => {
   if (!guruId.value || !targetKelasId) {
-    console.warn("Guru ID atau kelas ID belum tersedia");
+    console.warn("Teacher ID or class ID is not available yet.");
     return;
   }
 
@@ -39,7 +39,7 @@ const fetchMateriGuru = async () => {
     const res = await api.get(`/module-pembelajaran/kelas/${targetKelasId}`);
     materiGuru.value = res.data || [];
   } catch (error) {
-    console.error("Error mengambil materi guru:", error);
+    console.error("Error retrieving teacher materials.:", error);
     toast.add({
       severity: "error",
       summary: "Failed",
@@ -53,7 +53,7 @@ const fetchMateriGuru = async () => {
 
 // ✅ format tanggal
 const formatDate = (created_at) => {
-  if (!created_at) return "Tanggal tidak tersedia";
+  if (!created_at) return "Date not available.";
   return new Intl.DateTimeFormat("id-ID", {
     year: "numeric",
     month: "long",
@@ -62,7 +62,7 @@ const formatDate = (created_at) => {
   }).format(new Date(created_at));
 };
 
-// ✅ menu popup
+//  menu popup
 const toggleMenu = (event, materiId) => {
   const menuRef = menuMap.value[materiId];
   if (menuRef?.toggle) {
@@ -71,22 +71,22 @@ const toggleMenu = (event, materiId) => {
   selectedMateri.value = materiId;
 };
 
-// ✅ lihat detail materi
+//  lihat detail materi
 const lihatMateri = () => {
   if (selectedMateri.value)
     router.push({ name: 'Learning-Material-Details', params: { id: selectedMateri.value } });
 };
 
-// ✅ hapus materi
+//  hapus materi
 const deleteMateri = async () => {
   if (!selectedMateri.value) return;
 
   try {
     await api.delete(`/module-pembelajaran/${selectedMateri.value}`);
-    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Materi dihapus', life: 3000 });
+    toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Material deleted', life: 3000 });
     await fetchMateriGuru();
   } catch (error) {
-    toast.add({ severity: 'error', summary: 'Gagal', detail: 'Tidak bisa hapus materi', life: 3000 });
+    toast.add({ severity: 'error', summary: 'Gagal', detail: 'Cant Delete Material', life: 3000 });
     console.error("Error delete materi:", error);
   }
 };

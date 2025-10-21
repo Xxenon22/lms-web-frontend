@@ -55,14 +55,20 @@ const fetchDataSubject = async () => {
     }
 }
 
-const fetchDataTeacher = async () => {
+const fetchDataTeacher = async (order = "asc") => {
     try {
         const res = await api.get("/teacher")
-        guru.value = res.data;
+        guru.value = res.data.sort((a, b) => {
+            if (order === "asc") {
+                return a.name.localeCompare(b.name) // A-Z
+            } else {
+                return b.name.localeCompare(a.name) // Z-A
+            }
+        })
     } catch (err) {
         console.error("Fetch Teacher:", err)
     }
-}
+};
 
 const deleteKelas = (id) => {
     confirm.require({
@@ -193,7 +199,7 @@ onMounted(async () => {
     await fetchDataGradeLevel()
     await fetchDataKelas()
     await fetchDataSubject()
-    await fetchDataTeacher()
+    await fetchDataTeacher("asc")
 })
 </script>
 
