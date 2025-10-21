@@ -91,7 +91,7 @@ const requireConfirmation = (event) => {
                 <RouterLink to="/clp-admin">
                     <li>
                         <Icon class="icon" icon="marketeq:diagram-bar-3" />
-                        <span class="nav-item">Class Learning Plan</span>
+                        <span class="nav-item">Learning Plan</span>
                     </li>
                 </RouterLink>
                 <RouterLink to="/learning-reflection-admin">

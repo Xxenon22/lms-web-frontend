@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-const clpRefleksi = ref([])
+const clpRefleksi = ref({})
 const route = useRoute()
 const router = useRouter()
 const id = route.params.id
@@ -14,7 +14,6 @@ const fetchRpkReflection = async () => {
     try {
         const res = await api.get(`/rpk-refleksi/${id}`)
         clpRefleksi.value = res.data
-        console.log("data", clpRefleksi)
     } catch (error) {
         console.error("Error Fetch RPK Reflection :", error)
     }
@@ -40,7 +39,7 @@ const exportPDF = () => {
         theme: "grid",
         head: [["Field", "Value"]],
         body: [
-            ["Subject", data.nama_mapel || ""],
+            ["Subject", data.subject || ""],
             ["Teacher", data.teacher_name || ""],
             ["Instructor", data.instructor_name || ""],
             ["Grade", `${data.name_grade || ""} ${data.name_rombel || ""}`],
@@ -98,7 +97,7 @@ onMounted(async () => {
 
         <div>
             <div class="flex justify-center m-5">
-                <span class="text-3xl">Learning Reflection</span>
+                <span class="text-3xl"> Learning Reflection</span>
             </div>
 
             <!-- SUBJECT -->
@@ -110,7 +109,7 @@ onMounted(async () => {
                 </div>
                 <div class="w-2/3 space-y-5 m-4">
                     <div class="flex items-center space-x-2">
-                        <span>{{ clpRefleksi.nama_mapel }}</span>
+                        <span>{{ clpRefleksi.subject }}</span>
                     </div>
                 </div>
             </div>

@@ -14,7 +14,6 @@ const fetchRpkReflection = async () => {
     try {
         const res = await api.get(`/rpk-refleksi/${id}`)
         clpRefleksi.value = res.data
-        console.log("data", clpRefleksi)
     } catch (error) {
         console.error("Error Fetch RPK Reflection :", error)
     }
