@@ -654,7 +654,7 @@ onMounted(async () => {
                                         @scroll="() => handleScroll(materi.id)"
                                         class="overflow-y-scroll h-[500px] border rounded bg-white">
                                         <iframe v-if="materi.file_url"
-                                            :src="`https://metschoo-ils.my.id/uploads/${materi.file_url}`"
+                                            :src="`https://metschoo-ils.my.id/${materi.file_url}`"
                                             class="w-full h-[800px]" allow="fullscreen" allowfullscreen
                                             frameborder="0" />
                                     </div>
