@@ -151,7 +151,7 @@ const deleteKelas = async (id) => {
         Swal.fire({
             icon: "error",
             title: "Failed!",
-            text: err.response?.data?.error || "Server error occurred.",
+            text: "This class cannot be deleted because it is still linked to other data — such as learning modules, students, or assignments.",
         });
     }
 };
