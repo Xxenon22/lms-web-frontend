@@ -115,7 +115,7 @@ const kirimSemuaData = async (materiId) => {
             }
         });
 
-        console.log("Jawaban tersimpan:", data);
+        // console.log("Jawaban tersimpan:", data);
 
         activeSteps.value[materiId] = '4';
         await simpanProgress(materiId);
@@ -126,12 +126,12 @@ const kirimSemuaData = async (materiId) => {
         }
 
         toast.add({ severity: 'success', summary: 'Jawaban berhasil disimpan!', life: 3000 });
-        console.log("selesaiMateri setelah kirimSemuaData:", selesaiMateri.value);
+        // console.log("selesaiMateri setelah kirimSemuaData:", selesaiMateri.value);
     } catch (err) {
         console.error('kirimSemuaData', err);
         toast.add({
             severity: 'error',
-            summary: 'Gagal menyimpan jawaban',
+            summary: 'Failed to save answer',
             detail: err.response?.data?.message || err.message,
             life: 3000
         });
@@ -653,7 +653,8 @@ onMounted(async () => {
                                     <div :ref="el => pdfContainerRefs[materi.id] = el"
                                         @scroll="() => handleScroll(materi.id)"
                                         class="overflow-y-scroll h-[500px] border rounded bg-white">
-                                        <iframe v-if="materi.file_url" :src="`http://localhost:5000${materi.file_url}`"
+                                        <iframe v-if="materi.file_url"
+                                            :src="`https://metschoo-ils.my.id/uploads/${materi.file_url}`"
                                             class="w-full h-[800px]" allow="fullscreen" allowfullscreen
                                             frameborder="0" />
                                     </div>
