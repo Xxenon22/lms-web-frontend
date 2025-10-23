@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import api from "../../services/api";
 import { useToast } from "primevue";
+import Swal from "sweetalert2";
 
 const toast = useToast();
 const materiPembelajaran = ref([]);
@@ -98,6 +99,18 @@ const openEditDialog = (materi) => {
 
 //  hapus materi
 const deleteMateri = async (id) => {
+    const confirm = await Swal.fire({
+        title: "Are you sure?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it",
+        cancelButtonText: "Cancel",
+    });
+
+    if (!confirm.isConfirmed) return;
+
     try {
         await api.delete(`/module-pembelajaran/${id}`);
         toast.add({ severity: "success", summary: "Berhasil Dihapus", detail: "Materi berhasil dihapus", life: 2000 });
