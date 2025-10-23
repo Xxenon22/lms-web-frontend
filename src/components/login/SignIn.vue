@@ -17,6 +17,7 @@ const handleLogin = async () => {
     });
     return;
   }
+
   try {
     const res = await api.post("/auth/login", {
       email: email.value,
