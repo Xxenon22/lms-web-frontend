@@ -12,7 +12,9 @@ const toast = useToast();
 
 const handleLogin = async () => {
   if (!email.value || !password.value) {
-    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Email dan Password wajib diisi' });
+    toast.add({
+      severity: 'warn', summary: 'Warning', detail: 'Email and Password are required.'
+    });
     return;
   }
   try {
