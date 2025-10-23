@@ -128,27 +128,37 @@ const batalIkutiKelas = async (kelasId) => {
     }
 };
 
-// Search kelas
+// search engine
 const search = (event) => {
-    const query = event.query.toLowerCase();
+    const query = event.query ? event.query.toLowerCase() : "";
     const semuaKelas = [...kelasDiikuti.value, ...kelasLainnya.value];
 
+    // Filter berdasarkan nama mapel atau nama rombel
     filteredClass.value = semuaKelas
-        .filter((kelas) => kelas.nama_mapel.toLowerCase().includes(query))
+        .filter((kelas) => {
+            const mapel = kelas.nama_mapel?.toLowerCase() || "";
+            const grade = kelas.rombel?.grade_lvl?.toLowerCase() || "";
+            const rombel = kelas.rombel?.name_rombel?.toLowerCase() || "";
+            const guru = kelas.guru_name?.toLowerCase() || "";
+            return (
+                mapel.includes(query) ||
+                grade.includes(query) ||
+                rombel.includes(query) ||
+                guru.includes(query)
+            );
+        })
         .map((kelas) => ({
-            name: `${kelas.nama_mapel} - ${kelas.grade_lvl} ${kelas.name_rombel}`,
+            name: `${kelas.nama_mapel} - ${kelas.rombel?.grade_lvl || ""} ${kelas.rombel?.name_rombel || ""}`,
             id: kelas.id,
         }));
 };
 
-// Update hasil pencarian
+//update hasil pencarian
 watch(selectedClass, (newVal) => {
     if (newVal && newVal.id) {
         const semuaKelas = [...kelasDiikuti.value, ...kelasLainnya.value];
         const hasil = semuaKelas.find((k) => k.id === newVal.id);
-        if (hasil) {
-            kelasHasilPencarian.value = hasil;
-        }
+        kelasHasilPencarian.value = hasil || null;
     } else {
         kelasHasilPencarian.value = null;
     }
