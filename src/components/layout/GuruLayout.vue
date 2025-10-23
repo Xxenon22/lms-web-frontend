@@ -66,7 +66,7 @@ const fetchDataMapel = async () => {
 };
 
 const tambahKelas = async () => {
-  loading.value = true;
+
   if (!isirombel.value || !isiMapel.value) {
     toast.add({
       severity: "warn",
