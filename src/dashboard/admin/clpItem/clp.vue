@@ -14,7 +14,12 @@ const searchText = ref('')
 const fetchRpkData = async () => {
     try {
         const res = await api.get(`/rpk/all-rpk/${id}`)
-        rpkData.value = res.data
+        rpkData.value = res.data.map(k => ({
+            id: k.id,
+            hari_tanggal: k.hari_tanggal,
+            kelas: `${k.name_grade || '-'} ${k.name_rombel || ''}`,
+            name: `${k.name_grade || '-'} ${k.name_rombel || ''} - ${k.hari_tanggal}`
+        }))
     } catch (error) {
         console.error("Error rpk Data :", error)
     }
