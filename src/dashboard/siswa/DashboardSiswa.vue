@@ -206,8 +206,8 @@ const fetchGuruById = async (guruId) => {
 
                     <template #title>{{ kelasHasilPencarian.nama_mapel }}</template>
                     <template #subtitle>
-                        {{ kelasHasilPencarian.grade_lvl }}
-                        {{ kelasHasilPencarian.name_rombel }}
+                        {{ kelasHasilPencarian.rombel?.grade_lvl }}
+                        {{ kelasHasilPencarian.rombel?.name_rombel }}
                     </template>
                     <template #footer>
                         <div class="flex gap-4 mt-1">
@@ -256,7 +256,7 @@ const fetchGuruById = async (guruId) => {
 
                 <template #title>{{ kelas.nama_mapel }}</template>
                 <template #subtitle>
-                    {{ kelas.grade_lvl }} {{ kelas.name_rombel }}
+                    {{ kelas.rombel?.grade_lvl }} {{ kelas.rombel?.name_rombel }}
                 </template>
                 <template #footer>
                     <div class="flex justify-center gap-4 mt-1">
@@ -294,7 +294,7 @@ const fetchGuruById = async (guruId) => {
 
                 <template #title>{{ kelas.nama_mapel }}</template>
                 <template #subtitle>
-                    {{ kelas.grade_lvl }} {{ kelas.name_rombel }}
+                    {{ kelas.rombel?.grade_lvl }} {{ kelas.rombel?.name_rombel }}
                 </template>
                 <template #footer>
                     <div class="flex gap-4 mt-1">
