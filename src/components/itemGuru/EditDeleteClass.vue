@@ -177,7 +177,7 @@ const deleteKelas = async (id) => {
                             </div>
                             <div class="flex flex-col md:flex-row justify-between md:items-center flex-1 gap-6">
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
-                                    <div>
+                                    p <div>
                                         <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{
                                             kelas.nama_mapel }}</span>
                                         <div class="text-lg font-medium mt-2">
