@@ -11,6 +11,10 @@ const router = useRouter();
 const toast = useToast();
 
 const handleLogin = async () => {
+  if (!email.value || !password.value) {
+    toast.add({ severity: 'warn', summary: 'Warning', detail: 'Email dan Password wajib diisi' });
+    return;
+  }
   try {
     const res = await api.post("/auth/login", {
       email: email.value,
