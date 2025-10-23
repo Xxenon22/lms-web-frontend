@@ -4,6 +4,7 @@ import { useToast } from "primevue/usetoast";
 import { useRoute, useRouter } from 'vue-router';
 import Menu from 'primevue/menu';
 import api from '../../services/api';
+import Swal from 'sweetalert2';
 
 const router = useRouter();
 const route = useRoute();
@@ -80,7 +81,17 @@ const lihatMateri = () => {
 //  hapus materi
 const deleteMateri = async () => {
   if (!selectedMateri.value) return;
+  const confirm = await Swal.fire({
+    title: "Are you sure, you want to delete this Material?",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, delete it",
+    cancelButtonText: "Cancel",
+  });
 
+  if (!confirm.isConfirmed) return;
   try {
     await api.delete(`/module-pembelajaran/${selectedMateri.value}`);
     toast.add({ severity: 'success', summary: 'Berhasil', detail: 'Material deleted', life: 3000 });

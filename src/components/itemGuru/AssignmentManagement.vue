@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 import api from '../../services/api';
+import Swal from 'sweetalert2';
 
 const allMateri = ref([])
 const userId = ref(null)
@@ -35,6 +36,18 @@ const fetchAllMateri = async () => {
 }
 
 const deleteAssignment = async (bankSoalId) => {
+    const confirm = await Swal.fire({
+        title: "Are you sure, you want to delete this Assignment?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it",
+        cancelButtonText: "Cancel",
+    });
+
+    if (!confirm.isConfirmed) return;
+
     try {
         const res = await api.delete(`/bank-soal/${bankSoalId}`)
         await fetchAllMateri()

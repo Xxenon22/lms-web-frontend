@@ -100,7 +100,7 @@ const openEditDialog = (materi) => {
 //  hapus materi
 const deleteMateri = async (id) => {
     const confirm = await Swal.fire({
-        title: "Are you sure?",
+        title: "Are you sure, you want to delete this Material?",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#d33",

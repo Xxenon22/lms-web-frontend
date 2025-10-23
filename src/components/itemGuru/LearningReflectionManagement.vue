@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import api from '../../services/api';
 import { useToast } from 'primevue';
+import Swal from 'sweetalert2';
 
 const toast = useToast()
 const allLr = ref([])
@@ -26,6 +27,17 @@ const fetchLr = async () => {
 }
 
 const deleteLr = async (id) => {
+    const confirm = await Swal.fire({
+        title: "Are you sure, you want to delete this Learning Reflection?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it",
+        cancelButtonText: "Cancel",
+    });
+
+    if (!confirm.isConfirmed) return;
     try {
         const res = await api.delete(`/rpk-refleksi/${id}`)
         await fetchLr()
@@ -65,7 +77,7 @@ onMounted(async () => {
                                         <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{
                                             formatDate(lr.hari_tanggal) }}</span>
                                         <div class="text-lg font-medium mt-2"><span>{{ lr.name_grade
-                                        }} {{
+                                                }} {{
                                                     lr.name_rombel }}</span></div>
                                     </div>
                                 </div>
