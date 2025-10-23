@@ -57,8 +57,7 @@ onMounted(async () => {
 <template>
     <div class="flex justify-between m-3">
         <h1 class="font-bold">Learning Reflection</h1>
-        <AutoComplete v-model="searchText" optionLabel="name" :suggestions="suggestions" @complete="searchGuru"
-            @item-select="onSelectGuru" @clear="onClear" placeholder="Search teacher..." />
+        <InputText v-model="searchText" @clear="onClear" placeholder="Search teacher..." />
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-12">
