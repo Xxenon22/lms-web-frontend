@@ -14,7 +14,7 @@ const searchText = ref('')
 const fetchRpkData = async () => {
     try {
         const res = await api.get(`/rpk/all-rpk/${id}`)
-        rpkData.value
+        rpkData.value = res.data
     } catch (error) {
         console.error("Error rpk Data :", error)
     }
