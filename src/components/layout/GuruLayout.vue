@@ -162,7 +162,7 @@ onMounted(async () => {
               </div>
               <div class="flex items-center gap-2">
                 <Button type="button" label="Cancel" severity="secondary" @click="visible = false"></Button>
-                <Button type="button" label="Save" @click="tambahKelas" :loading="loading"></Button>
+                <Button type="button" label="Save" @click="tambahKelas"></Button>
               </div>
             </div>
           </div>
