@@ -70,7 +70,8 @@ onMounted(async () => {
 <template>
     <div class="flex justify-between">
         <Button label="Back" icon="pi pi-arrow-left" @click="back" />
-        <AutoComplete v-model="searchText" @complete="searchClp" @clear="onClear" placeholder="Search Reflection..." />
+        <InputText v-model="searchText" optionLabel="name" :suggestions="suggestions" @complete="searchClp"
+            @item-select="onSelectClass" @clear="onClear" placeholder="Search Reflection..." />
     </div>
 
     <div v-if="isLoading" class="flex justify-center py-10">
