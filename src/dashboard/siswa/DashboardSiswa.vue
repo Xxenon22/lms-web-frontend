@@ -52,11 +52,20 @@ onMounted(async () => {
 const fetchSemuaKelas = async () => {
     try {
         const res = await api.get("/kelas/all/list");
+
         return res.data.map(kelas => ({
-            ...kelas,
-            guruPhoto: kelas.profiles?.photo_profiles_user
-                ? `${import.meta.env.VITE_API_URL}${kelas.profiles.photo_profiles_user}`
-                : null
+            id: kelas.id,
+            nama_mapel: kelas.nama_mapel,
+            guru_id: kelas.guru_id,
+            guru_name: kelas.teacher?.username || "Unknown Teacher",
+            guruPhoto: kelas.teacher?.photo_profiles_user
+                ? `${import.meta.env.VITE_API_URL}${kelas.teacher.photo_profiles_user}`
+                : null,
+            grade_lvl: kelas.rombel?.grade_lvl || "-",
+            name_rombel: kelas.rombel?.name_rombel || "-",
+            link_wallpaper_kelas: kelas.link_wallpaper_kelas
+                ? `${import.meta.env.VITE_API_URL}${kelas.link_wallpaper_kelas}`
+                : "/wallpapers/default.jpg",
         }));
     } catch (err) {
         toast.add({
@@ -158,6 +167,7 @@ const search = (event) => {
         }));
 };
 
+
 watch(selectedClass, (newVal) => {
     if (newVal && newVal.id) {
         const semuaKelas = [...kelasDiikuti.value, ...kelasLainnya.value];
@@ -210,12 +220,13 @@ const fetchGuruById = async (guruId) => {
                         <div class="relative">
                             <img :src="kelasHasilPencarian.link_wallpaper_kelas || '/wallpapers/w1.jpg'"
                                 class="w-full h-32 object-cover" />
-                            <div @click="fetchGuruById(kelas.guru_id)"
+                            <div @click="fetchGuruById(kelasHasilPencarian.guru_id)"
                                 class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
-                                <img v-if="kelas.guruPhoto" :src="kelas.guruPhoto" alt="Photo Profile"
-                                    class="w-full h-full object-cover" />
+                                <img v-if="kelasHasilPencarian.guruPhoto" :src="kelasHasilPencarian.guruPhoto"
+                                    alt="Photo Profile" class="w-full h-full object-cover" />
                                 <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem;"></i>
                             </div>
+
                         </div>
                     </template>
                     <template #title>{{ kelasHasilPencarian.nama_mapel }}</template>
