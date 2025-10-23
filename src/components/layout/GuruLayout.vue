@@ -72,8 +72,8 @@ const tambahKelas = async () => {
       severity: "warn",
       summary: "Warning",
       detail: "Class and Subject are required!"
-    })
-
+    });
+    return;
   }
   try {
     await api.post("/kelas", {
