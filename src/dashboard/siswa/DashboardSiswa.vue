@@ -13,24 +13,8 @@ const filteredClass = ref([]);
 const kelasHasilPencarian = ref(null);
 const isLoading = ref(true);
 const visible = ref(false);
-const src = ref(null)
-const profile = ref([])
-
-
-// Utility untuk format profile + wallpaper jadi URL penuh
-// const formatKelas = (kelas) => {
-//     return {
-//         ...kelas,
-//         profiles: kelas.profiles
-//             ? {
-//                 ...kelas.profiles,
-//                 photo_profiles_user: kelas.profiles.photo_profiles_user
-//                     ? `${import.meta.env.VITE_API_URL}${kelas.profiles.photo_profiles_user}`
-//                     : null,
-//             }
-//             : null,
-//     };
-// };
+const src = ref(null);
+const profile = ref([]);
 
 // Lifecycle
 onMounted(async () => {
@@ -48,10 +32,11 @@ onMounted(async () => {
     isLoading.value = false;
 });
 
+// Ambil semua kelas dan format data guru
 const fetchSemuaKelas = async () => {
     try {
         const res = await api.get("/kelas/all/list");
-        return res.data.map(kelas => ({
+        return res.data.map((kelas) => ({
             ...kelas,
             guru_photo: kelas.guru?.photo_profiles_user
                 ? `${import.meta.env.VITE_API_URL}${kelas.guru.photo_profiles_user}`
@@ -68,8 +53,6 @@ const fetchSemuaKelas = async () => {
         return [];
     }
 };
-
-
 
 // Ambil kelas yang diikuti user
 const fetchKelasYangDiikuti = async () => {
@@ -150,16 +133,14 @@ const search = (event) => {
     const semuaKelas = [...kelasDiikuti.value, ...kelasLainnya.value];
 
     filteredClass.value = semuaKelas
-        .filter((kelas) =>
-            kelas.nama_mapel.toLowerCase().includes(query)
-        )
+        .filter((kelas) => kelas.nama_mapel.toLowerCase().includes(query))
         .map((kelas) => ({
             name: `${kelas.nama_mapel} - ${kelas.grade_lvl} ${kelas.name_rombel}`,
             id: kelas.id,
         }));
 };
 
-
+// Update hasil pencarian
 watch(selectedClass, (newVal) => {
     if (newVal && newVal.id) {
         const semuaKelas = [...kelasDiikuti.value, ...kelasLainnya.value];
@@ -172,6 +153,7 @@ watch(selectedClass, (newVal) => {
     }
 });
 
+// Ambil detail guru (untuk dialog)
 const fetchGuruById = async (guruId) => {
     try {
         const res = await api.get(`/auth/teacher/${guruId}`);
@@ -190,8 +172,6 @@ const fetchGuruById = async (guruId) => {
         });
     }
 };
-
-
 </script>
 
 <template>
@@ -218,17 +198,15 @@ const fetchGuruById = async (guruId) => {
                                 class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
                                 <img v-if="kelasHasilPencarian.guru_photo" :src="kelasHasilPencarian.guru_photo"
                                     alt="Photo Profile" class="w-full h-full object-cover" />
-                                <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem;"></i>
+                                <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
                             </div>
-
-
-
                         </div>
                     </template>
+
                     <template #title>{{ kelasHasilPencarian.nama_mapel }}</template>
                     <template #subtitle>
-                        {{ kelasHasilPencarian.grade_lvl }} {{
-                            kelasHasilPencarian.name_rombel }}
+                        {{ kelasHasilPencarian.grade_lvl }}
+                        {{ kelasHasilPencarian.name_rombel }}
                     </template>
                     <template #footer>
                         <div class="flex gap-4 mt-1">
@@ -246,6 +224,8 @@ const fetchGuruById = async (guruId) => {
                 </Card>
             </div>
         </div>
+
+        <!-- Joined Classes -->
         <div class="m-5">
             <h1 class="text-xl font-bold">Joined Classes</h1>
         </div>
@@ -253,7 +233,6 @@ const fetchGuruById = async (guruId) => {
         <div v-if="isLoading" class="flex justify-center py-10">
             <ProgressSpinner />
         </div>
-
 
         <div v-else-if="kelasDiikuti.length === 0" class="text-center text-gray-400 mb-8">
             You are not enrolled in any classes yet.
@@ -269,15 +248,12 @@ const fetchGuruById = async (guruId) => {
                             class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
                             <img v-if="kelas.guru_photo" :src="kelas.guru_photo" alt="Photo Profile"
                                 class="w-full h-full object-cover" />
-                            <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem;"></i>
-
+                            <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
                         </div>
                     </div>
                 </template>
 
-                <template #title>
-                    <span>{{ kelas.nama_mapel }}</span>
-                </template>
+                <template #title>{{ kelas.nama_mapel }}</template>
                 <template #subtitle>
                     {{ kelas.grade_lvl }} {{ kelas.name_rombel }}
                 </template>
@@ -292,10 +268,9 @@ const fetchGuruById = async (guruId) => {
                 </template>
             </Card>
         </div>
-
     </section>
 
-    <!-- Daftar Kelas Lainnya -->
+    <!-- Kelas Lainnya -->
     <section class="flex flex-col mt-12">
         <div class="m-5">
             <h1 class="text-xl font-bold">Other Classroom</h1>
@@ -309,12 +284,13 @@ const fetchGuruById = async (guruId) => {
                             class="w-full h-32 object-cover" />
                         <div @click="fetchGuruById(kelas.guru_id)"
                             class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
-                            <img v-if="profile.photo_profiles_user" :src="src" alt="Photo Profile"
+                            <img v-if="kelas.guru_photo" :src="kelas.guru_photo" alt="Photo Profile"
                                 class="w-full h-full object-cover" />
-                            <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem;"></i>
+                            <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
                         </div>
                     </div>
                 </template>
+
                 <template #title>{{ kelas.nama_mapel }}</template>
                 <template #subtitle>
                     {{ kelas.grade_lvl }} {{ kelas.name_rombel }}
@@ -329,19 +305,25 @@ const fetchGuruById = async (guruId) => {
         </div>
     </section>
 
-    <Dialog v-model:visible="visible" modal :header="'Teachers Profile'" :style="{ width: '40vw' }"
+    <!-- Dialog Profil Guru -->
+    <Dialog v-model:visible="visible" modal :header="'Teacher Profile'" :style="{ width: '40vw' }"
         :breakpoints="{ '1199px': '75vw', '575px': '90vw' }">
-
         <div v-if="profile" class="flex flex-col items-center gap-4">
             <div
                 class="w-32 h-32 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow">
                 <img v-if="profile.photo_profiles_user" :src="src" alt="Photo Profile"
                     class="w-full h-full object-cover" />
-                <i v-else class="pi pi-user text-gray-500" style="font-size: 3.5rem;"></i>
+                <i v-else class="pi pi-user text-gray-500" style="font-size: 3.5rem"></i>
             </div>
-            <h2 class="text-xl font-semibold">{{ profile.username || 'Name not Available' }}</h2>
-            <p class="text-gray-600">{{ profile.phone_number || 'Phone number not Available' }}</p>
-            <p class="text-gray-500">{{ profile.teacher_subject || 'Subject not Available' }}</p>
+            <h2 class="text-xl font-semibold">
+                {{ profile.username || "Name not Available" }}
+            </h2>
+            <p class="text-gray-600">
+                {{ profile.phone_number || "Phone number not Available" }}
+            </p>
+            <p class="text-gray-500">
+                {{ profile.teacher_subject || "Subject not Available" }}
+            </p>
         </div>
     </Dialog>
 
