@@ -38,10 +38,11 @@ const fetchSemuaKelas = async () => {
         const res = await api.get("/kelas/all/list");
         return res.data.map((kelas) => ({
             ...kelas,
-            guru_photo: kelas.guru?.photo_profiles_user
-                ? `${import.meta.env.VITE_API_URL}${kelas.guru.photo_profiles_user}`
+            guru_photo: kelas.teacher?.photo_profiles_user
+                ? `${import.meta.env.VITE_API_URL}${kelas.teacher.photo_profiles_user}`
                 : null,
-            guru_name: kelas.guru?.username || "Unknown",
+            guru_name: kelas.teacher?.username || "Unknown",
+
         }));
     } catch (err) {
         toast.add({
