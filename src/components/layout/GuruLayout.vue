@@ -67,6 +67,14 @@ const fetchDataMapel = async () => {
 
 const tambahKelas = async () => {
   loading.value = true;
+  if (!isirombel.value || !isiMapel.value) {
+    toast.add({
+      severity: "warn",
+      summary: "Warning",
+      detail: "Class and Subject are required!"
+    })
+
+  }
   try {
     await api.post("/kelas", {
       rombel_id: isirombel.value,
