@@ -95,7 +95,7 @@ const handleLogin = async () => {
 
     </div>
     <footer class="text-white">
-      © 2025 Copyright PUSDALITBANGJAR - V.1.0.0 <!-- Logo PUSDALIT & BANGJAR -->
+      © 2025 Copyright PUSDALITBANGJAR - V.1.2.0 <!-- Logo PUSDALIT & BANGJAR -->
     </footer>
     <Toast />
   </div>

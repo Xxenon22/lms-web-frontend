@@ -8,9 +8,10 @@ const toast = useToast()
 const username = ref("")
 const email = ref("")
 const password = ref("")
+const confirmPassword = ref("")
 
 const isDisabled = computed(() => {
-    return !username.value || !email.value || !password.value;
+    return !username.value || !email.value || !password.value || !confirmPassword.value;
 });
 
 const addAccTeacher = async () => {
@@ -18,7 +19,8 @@ const addAccTeacher = async () => {
         const res = await api.post("/auth/register-teacher", {
             username: username.value,
             email: email.value,
-            password: password.value
+            password: password.value,
+            confirmPassword: confirmPassword.value
         });
         toast.add({
             severity: "success",
@@ -30,6 +32,7 @@ const addAccTeacher = async () => {
         username.value = "";
         email.value = "";
         password.value = "";
+        confirmPassword.value = "";
     } catch (error) {
         console.error("Error add teacher account :", error)
     }
@@ -57,6 +60,12 @@ const addAccTeacher = async () => {
                 <IftaLabel>
                     <Password toggleMask class="w-full" variant="filled" input-class="w-full" v-model="password" />
                     <label for="password">Password</label>
+                </IftaLabel>
+
+                <IftaLabel>
+                    <Password toggleMask class="w-full" variant="filled" input-class="w-full"
+                        v-model="confirmPassword" />
+                    <label for="confirmPassword">Confirm Password</label>
                 </IftaLabel>
 
                 <div class="flex justify-end mt-5">

@@ -604,7 +604,7 @@ onMounted(async () => {
 
                 <template #footer>
                     <!-- UPLOAD GAMBAR/PDF DARI JAWABAN SISWA -->
-                    <FileUpload ref="fileUpload" mode="advanced" name="files" customUpload
+                    <FileUpload refkt="fileUpload" mode="advanced" name="files" customUpload
                         @uploader="(e) => onAdvancedUpload(e, materi.id)" :multiple="true"
                         accept="image/*, application/pdf" :maxFileSize="5000000">
                         <template #empty>

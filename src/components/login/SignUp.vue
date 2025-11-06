@@ -4,30 +4,44 @@ import api from "../../services/api";
 import { useToast } from "primevue/usetoast";
 import bg from "../../assets/bg.vue";
 import { useRouter } from "vue-router";
+import { Password } from "primevue";
 
 const router = useRouter()
 const toast = useToast();
 const username = ref("");
 const email = ref("");
 const password = ref("");
+const confirmPassword = ref("");
 
 const handleRegister = async () => {
+
+  if (password.value !== confirmPassword.value) {
+    toast.add({
+      severity: "warn",
+      summary: "Password Mismatch",
+      detail: "Password and confirmation do not match",
+      life: 4000,
+    })
+    return;
+  }
+
   try {
     const res = await api.post("/auth/register", {
       username: username.value,
       email: email.value,
       password: password.value,
+      confirmPassword: confirmPassword.value,
     });
 
     toast.add({
       severity: "success",
       summary: "Success",
-      detail: res.data.message || "Registrasi berhasil, silakan login",
+      detail: res.data.message,
       life: 5000,
     });
     localStorage.setItem("role", "student");
     localStorage.setItem("token", res.data.token ?? "");
-    router.push("/home-student"); // samakan dengan login
+    router.push("/home-student");
   } catch (err) {
     console.error("Register error:", err.response?.data || err);
     toast.add({
@@ -68,7 +82,10 @@ const handleRegister = async () => {
               <Password toggleMask class="w-full" input-class="w-full" v-model="password" />
               <label for="password">Password</label>
             </FloatLabel>
-
+            <FloatLabel variant="in">
+              <Password toggleMask class="w-full" input-class="w-full" v-model="confirmPassword" />
+              <label for="confirmPassword">Confirm Password</label>
+            </FloatLabel>
           </div>
 
           <div class="text-center space-y-5">
@@ -80,7 +97,7 @@ const handleRegister = async () => {
       </div>
     </div>
     <footer class="text-white">
-      © 2025 Copyright PUSDALITBANGJAR - V.1.0.0
+      © 2025 Copyright PUSDALITBANGJAR - V.1.2.0
     </footer>
   </div>
   <Toast />
