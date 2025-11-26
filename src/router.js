@@ -20,6 +20,14 @@ const routes = [
         }
     },
     {
+        path: '/verify-code',
+        component: () => import("./components/login/verificationPage.vue"),
+        name: "verify",
+        meta: {
+            title: 'Verify code - Metschoo Integrated Learning System'
+        }
+    },
+    {
         path: "/home-admin",
         component: () => import("./dashboard/admin/DashboardAdmin.vue"),
         meta: {
@@ -419,17 +427,36 @@ router.beforeEach((to, from, next) => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
-    // kalau butuh login tapi belum ada token → balik ke login
-    if (to.meta.requiresAuth && !token) {
+    const tempToken = localStorage.getItem("tempToken");
+    const pending = localStorage.getItem("pendingVerification");
+    const isVerified = localStorage.getItem("is_verified");
+
+    if (pending === "true" || isVerified === "false") {
+        if (to.path !== "/verify-code") {
+            return next("/verify-code")
+        }
+        return next();
+    }
+
+    if (to.path === "/verify-code" && isVerified === "true") {
+        if (role === "student") return next("/home-student");
+        if (role === "teacher") return next("/home-teacher");
+        if (role === "admin") return next("/home-admin");
         return next("/");
+    }
+
+    if (to.meta.requiresAuth) {
+        if (!token) {
+            return next("/");
+        }
     }
 
     // kalau route ada rule role, tapi role user beda → lempar ke dashboard sesuai role dia
     if (to.meta.role && role !== to.meta.role) {
         if (role === "student") return next("/home-student");
-        if (role === "teacher") return next("/home-guru");
+        if (role === "teacher") return next("/home-teacher"); // FIXED
         if (role === "admin") return next("/home-admin");
-        return next("/"); // fallback
+        return next("/");
     }
 
     next();

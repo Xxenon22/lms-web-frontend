@@ -22,7 +22,7 @@ onMounted(fetchFiles)
     <div>
         <div v-if="file" class="mt-6">
             <h3 class="mb-2 font-semibold">Teacher Timetable</h3>
-            <iframe :src="`https://metschoo-ils.my.id/uploads/timetables/${file.file_name}`" width="100%" height="600px"
+            <iframe :src="`http://localhost:5000/uploads/timetables/${file.file_name}`" width="100%" height="600px"
                 allow="fullscreen; autoplay; encrypted-media" allowfullscreen style="border:none;"></iframe>
         </div>
     </div>

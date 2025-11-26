@@ -653,8 +653,7 @@ onMounted(async () => {
                                     <div :ref="el => pdfContainerRefs[materi.id] = el"
                                         @scroll="() => handleScroll(materi.id)"
                                         class="overflow-y-scroll h-[500px] border rounded bg-white">
-                                        <iframe v-if="materi.file_url"
-                                            :src="`https://metschoo-ils.my.id/${materi.file_url}`"
+                                        <iframe v-if="materi.file_url" :src="`http://localhost:5000/${materi.file_url}`"
                                             class="w-full h-[800px]" allow="fullscreen" allowfullscreen
                                             frameborder="0" />
                                     </div>

@@ -39,15 +39,17 @@ const handleRegister = async () => {
       detail: res.data.message,
       life: 5000,
     });
+    localStorage.setItem("processType", "register");
+    localStorage.setItem("email", email.value); // untuk verifikasi
     localStorage.setItem("role", "student");
-    localStorage.setItem("token", res.data.token ?? "");
-    router.push("/home-student");
+    localStorage.setItem("isLoginProcess", "false"); // <- penting
+    router.push("/verify-code");
   } catch (err) {
     console.error("Register error:", err.response?.data || err);
     toast.add({
       severity: "error",
       summary: "Failed",
-      detail: err.response?.data?.error || "Terjadi kesalahan",
+      detail: err.response?.data?.message,
       life: 5000,
     });
   }

@@ -16,7 +16,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://metschoo-ils.my.id',
+        target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false
       }

@@ -13,39 +13,40 @@ const toast = useToast();
 const handleLogin = async () => {
   if (!email.value || !password.value) {
     toast.add({
-      severity: 'warn', summary: 'Warning', detail: 'Email and Password are required.'
+      severity: "warn",
+      summary: "Warning",
+      detail: "Email and Password are required.",
     });
     return;
   }
 
   try {
+    // STEP 1 LOGIN → request OTP
     const res = await api.post("/auth/login", {
       email: email.value,
       password: password.value,
     });
 
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("role", res.data.users.role);
-    localStorage.setItem("id", res.data.users.id); // simpan guru_id
+    // === SUCCESS: OTP DIKIRIM ===
+    if (res.data.nextStep === "verify-login-code") {
+      toast.add({
+        severity: "info",
+        summary: "OTP Sent",
+        detail: "We have sent a login code to your email.",
+        life: 3000,
+      });
 
-    toast.add({
-      severity: "success",
-      summary: "Login Success",
-      detail: `Hi! , ${res.data.users.username}`,
-      life: 3000,
-    });
+      // SIMPAN EMAIL & MODE LOGIN
+      localStorage.setItem("email", email.value);
+      localStorage.setItem("processType", "login"); // membedakan dengan register
 
-    // redirect sesuai role
-    if (res.data.users.role === "student") {
-      router.push("/home-student");
-    } else if (res.data.users.role === "teacher") {
-      router.push("/home-teacher");
-    } else if (res.data.users.role === "admin") {
-      router.push("/home-admin");
+      router.push("/verify-code");
+      return;
     }
 
   } catch (err) {
-    console.error("error login:", err)
+    console.error("error login:", err);
+
     toast.add({
       severity: "error",
       summary: "Login Failed",
@@ -95,7 +96,7 @@ const handleLogin = async () => {
 
     </div>
     <footer class="text-white">
-      © 2025 Copyright PUSDALITBANGJAR - V.1.2.0 <!-- Logo PUSDALIT & BANGJAR -->
+      © 2025 Copyright PUSDALITBANGJAR - V.1.2.0
     </footer>
     <Toast />
   </div>
