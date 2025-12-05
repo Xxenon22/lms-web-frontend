@@ -132,98 +132,89 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Card>
-        <template #header>
-            <h1 class="m-5">Learning Reflection</h1>
-        </template>
+    <h1 class="m-5 text-2xl">Learning Reflection</h1>
 
+    <!-- Identity Section -->
+    <Card class="mb-10">
         <template #content>
-            <!-- Identity Section -->
-            <Card class="mb-10">
-                <template #content>
-                    <div class="space-y-5">
-                        <h1>Identity</h1>
-                        <div class="flex flex-row space-x-5">
-                            <div class="w-1/2 space-y-5">
-                                <div class="flex flex-col space-y-2">
-                                    <Label> Class </Label>
-                                    <Select v-model="rombel" :options="selectedRombel" option-label="name"
-                                        option-value="id" placeholder="-- Select Class --" class="w-full" />
-                                </div>
-                                <div class="flex flex-col space-y-2">
-                                    <Label> Study Time</Label>
-                                    <InputText v-model="studyTime" placeholder="Example: 07:00 - 09:30 WIB"
-                                        class="w-full" />
+            <div class="space-y-5">
+                <h1 class="text-lg font-semibold">Identity</h1>
+                <div class="flex flex-row space-x-5">
+                    <div class="w-1/2 space-y-5">
+                        <div class="flex flex-col space-y-2">
+                            <Label> Class </Label>
+                            <Select v-model="rombel" :options="selectedRombel" option-label="name" option-value="id"
+                                placeholder="-- Select Class --" class="w-full" />
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <Label> Study Time</Label>
+                            <InputText v-model="studyTime" placeholder="Example: 07:00 - 09:30 WIB" class="w-full" />
 
-                                </div>
-                            </div>
-                            <div class="w-1/2 space-y-5">
-                                <div class="flex flex-col space-y-2">
-                                    <Label> Day / Date</Label>
-                                    <DatePicker v-model="tanggal" showIcon fluid iconDisplay="input"
-                                        placeholder="-- Day / Date --" class="w-full" />
-                                </div>
-                                <div class="flex flex-col space-y-2">
-                                    <Label> Instructor</Label>
-                                    <Select v-model="namaGuru" :options="selectedInstructor" option-label="name"
-                                        option-value="id" placeholder="-- Select Instructor --" class="w-full" />
-                                </div>
-                            </div>
                         </div>
                     </div>
-                </template>
-            </Card>
-
-            <!-- Reflection-->
-            <Card class="mb-10">
-                <template #header>
-                    <div class="m-5">
-                        <h1>Reflection</h1>
-                    </div>
-                </template>
-
-                <template #content>
-                    <div class="flex flex-col space-x-5">
-                        <div class="w-full space-y-5">
-                            <div class="flex flex-col space-y-2">
-                                <label>Student's Reflection</label>
-                                <Textarea v-model="refleksiSiswa" class="w-full" />
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <label>Teacher's Reflection</label>
-                                <Textarea v-model="refleksiGuru" class="w-full" />
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <label>Level of Achievement</label>
-                                <Textarea v-model="tngktPencapaian" class="w-full" />
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <label>Description of Achievement</label>
-                                <Textarea v-model="deskPencapaian" class="w-full" />
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <label>Follow Up</label>
-                                <Textarea v-model="followUp" class="w-full" />
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <label>Students in need of guidance</label>
-                                <Textarea v-model="pendampinganSiswa" class="w-full" />
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <label>Notes</label>
-                                <Textarea v-model="notes" class="w-full" />
-                            </div>
+                    <div class="w-1/2 space-y-5">
+                        <div class="flex flex-col space-y-2">
+                            <Label> Day / Date</Label>
+                            <DatePicker v-model="tanggal" showIcon fluid iconDisplay="input"
+                                placeholder="-- Day / Date --" class="w-full" />
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <Label> Instructor</Label>
+                            <Select v-model="namaGuru" :options="selectedInstructor" option-label="name"
+                                option-value="id" placeholder="-- Select Instructor --" class="w-full" />
                         </div>
                     </div>
-                </template>
-            </Card>
-        </template>
-
-        <template #footer>
-            <div class="flex justify-end">
-                <Button label="Save Plan" @click="submitRPK" />
+                </div>
             </div>
         </template>
     </Card>
+
+    <!-- Reflection-->
+    <Card class="mb-10">
+        <template #header>
+            <div class="m-5">
+                <h1 class="text-lg font-semibold">Reflection</h1>
+            </div>
+        </template>
+
+        <template #content>
+            <div class="flex flex-col space-x-5">
+                <div class="w-full space-y-5">
+                    <div class="flex flex-col space-y-2">
+                        <label>Student's Reflection</label>
+                        <Textarea v-model="refleksiSiswa" class="w-full" />
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label>Teacher's Reflection</label>
+                        <Textarea v-model="refleksiGuru" class="w-full" />
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label>Level of Achievement</label>
+                        <Textarea v-model="tngktPencapaian" class="w-full" />
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label>Description of Achievement</label>
+                        <Textarea v-model="deskPencapaian" class="w-full" />
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label>Follow Up</label>
+                        <Textarea v-model="followUp" class="w-full" />
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label>Students in need of guidance</label>
+                        <Textarea v-model="pendampinganSiswa" class="w-full" />
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label>Notes</label>
+                        <Textarea v-model="notes" class="w-full" />
+                    </div>
+                </div>
+            </div>
+        </template>
+    </Card>
+
+    <div class="flex justify-end ">
+        <Button label="Submit" @click="submitRPK" class="!bg-[#008C95]" />
+    </div>
     <Toast />
 </template>

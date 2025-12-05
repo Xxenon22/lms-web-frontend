@@ -73,13 +73,13 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="space-y-5" v-if="modulePembelajaran">
+    <div class="space-y-5 m-5" v-if="modulePembelajaran">
         <div class="flex justify-between">
-            <Button icon="pi pi-arrow-left" label="Back" @click="kembali" />
-            <Button label="Join Meeting" @click="bukaLinkZoom(modulePembelajaran)" rounded />
+            <Button icon="pi pi-arrow-left" label="Back" @click="kembali" class="bg-[#008C95]" />
+            <Button label="Join Meeting" @click="bukaLinkZoom(modulePembelajaran)" rounded class="bg-[#008C95]" />
         </div>
 
-        <Card>
+        <Card class="m-5">
             <template #header>
                 <h1 class="m-5">Learning Material: {{ modulePembelajaran.judul }}</h1>
             </template>

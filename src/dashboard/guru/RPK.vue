@@ -236,227 +236,217 @@ onMounted(() => {
 </script>
 
 <template>
-    <Card>
-        <template #header>
-            <h1 class="m-5">Learning Plan</h1>
-        </template>
-
+    <h1 class="m-5 text-2xl">Learning Plan</h1>
+    <!-- Identity Section -->
+    <Card class="mb-10">
         <template #content>
-            <!-- Identity Section -->
-            <Card class="mb-10">
-                <template #content>
-                    <div class="space-y-5">
-                        <h1>Identity</h1>
-                        <div class="flex flex-row space-x-5">
-                            <div class="w-1/2 space-y-5">
-                                <div class="flex flex-col space-y-2">
-                                    <Label> Class </Label>
-                                    <Select v-model="rombel" :options="selectedRombel" option-label="name"
-                                        option-value="id" placeholder="-- Select Class --" class="w-full" />
-                                </div>
-                                <div class="flex flex-col space-y-2">
-                                    <Label> Day / Date</Label>
-                                    <DatePicker v-model="tanggal" showIcon fluid iconDisplay="input"
-                                        placeholder="-- Day / Date --" class="w-full" />
-                                </div>
-                                <div class="flex flex-col space-y-2">
-                                    <Label> Study Time</Label>
-                                    <InputText v-model="studyTime" placeholder="Example: 07:00 - 09:30 WIB"
-                                        class="w-full" />
-                                </div>
-                            </div>
-                            <div class="w-1/2 space-y-5">
-                                <div class="flex flex-col space-y-2">
-                                    <Label> Instructor</Label>
-                                    <Select v-model="namaGuru" :options="selectedInstructor" option-label="name"
-                                        option-value="id" placeholder="-- Select Instructor --" class="w-full" />
-                                </div>
-                                <div class="flex flex-col space-y-2">
-                                    <Label> Tutor (optional)</Label>
-                                    <InputText v-model="tutor" class="w-full" />
-                                </div>
-                                <div class="flex flex-col space-y-2">
-                                    <Label> Phase </Label>
-                                    <Select v-model="fase" :options="selectedFase" option-label="phase"
-                                        option-value="id" placeholder="-- Select Learning Phase --" class="w-full" />
-                                </div>
-                            </div>
+            <div class="space-y-5">
+                <h1 class="text-lg font-semibold">Identity</h1>
+                <div class="flex flex-row space-x-5">
+                    <div class="w-1/2 space-y-5">
+                        <div class="flex flex-col space-y-2">
+                            <Label> Class </Label>
+                            <Select v-model="rombel" :options="selectedRombel" option-label="name" option-value="id"
+                                placeholder="-- Select Class --" class="w-full" />
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <Label> Day / Date</Label>
+                            <DatePicker v-model="tanggal" showIcon fluid iconDisplay="input"
+                                placeholder="-- Day / Date --" class="w-full" />
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <Label> Study Time</Label>
+                            <InputText v-model="studyTime" placeholder="Example: 07:00 - 09:30 WIB" class="w-full" />
                         </div>
                     </div>
-                </template>
-            </Card>
-
-            <!-- Instructional Design -->
-            <Card class="mb-10">
-                <template #header>
-                    <div class="m-5">
-                        <h1>Instructional Design</h1>
-                    </div>
-                </template>
-
-                <template #content>
-                    <div class="flex flex-row space-x-5">
-                        <div class="w-1/2 space-y-5">
-                            <div class="flex flex-col space-y-2">
-                                <label>Learning Objective</label>
-                                <Textarea v-model="tujuanPemb" class="w-full" />
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <label>Interdisciplinary</label>
-                                <Textarea v-model="lintasDis" class="w-full" />
-                            </div>
+                    <div class="w-1/2 space-y-5">
+                        <div class="flex flex-col space-y-2">
+                            <Label> Instructor</Label>
+                            <Select v-model="namaGuru" :options="selectedInstructor" option-label="name"
+                                option-value="id" placeholder="-- Select Instructor --" class="w-full" />
                         </div>
-                        <div class="w-1/2 space-y-5">
-                            <div class="flex flex-col space-y-2">
-                                <label>Digital Utilization</label>
-                                <Textarea v-model="pemanfaatan" class="w-full" />
-                            </div>
-                            <!-- <div class="flex flex-col space-y-2">
-                                <label>Learning Material</label>
-                                <Textarea v-model="materiPemb" class="w-full" />
-                            </div> -->
-                            <div class="flex flex-col space-y-2">
-                                <label>Learning Partnership</label>
-                                <Textarea v-model="kemitraanPemb" class="w-full" />
-                            </div>
+                        <div class="flex flex-col space-y-2">
+                            <Label> Tutor (optional)</Label>
+                            <InputText v-model="tutor" class="w-full" />
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <Label> Phase </Label>
+                            <Select v-model="fase" :options="selectedFase" option-label="phase" option-value="id"
+                                placeholder="-- Select Learning Phase --" class="w-full" />
                         </div>
                     </div>
-                </template>
-            </Card>
-
-            <!-- Graduate Profile Dimensions -->
-            <Card class="mb-10">
-                <template #header>
-                    <div class="m-5">
-                        <h1>Dimensi Profil Lulusan</h1>
-                    </div>
-                </template>
-
-                <template #content>
-                    <div class="flex flex-col gap-4">
-                        <div class="flex items-center gap-2">
-                            <Checkbox v-model="dpl1" :binary="true" inputId="gpd1" />
-                            <label for="gpd1"><b>DPL 1:</b> Keimanan dan ketakwaan terhadap Tuhan YME </label>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <Checkbox v-model="dpl2" :binary="true" inputId="gpd2" />
-                            <label for="gpd2"><b>DPL 2:</b> Kewargaan </label>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <Checkbox v-model="dpl3" :binary="true" inputId="gpd3" />
-                            <label for="gpd3"><b>DPL 3:</b> Penalaran Kritis </label>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <Checkbox v-model="dpl4" :binary="true" inputId="gpd4" />
-                            <label for="gpd4"><b>DPL 4:</b> Kreativitas</label>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <Checkbox v-model="dpl5" :binary="true" inputId="gpd5" />
-                            <label for="gpd5"><b>DPL 5:</b> Kolaborasi</label>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <Checkbox v-model="dpl6" :binary="true" inputId="gpd6" />
-                            <label for="gpd6"><b>DPL 6:</b> Kemandirian</label>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <Checkbox v-model="dpl7" :binary="true" inputId="gpd7" />
-                            <label for="gpd7"><b>DPL 7:</b> Kesehatan</label>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <Checkbox v-model="dpl8" :binary="true" inputId="gpd8" />
-                            <label for="gpd8"><b>DPL 8:</b> Komunikasi</label>
-                        </div>
-                    </div>
-                </template>
-            </Card>
-
-            <Card>
-                <template #content>
-                    <div class="flex flex-row space-x-5">
-                        <div class="w-1/3 space-y-5">
-                            <h1>Pengalaman Belajar</h1>
-                            <div class="flex flex-col space-y-2">
-                                <label>Memahami</label>
-                                <Textarea v-model="memahami" class="w-full" />
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <label>Mengaplikasikan</label>
-                                <Textarea v-model="mengaplikasikan" class="w-full" />
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <label>Merefleksi</label>
-                                <Textarea v-model="merefleksi" class="w-full" />
-                            </div>
-                        </div>
-                        <div class="w-1/3 space-y-5">
-                            <h1 class="mb-10">Prinsip Pembelajaran</h1>
-                            <div class="flex flex-col space-y-2 ">
-                                <div class="flex space-x-1 items-center">
-                                    <Checkbox v-model="berkesadaranMemahami" :binary="true" inputId="gpd8" />
-                                    <label for="gpd8">Berkesadaran</label>
-                                </div>
-                                <div class="flex space-x-1 items-center">
-                                    <Checkbox v-model="bermaknaMemahami" :binary="true" inputId="gpd8" />
-                                    <label for="gpd8">Bermakna</label>
-                                </div>
-                                <div class="flex space-x-1 items-center mb-2">
-                                    <Checkbox v-model="menggembirakanMemahami" :binary="true" inputId="gpd8" />
-                                    <label for="gpd8">Menggembirakan</label>
-                                </div>
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <div class="flex space-x-1 items-center">
-                                    <Checkbox v-model="berkesadaranMengaplikasikan" :binary="true" inputId="gpd8" />
-                                    <label for="gpd8">Berkesadaran</label>
-                                </div>
-                                <div class="flex space-x-1 items-center">
-                                    <Checkbox v-model="bermaknaMengaplikasikan" :binary="true" inputId="gpd8" />
-                                    <label for="gpd8">Bermakna</label>
-                                </div>
-                                <div class="flex space-x-1 items-center mb-3">
-                                    <Checkbox v-model="menggembirakanMengaplikasikan" :binary="true" inputId="gpd8" />
-                                    <label for="gpd8">Menggembirakan</label>
-                                </div>
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <div class="flex space-x-1 items-center">
-                                    <Checkbox v-model="berkesadaranMerefleksi" :binary="true" inputId="gpd8" />
-                                    <label for="gpd8">Berkesadaran</label>
-                                </div>
-                                <div class="flex space-x-1 items-center">
-                                    <Checkbox v-model="bermaknaMerefleksi" :binary="true" inputId="gpd8" />
-                                    <label for="gpd8">Bermakna</label>
-                                </div>
-                                <div class="flex space-x-1 items-center">
-                                    <Checkbox v-model="menggembirakanMerefleksi" :binary="true" inputId="gpd8" />
-                                    <label for="gpd8">Menggembirakan</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="w-1/3 space-y-5">
-                            <h1>Asesmen</h1>
-                            <div class="flex flex-col space-y-2">
-                                <label>Asesmen 1</label>
-                                <Textarea v-model="asesmenMemahami" class="w-full" />
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <label>Asesmen 2</label>
-                                <Textarea v-model="asesmenMengaplikasikan" class="w-full" />
-                            </div>
-                            <div class="flex flex-col space-y-2">
-                                <label>Asesmen 3</label>
-                                <Textarea v-model="asesmenMerefleksi" class="w-full" />
-                            </div>
-                        </div>
-                    </div>
-                </template>
-            </Card>
-        </template>
-
-        <template #footer>
-            <div class="flex justify-end">
-                <Button label="Save Plan" @click="submitRPK" />
+                </div>
             </div>
         </template>
     </Card>
+
+    <!-- Instructional Design -->
+    <Card class="mb-10">
+        <template #header>
+            <div class="m-5">
+                <h1 class="text-lg font-semibold">Instructional Design</h1>
+            </div>
+        </template>
+
+        <template #content>
+            <div class="flex flex-row space-x-5">
+                <div class="w-1/2 space-y-5">
+                    <div class="flex flex-col space-y-2">
+                        <label>Learning Objective</label>
+                        <Textarea v-model="tujuanPemb" class="w-full" />
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label>Interdisciplinary</label>
+                        <Textarea v-model="lintasDis" class="w-full" />
+                    </div>
+                </div>
+                <div class="w-1/2 space-y-5">
+                    <div class="flex flex-col space-y-2">
+                        <label>Digital Utilization</label>
+                        <Textarea v-model="pemanfaatan" class="w-full" />
+                    </div>
+                    <!-- <div class="flex flex-col space-y-2">
+                                <label>Learning Material</label>
+                                <Textarea v-model="materiPemb" class="w-full" />
+                            </div> -->
+                    <div class="flex flex-col space-y-2">
+                        <label>Learning Partnership</label>
+                        <Textarea v-model="kemitraanPemb" class="w-full" />
+                    </div>
+                </div>
+            </div>
+        </template>
+    </Card>
+
+    <!-- Graduate Profile Dimensions -->
+    <Card class="mb-10">
+        <template #header>
+            <div class="m-5">
+                <h1 class="text-lg font-semibold">Dimensi Profil Lulusan</h1>
+            </div>
+        </template>
+
+        <template #content>
+            <div class="flex flex-col gap-4">
+                <div class="flex items-center gap-2">
+                    <Checkbox v-model="dpl1" :binary="true" inputId="gpd1" />
+                    <label for="gpd1"><b>DPL 1:</b> Keimanan dan ketakwaan terhadap Tuhan YME </label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <Checkbox v-model="dpl2" :binary="true" inputId="gpd2" />
+                    <label for="gpd2"><b>DPL 2:</b> Kewargaan </label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <Checkbox v-model="dpl3" :binary="true" inputId="gpd3" />
+                    <label for="gpd3"><b>DPL 3:</b> Penalaran Kritis </label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <Checkbox v-model="dpl4" :binary="true" inputId="gpd4" />
+                    <label for="gpd4"><b>DPL 4:</b> Kreativitas</label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <Checkbox v-model="dpl5" :binary="true" inputId="gpd5" />
+                    <label for="gpd5"><b>DPL 5:</b> Kolaborasi</label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <Checkbox v-model="dpl6" :binary="true" inputId="gpd6" />
+                    <label for="gpd6"><b>DPL 6:</b> Kemandirian</label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <Checkbox v-model="dpl7" :binary="true" inputId="gpd7" />
+                    <label for="gpd7"><b>DPL 7:</b> Kesehatan</label>
+                </div>
+                <div class="flex items-center gap-2">
+                    <Checkbox v-model="dpl8" :binary="true" inputId="gpd8" />
+                    <label for="gpd8"><b>DPL 8:</b> Komunikasi</label>
+                </div>
+            </div>
+        </template>
+    </Card>
+
+    <Card>
+        <template #content>
+            <div class="flex flex-row space-x-5">
+                <div class="w-1/3 space-y-5">
+                    <h1 class="text-lg font-semibold">Pengalaman Belajar</h1>
+                    <div class="flex flex-col space-y-2">
+                        <label>Memahami</label>
+                        <Textarea v-model="memahami" class="w-full" />
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label>Mengaplikasikan</label>
+                        <Textarea v-model="mengaplikasikan" class="w-full" />
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label>Merefleksi</label>
+                        <Textarea v-model="merefleksi" class="w-full" />
+                    </div>
+                </div>
+                <div class="w-1/3 space-y-5">
+                    <h1 class="mb-10 text-lg font-semibold">Prinsip Pembelajaran</h1>
+                    <div class="flex flex-col space-y-2 ">
+                        <div class="flex space-x-1 items-center">
+                            <Checkbox v-model="berkesadaranMemahami" :binary="true" inputId="gpd8" />
+                            <label for="gpd8">Berkesadaran</label>
+                        </div>
+                        <div class="flex space-x-1 items-center">
+                            <Checkbox v-model="bermaknaMemahami" :binary="true" inputId="gpd8" />
+                            <label for="gpd8">Bermakna</label>
+                        </div>
+                        <div class="flex space-x-1 items-center mb-2">
+                            <Checkbox v-model="menggembirakanMemahami" :binary="true" inputId="gpd8" />
+                            <label for="gpd8">Menggembirakan</label>
+                        </div>
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <div class="flex space-x-1 items-center">
+                            <Checkbox v-model="berkesadaranMengaplikasikan" :binary="true" inputId="gpd8" />
+                            <label for="gpd8">Berkesadaran</label>
+                        </div>
+                        <div class="flex space-x-1 items-center">
+                            <Checkbox v-model="bermaknaMengaplikasikan" :binary="true" inputId="gpd8" />
+                            <label for="gpd8">Bermakna</label>
+                        </div>
+                        <div class="flex space-x-1 items-center mb-3">
+                            <Checkbox v-model="menggembirakanMengaplikasikan" :binary="true" inputId="gpd8" />
+                            <label for="gpd8">Menggembirakan</label>
+                        </div>
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <div class="flex space-x-1 items-center">
+                            <Checkbox v-model="berkesadaranMerefleksi" :binary="true" inputId="gpd8" />
+                            <label for="gpd8">Berkesadaran</label>
+                        </div>
+                        <div class="flex space-x-1 items-center">
+                            <Checkbox v-model="bermaknaMerefleksi" :binary="true" inputId="gpd8" />
+                            <label for="gpd8">Bermakna</label>
+                        </div>
+                        <div class="flex space-x-1 items-center">
+                            <Checkbox v-model="menggembirakanMerefleksi" :binary="true" inputId="gpd8" />
+                            <label for="gpd8">Menggembirakan</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-1/3 space-y-5">
+                    <h1 class="text-lg font-semibold">Asesmen</h1>
+                    <div class="flex flex-col space-y-2">
+                        <label>Asesmen 1</label>
+                        <Textarea v-model="asesmenMemahami" class="w-full" />
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label>Asesmen 2</label>
+                        <Textarea v-model="asesmenMengaplikasikan" class="w-full" />
+                    </div>
+                    <div class="flex flex-col space-y-2">
+                        <label>Asesmen 3</label>
+                        <Textarea v-model="asesmenMerefleksi" class="w-full" />
+                    </div>
+                </div>
+            </div>
+        </template>
+    </Card>
+
+    <div class="flex justify-end mt-10">
+        <Button label="Submit" @click="submitRPK" class="!bg-[#008C95]" />
+    </div>
 </template>

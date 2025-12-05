@@ -7,16 +7,19 @@ import api from '../../services/api';
 const visibleClass = ref(false);
 const visibleSubject = ref(false);
 const visibleTeacher = ref(false)
-const kelas = ref([])
-const subject = ref([])
-const guru = ref([])
+const kelas = ref([]);
+const subject = ref([]);
+const guru = ref([]);
 const confirm = useConfirm();
 const toast = useToast();
-const gradeLvl = ref([])
+const gradeLvl = ref([]);
+const jurusan = ref([]);
+const rombelNumber = ref([]);
 
 const editClassData = ref({
     id: null,
     name_rombel: '',
+    jurusan_id: '',
     grade_id: null,
 })
 const editSubjectData = ref({
@@ -28,14 +31,38 @@ const editTeacherData = ref({
     name: '',
 })
 
-const fetchDataGradeLevel = async () => {
+const fetchRomberlNumber = async () => {
     try {
-        const res = await api.get("/grade-level")
-        gradeLvl.value = res.data
-    } catch (err) {
-        console.error("Fetch Grade Level:", err)
+        const res = await api.get("/number-rombel");
+
+        rombelNumber.value = res.data
+            .map(item => ({
+                id: item.id,
+                rombel_number: item.number?.trim() ?? ""
+            }))
+            .sort((a, b) => a.id - b.id);
+
+    } catch (error) {
+        console.error("Fetch Rombel Number:", error);
     }
-}
+};
+
+const fetchDataGradeLevel = async (order = "asc") => {
+    try {
+        const res = await api.get("/grade-level");
+
+        gradeLvl.value = res.data.sort((a, b) => {
+            if (order === "asc") {
+                return a.id - b.id;  // Urut berdasarkan ID
+            } else {
+                return b.id - a.id;
+            }
+        });
+    } catch (err) {
+        console.error("Fetch Grade Level:", err);
+    }
+};
+
 
 const fetchDataKelas = async () => {
     try {
@@ -43,6 +70,16 @@ const fetchDataKelas = async () => {
         kelas.value = res.data;
     } catch (err) {
         console.error("Fetch Class:", err)
+    }
+}
+
+const fetchJurusan = async () => {
+    try {
+        const res = await api.get("/jurusan")
+        jurusan.value = res.data;
+    } catch (err) {
+        console.error("Fetch Major:", err)
+        return [];
     }
 }
 
@@ -133,8 +170,9 @@ const deleteTeacher = (id) => {
 const openEditDialog = (row) => {
     editClassData.value = {
         id: row.id,
-        name_rombel: row.name_rombel,
+        name_rombel: row.name_rombel ?? null,
         grade_id: row.grade_id,
+        jurusan_id: row.jurusan_id,
     }
     visibleClass.value = true
 }
@@ -160,6 +198,7 @@ const updateClass = async () => {
         await api.put(`/rombel/${editClassData.value.id}`, {
             name_rombel: editClassData.value.name_rombel,
             grade_id: editClassData.value.grade_id,
+            jurusan_id: editClassData.value.jurusan_id,
         })
         toast.add({ severity: 'success', summary: 'Updated', detail: 'Class updated successfully', life: 3000 })
         visibleClass.value = false
@@ -198,6 +237,8 @@ const updateTeacher = async () => {
 onMounted(async () => {
     await fetchDataGradeLevel()
     await fetchDataKelas()
+    await fetchJurusan()
+    await fetchRomberlNumber()
     await fetchDataSubject()
     await fetchDataTeacher("asc")
 })
@@ -216,7 +257,8 @@ onMounted(async () => {
                     <DataTable :value="kelas" paginator :rows="5" :rowsPerPageOptions="[5, 10, 20, 50]"
                         tableStyle="min-width: 50rem">
                         <Column field="grade_name" header="Grade Level" style="width: 25%" />
-                        <Column field="name_rombel" header="Class" style="width: 50%" />
+                        <Column field="major" header="Major" style="width: 25%" />
+                        <Column field="rombel_number" header="Class" style="width: 25%" />
 
                         <!-- Action Buttons -->
                         <Column header="Action" style="width: 25%">
@@ -236,9 +278,16 @@ onMounted(async () => {
                                                 class="w-full md:w-56" />
                                         </div>
                                         <div class="flex items-center gap-4 mb-4">
-                                            <label for="username" class="font-semibold w-24">Class</label>
-                                            <InputText v-model="editClassData.name_rombel" id="username"
-                                                class="flex-auto" autocomplete="off" />
+                                            <label for="major" class="font-semibold w-24">Major</label>
+                                            <Select v-model="editClassData.jurusan_id" :options="jurusan"
+                                                option-value="id" option-label="nama_jurusan"
+                                                placeholder="Select a Major" class="w-full md:w-56" />
+                                        </div>
+                                        <div class="flex items-center gap-4 mb-4">
+                                            <label for="rombel" class="font-semibold w-24">Class</label>
+                                            <Select v-model="editClassData.name_rombel" :options="rombelNumber"
+                                                option-value="id" option-label="rombel_number"
+                                                placeholder="Select a Rombel Number" class="w-full md:w-56" />
                                         </div>
                                         <div class="flex justify-end gap-2">
                                             <Button type="button" label="Cancel" severity="secondary"

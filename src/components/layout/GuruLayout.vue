@@ -116,21 +116,23 @@ onMounted(async () => {
 <template>
   <!-- Fixed Navbar -->
   <div class="">
-    <nav class="navbar fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center space-x-5 relative z-10">
+    <nav class="navbar top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center space-x-5 ">
         <img src="../../assets/LOGO_SMK_METLAND.png" alt="Logo" width="65" />
-        <h1>
-          <b>MILS</b> <br /> <b>M</b>etschoo <b>I</b>ntegrated <b>L</b>earning <b>S</b>ystem
-        </h1>
+        <div class="flex flex-col">
+          <h1 class="text-2xl font-semibold">MILS</h1>
+          <p>
+            Metschoo Integrated Learning System</p>
+        </div>
       </div>
-      <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-3">
         <!-- <div class="relative z-10"> -->
         <Button @click="visible = true"
-          v-tooltip.bottom="{ value: 'Create / Add Classroom', showDelay: 1000, hideDelay: 300 }" icon="pi pi-plus"
-          text />
+          v-tooltip.bottom="{ value: 'Create Classroom', showDelay: 1000, hideDelay: 300 }" icon="pi pi-plus bg-none"
+          rounded class="text-white add-icon" />
         <Drawer v-model:visible="visible" :responsiveOptions="responsiveOptions" modal header="Create Classroom"
           position="bottom" style="height: auto">
-          <div class="flex justify-center items-center">
+          <div class="flex justify-center items-center ">
             <div class="flex justify-center items-center w-1/2">
               <div class="">
                 <Galleria :value="images.slice(0)" :numVisible="5" v-model:activeIndex="activeIndex"
@@ -149,20 +151,20 @@ onMounted(async () => {
               </div>
             </div>
 
-            <div class="flex flex-col justify-center items-center  w-1/2">
-              <div class="flex items-center mb-4">
-                <label for="rombel" class="font-semibold w-24">Class</label>
+            <div class="flex flex-col mt-0 m-auto p-5 w-1/2 space-y-8">
+              <div class="flex flex-col space-y-1">
+                <label for="rombel">Class</label>
                 <Select v-model="isirombel" :options="rombel" option-value="id" option-label="name"
-                  placeholder="Select Class" class="w-full md:w-56" />
+                  placeholder="Select Class" class="w-full" />
               </div>
-              <div class="flex items-center mb-10">
-                <label for="mataPelajaran" class="font-semibold w-24">Subject</label>
+              <div class="flex flex-col space-y-1">
+                <label for="mataPelajaran">Subject</label>
                 <Select v-model="isiMapel" :options="mapel" option-value="id" option-label="nama_mapel"
-                  placeholder="Select Subject" class="w-full md:w-56" />
+                  placeholder="Select Subject" class="w-full" />
               </div>
-              <div class="flex items-center gap-2">
+              <div class="flex justify-end gap-2 mt-35">
                 <Button type="button" label="Cancel" severity="secondary" @click="visible = false"></Button>
-                <Button type="button" label="Save" @click="tambahKelas"></Button>
+                <Button type="button" label="Save" class="button-join" @click="tambahKelas"></Button>
               </div>
             </div>
           </div>
@@ -188,24 +190,13 @@ onMounted(async () => {
       </div>
 
     </nav>
-    <div class="absolute z-0 overflow-hidden top-0 right-0">
-      <img src="/src/assets/Aset Mawar.png" width="130">
-    </div>
-
-    <div class="absolute z-0">
-      <img src="/src/assets/Pesawat.png" width="500">
-    </div>
-
-    <div class="absolute z-0" style="top: -90px;">
-      <img src="/src/assets/pesawat_2.png" width="700">
-    </div>
-
   </div>
+
   <!-- Layout wrapper -->
-  <div class="flex h-screen pt-[96px]">
+  <div class="flex h-screen">
     <!-- Sidebar -->
-    <aside class="sidebar text-black flex flex-col overflow-y-auto relative">
-      <div class="logo flex items-center px-4 py-6">
+    <aside class="sidebar text-white flex flex-col overflow-y-auto rounded-lg">
+      <div class="relative z-50 logo flex items-center border-b-2 border-white m-4 mt-8">
         <Icon class="icon" icon="famicons:book-sharp" />
         <h1 class="m-4 font-semibold">Let’s make learning awesome!</h1>
       </div>
@@ -265,7 +256,6 @@ onMounted(async () => {
           </li>
         </RouterLink>
       </ul>
-
     </aside>
 
     <!-- Main content -->
@@ -279,13 +269,27 @@ onMounted(async () => {
 
 <style scoped>
 .navbar {
+  position: fixed;
+  top: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 2300px;
   height: 96px;
+  z-index: 1000;
+  background: linear-gradient(90deg, rgba(245, 245, 245, 1) 0%, rgba(69, 139, 139, 1) 100%);
+  border-radius: 1rem;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 .sidebar {
   position: fixed;
-  top: 96px;
-  left: 0;
+  top: 135px;
+  left: 20px;
   width: 60px;
   height: calc(100vh - 96px);
   transition: width 0.3s ease;
@@ -293,6 +297,7 @@ onMounted(async () => {
   scrollbar-width: none;
   -ms-overflow-style: none;
   z-index: 40;
+  background-color: #146B6B;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -300,8 +305,30 @@ onMounted(async () => {
   background: transparent;
 }
 
+.sidebar .icon {
+  min-width: 30px;
+  height: 30px;
+  font-size: 20px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-item {
+  white-space: nowrap;
+  visibility: hidden;
+  transition: opacity 0.8s ease;
+  color: #ffffff;
+}
+
+.sidebar:hover .nav-item {
+  opacity: 1;
+  visibility: visible;
+}
+
 .sidebar:hover {
-  width: 250px;
+  width: 270px;
 }
 
 .sidebar ul {
@@ -314,52 +341,44 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  transition: background-color 0.2s ease;
+  padding: 12px 7px;
+  transition: background-color 0.8s ease;
   border-radius: 8px;
   cursor: pointer;
+  margin: 8px;
 }
+
 
 .sidebar li:hover {
-  background-color: #FFFCB8;
-  opacity: 0.7;
-}
-
-.sidebar .icon {
-  min-width: 30px;
-  height: 30px;
-  font-size: 20px;
-  color: #797574;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.nav-item {
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease;
-  color: black;
-}
-
-.sidebar:hover .nav-item {
-  opacity: 1;
-  visibility: visible;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.45);
 }
 
 .main-content {
+  margin-top: 135px;
   flex-grow: 1;
-  margin-left: 60px;
+  margin-left: 100px;
+  margin-right: 20px;
   transition: margin-left 0.3s ease;
   background-color: white;
-  padding: 1.5rem;
   border-radius: 1.5rem;
   overflow-y: auto;
-  height: calc(100vh - 96px);
+  height: calc(100vh - 155px);
+
 }
 
 .sidebar:hover~.main-content {
-  margin-left: 250px;
+  margin-left: 310px;
+}
+
+.button-join {
+  background-color: #008C95;
+
+}
+
+.add-icon {
+  background-color: transparent !important;
+  border: none !important;
 }
 </style>

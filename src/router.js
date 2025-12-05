@@ -1,5 +1,5 @@
 import { createWebHistory, createRouter } from 'vue-router'
-import Signin from './components/login/SignIn.vue'
+import Signin from "./components/auth/SignIn.vue"
 
 const routes = [
 
@@ -13,7 +13,7 @@ const routes = [
     },
     {
         path: '/sign-up',
-        component: () => import("./components/login/SignUp.vue"),
+        component: () => import("./components/auth/SignUp.vue"),
         name: "SignUp",
         meta: {
             title: 'Sign up - Metschoo Integrated Learning System'
@@ -21,7 +21,7 @@ const routes = [
     },
     {
         path: '/verify-code',
-        component: () => import("./components/login/verificationPage.vue"),
+        component: () => import("./components/auth/verificationPage.vue"),
         name: "verify",
         meta: {
             title: 'Verify code - Metschoo Integrated Learning System'

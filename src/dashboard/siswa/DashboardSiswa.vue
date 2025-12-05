@@ -2,7 +2,6 @@
 import api from "../../services/api";
 import { onMounted, ref, watch } from "vue";
 import { useToast } from "primevue/usetoast";
-import { useRoute } from "vue-router";
 
 const toast = useToast();
 const kelasDiikuti = ref([]);
@@ -15,6 +14,7 @@ const isLoading = ref(true);
 const visible = ref(false);
 const src = ref(null);
 const profile = ref([]);
+const selectedView = ref("joined");
 
 // Lifecycle
 onMounted(async () => {
@@ -138,7 +138,7 @@ const search = (event) => {
         .filter((kelas) => {
             const mapel = kelas.nama_mapel?.toLowerCase() || "";
             const grade = kelas.rombel?.grade_lvl?.toLowerCase() || "";
-            const rombel = kelas.rombel?.name_rombel?.toLowerCase() || "";
+            const rombel = kelas.rombel?.rombel?.toLowerCase() || "";
             const guru = kelas.guru_name?.toLowerCase() || "";
             return (
                 mapel.includes(query) ||
@@ -148,7 +148,7 @@ const search = (event) => {
             );
         })
         .map((kelas) => ({
-            name: `${kelas.nama_mapel} - ${kelas.rombel?.grade_lvl || ""} ${kelas.rombel?.name_rombel || ""}`,
+            name: `${kelas.nama_mapel} - ${kelas.rombel?.grade_lvl || ""} ${kelas.rombel?.rombel || ""}`,
             id: kelas.id,
         }));
 };
@@ -187,19 +187,32 @@ const fetchGuruById = async (guruId) => {
 
 <template>
     <!-- Kelas yang diikuti -->
-    <section class="flex flex-col">
-        <div class="searching flex justify-end">
-            <AutoComplete v-model="selectedClass" optionLabel="name" placeholder="🔍 Find your class here..."
-                :suggestions="filteredClass" @complete="search" />
+    <section class="flex flex-col m-10">
+        <div class="searching flex justify-between items-center">
+            <div class="flex flex-col">
+                <h1 class="text-3xl font-semibold">Classroom</h1>
+                <p class="text-lg text-gray-500">All your class</p>
+            </div>
+
+            <div class="relative ">
+                <div
+                    class="absolute left-0 top-0 bottom-0 w-12 flex items-center rounded-xl justify-center m-1.5 bg-[#166B6B] z-10">
+                    <i class="pi pi-search text-white text-lg"></i>
+                </div>
+
+                <AutoComplete v-model="selectedClass" optionLabel="name" :suggestions="filteredClass" @complete="search"
+                    placeholder="Find your class here" class="auto-input" />
+            </div>
         </div>
+
 
         <!-- Hasil Pencarian -->
         <div v-if="kelasHasilPencarian">
-            <div class="m-5">
+            <div class="mt-5">
                 <h1 class="text-xl font-bold">Search Result</h1>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-5">
                 <Card :key="kelasHasilPencarian.id" class="w-full overflow-hidden">
                     <template #header>
                         <div class="relative">
@@ -216,103 +229,119 @@ const fetchGuruById = async (guruId) => {
 
                     <template #title>{{ kelasHasilPencarian.nama_mapel }}</template>
                     <template #subtitle>
-                        {{ kelasHasilPencarian.rombel?.grade_lvl }}
-                        {{ kelasHasilPencarian.rombel?.name_rombel }}
-                    </template>
-                    <template #footer>
-                        <div class="flex gap-4 mt-1">
-                            <RouterLink v-if="kelasHasilPencarian.sudahDiikuti"
-                                :to="{ name: 'Join-Class', params: { id: kelasHasilPencarian.id } }">
-                                <Button label="Join" class="w-full" />
-                            </RouterLink>
-                            <Button v-if="kelasHasilPencarian.sudahDiikuti" icon="pi pi-check" label="Following"
-                                v-tooltip.bottom="'Following a Class'" outlined severity="secondary" class="w-full"
-                                @click="batalIkutiKelas(kelasHasilPencarian.id)" />
-                            <Button v-else label="Follow" outlined severity="secondary" class="w-full"
-                                @click="ikutiKelas(kelasHasilPencarian.id)" />
+                        <div class="flex justify-between">
+                            <div class="">
+                                {{ kelasHasilPencarian.rombel?.grade_lvl }}
+                                {{ kelasHasilPencarian.rombel?.rombel }}
+                            </div>
+
+                            <div class="flex gap-4 mt-1 text-white">
+                                <Button v-if="kelasHasilPencarian.sudahDiikuti" icon="pi pi-check"
+                                    v-tooltip.bottom="'Following a Class'" class="button-join w-full no-border-btn"
+                                    rounded @click="batalIkutiKelas(kelasHasilPencarian.id)" />
+                                <RouterLink v-if="kelasHasilPencarian.sudahDiikuti"
+                                    :to="{ name: 'Join-Class', params: { id: kelasHasilPencarian.id } }">
+                                    <Button label="Join" class="button-join no-border-btn w-32" rounded />
+                                </RouterLink>
+                                <Button v-else :label="kelasHasilPencarian.sudahDiikuti ? 'Following' : 'Add'"
+                                    class="no-border-btn w-40 button-join focus:outline-none" icon="pi pi-plus"
+                                    iconPos="left" @click="ikutiKelas(kelasHasilPencarian.id)" />
+                            </div>
                         </div>
                     </template>
                 </Card>
             </div>
         </div>
 
+        <!-- Button switch -->
+        <div class="mt-10 mb-5 space-x-4 w-full">
+            <Button class="switch-btn w-40 text-white" rounded
+                :class="selectedView === 'joined' ? '!bg-[#0D7474]' : '!bg-[#94A4A4]'" @click="selectedView = 'joined'">
+                Joined Classes
+            </Button>
+
+            <Button class="switch-btn w-40 text-white" rounded
+                :class="selectedView === 'other' ? '!bg-[#0D7474]' : '!bg-[#94A4A4]'" @click="selectedView = 'other'">
+                Other Class
+            </Button>
+        </div>
+
+
         <!-- Joined Classes -->
-        <div class="m-5">
-            <h1 class="text-xl font-bold">Joined Classes</h1>
-        </div>
 
-        <div v-if="isLoading" class="flex justify-center py-10">
-            <ProgressSpinner />
-        </div>
+        <div class="" v-if="selectedView === 'joined'">
+            <div v-if="isLoading" class="flex justify-center py-10">
+                <ProgressSpinner />
+            </div>
 
-        <div v-else-if="kelasDiikuti.length === 0" class="text-center text-gray-400 mb-8">
-            You are not enrolled in any classes yet.
-        </div>
+            <div v-else-if="kelasDiikuti.length === 0" class="text-center text-gray-400 mb-8">
+                You are not enrolled in any classes yet.
+            </div>
 
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card v-for="kelas in kelasDiikuti" :key="kelas.id" class="w-full overflow-hidden">
-                <template #header>
-                    <div class="relative">
-                        <img :src="kelas.link_wallpaper_kelas || 'https://primefaces.org/cdn/primevue/images/usercard.png'"
-                            class="w-full h-32 object-cover" />
-                        <div @click="fetchGuruById(kelas.guru_id)"
-                            class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
-                            <img v-if="kelas.guru_photo" :src="kelas.guru_photo" alt="Photo Profile"
-                                class="w-full h-full object-cover" />
-                            <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <Card v-for="kelas in kelasDiikuti" :key="kelas.id" class="w-full overflow-hidden">
+                    <template #header>
+                        <div class="relative">
+                            <img :src="kelas.link_wallpaper_kelas || 'https://primefaces.org/cdn/primevue/images/usercard.png'"
+                                class="w-full h-32 object-cover" />
+                            <div @click="fetchGuruById(kelas.guru_id)"
+                                class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
+                                <img v-if="kelas.guru_photo" :src="kelas.guru_photo" alt="Photo Profile"
+                                    class="w-full h-full object-cover" />
+                                <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
+                            </div>
                         </div>
-                    </div>
-                </template>
+                    </template>
 
-                <template #title>{{ kelas.nama_mapel }}</template>
-                <template #subtitle>
-                    {{ kelas.rombel?.grade_lvl }} {{ kelas.rombel?.name_rombel }}
-                </template>
-                <template #footer>
-                    <div class="flex justify-center gap-4 mt-1">
-                        <RouterLink :to="{ name: 'Join-Class', params: { id: kelas.id } }">
-                            <Button label="Join" class="w-full" />
-                        </RouterLink>
-                        <Button icon="pi pi-check" label="Following" v-tooltip.bottom="'Following a Class'" outlined
-                            severity="secondary" class="w-full" @click="batalIkutiKelas(kelas.id)" />
-                    </div>
-                </template>
-            </Card>
-        </div>
-    </section>
+                    <template #title>{{ kelas.nama_mapel }}</template>
+                    <template #subtitle>
+                        {{ kelas.rombel?.grade_lvl }} {{ kelas.rombel?.rombel }}
 
-    <!-- Kelas Lainnya -->
-    <section class="flex flex-col mt-12">
-        <div class="m-5">
-            <h1 class="text-xl font-bold">Other Classroom</h1>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card v-for="kelas in kelasLainnya" :key="kelas.id" class="w-full overflow-hidden">
-                <template #header>
-                    <div class="relative">
-                        <img :src="kelas.link_wallpaper_kelas || 'https://primefaces.org/cdn/primevue/images/usercard.png'"
-                            class="w-full h-32 object-cover" />
-                        <div @click="fetchGuruById(kelas.guru_id)"
-                            class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
-                            <img v-if="kelas.guru_photo" :src="kelas.guru_photo" alt="Photo Profile"
-                                class="w-full h-full object-cover" />
-                            <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
+                        <div class="flex justify-end gap-4 mt-1 ">
+                            <Button v-tooltip.bottom="'Following a Class'" class="no-border-btn button-join"
+                                icon="pi pi-check" @click="batalIkutiKelas(kelas.id)" rounded />
+                            <RouterLink :to="{ name: 'Join-Class', params: { id: kelas.id } }">
+                                <Button label="Join" class="button-join w-32 no-border-btn" rounded />
+                            </RouterLink>
                         </div>
-                    </div>
-                </template>
+                    </template>
+                </Card>
+            </div>
+        </div>
 
-                <template #title>{{ kelas.nama_mapel }}</template>
-                <template #subtitle>
-                    {{ kelas.rombel?.grade_lvl }} {{ kelas.rombel?.name_rombel }}
-                </template>
-                <template #footer>
-                    <div class="flex gap-4 mt-1">
-                        <Button :label="kelas.sudahDiikuti ? 'Following' : 'Follow'" severity="secondary" outlined
-                            class="w-full" :disabled="kelas.sudahDiikuti" @click="ikutiKelas(kelas.id)" />
-                    </div>
-                </template>
-            </Card>
+        <!-- Other Classes -->
+        <div class="" v-if="selectedView === 'other'">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 ">
+                <Card v-for="kelas in kelasLainnya" :key="kelas.id" class="w-full overflow-hidden">
+                    <template #header>
+                        <div class="relative">
+                            <img :src="kelas.link_wallpaper_kelas || 'https://primefaces.org/cdn/primevue/images/usercard.png'"
+                                class="w-full h-32 object-cover" />
+                            <div @click="fetchGuruById(kelas.guru_id)"
+                                class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
+                                <img v-if="kelas.guru_photo" :src="kelas.guru_photo" alt="Photo Profile"
+                                    class="w-full h-full object-cover" />
+                                <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template #title>{{ kelas.nama_mapel }}</template>
+                    <template #subtitle>
+                        <div class="flex justify-between">
+                            <div class="">
+                                {{ kelas.rombel?.grade_lvl }} {{ kelas.rombel?.rombel }}
+                            </div>
+                            <div class="flex gap-4 mt-1 text-white">
+                                <Button :label="kelas.sudahDiikuti ? 'Following' : 'Add'"
+                                    class="no-border-btn w-40 button-join focus:outline-none"
+                                    :disabled="kelas.sudahDiikuti" icon="pi pi-plus" iconPos="left"
+                                    @click="ikutiKelas(kelas.id)" />
+                            </div>
+                        </div>
+                    </template>
+                </Card>
+            </div>
         </div>
     </section>
 
@@ -340,3 +369,22 @@ const fetchGuruById = async (guruId) => {
 
     <Toast />
 </template>
+
+<style scoped>
+/* Khusus untuk tombol switch saja */
+:deep(.switch-btn.p-button) {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.button-join {
+    background-color: #0D7474;
+    border-radius: 15px;
+}
+
+:deep(.auto-input .p-inputtext) {
+    padding-left: 4rem !important;
+    border-radius: 15px;
+}
+</style>

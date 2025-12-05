@@ -48,9 +48,10 @@ onMounted(async () => {
 
 <template>
 
-  <section class="flex flex-col">
-    <div class="m-5">
-      <h1 class="font-bold">Classroom</h1>
+  <section class="flex flex-col m-10">
+    <div class="flex flex-col ml-10">
+      <h1 class="text-3xl font-semibold">Classroom</h1>
+      <p class="text-sm text-gray-500">All your class</p>
     </div>
 
     <div v-if="isLoading" class="flex justify-center py-10">
@@ -62,7 +63,7 @@ onMounted(async () => {
     </div>
 
     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      <Card v-for="kls in kelas" class="w-full overflow-hidden">
+      <Card v-for="kls in kelas" class="w-full overflow-hidden m-5">
         <template #header>
           <div class="relative">
             <img :src="kls.link_wallpaper_kelas || '/wallpapers/w1.jpg'" class="w-full h-40 object-cover" />
@@ -76,7 +77,7 @@ onMounted(async () => {
               <Button label="Assignment List" severity="secondary" outlined class="w-full" />
             </router-link>
             <router-link :to="{ path: `/enter-to-the-class/${kls.id}` }" class="w-full">
-              <Button label="Access Class" class="w-full" />
+              <Button label="Access Class" class="w-full button-join" />
             </router-link>
           </div>
         </template>
@@ -85,3 +86,16 @@ onMounted(async () => {
   </section>
   <Toast />
 </template>
+
+<style scoped>
+:deep(.button-join) {
+  /* background: transparent !important; */
+  border: none !important;
+  /* box-shadow: none !important; */
+}
+
+.button-join {
+  background-color: #0D7474;
+  /* border-radius: 15px; */
+}
+</style>

@@ -11,6 +11,7 @@ const kelasId = route.params.id;
 const activePanel = ref(null);
 const daftarMateri = ref([]);
 const soalList = ref({});
+const classroom = ref([])
 const selectedAnswers = ref({});
 const jawabanEssaiSiswa = ref({})
 const refleksi = ref({});
@@ -31,6 +32,7 @@ const isLoading = ref(true)
 const selectedFile = ref(null);
 const fileUrl = ref(null);
 const uploaded = ref(false);
+// const wallpaper = ref("../../../public/wallpapers/w7.jpg");
 
 
 // map soal_id -> jawaban (dari jawaban_siswa) untuk user ini
@@ -526,7 +528,20 @@ const onAdvancedUpload = async (event, materiId) => {
     }
 };
 
+const fetchClassroom = async () => {
+    try {
+        const res = await api.get(`/kelas/${kelasId}`);
+        classroom.value = res.data;
+        console.log("Classroom data:", classroom.value);
+        if (!res) {
+            toast.add({ severity: "error", summary: "Classroom not found!", life: 3000 });
+            return;
+        }
 
+    } catch (err) {
+        console.error('fetchClassroom', err);
+    }
+}
 
 onMounted(async () => {
     try {
@@ -545,6 +560,7 @@ onMounted(async () => {
         userId.value = res.data.id;
 
         await fetchProgressMateri();
+        await fetchClassroom();
         await fetchMateriById();
         await fetchLinkGroupById();
         await nextTick();
@@ -557,20 +573,50 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="space-y-4 mb-5">
+    <section v-if="classroom"
+        class="relative w-full h-[285px] rounded-b-3xl overflow-hidden flex items-center text-black mb-5 shadow-2xl">
+        <!-- Wallpaper -->
+        <div class="absolute inset-0 bg-cover bg-center">
+            <img :src="classroom.link_wallpaper_kelas" alt="" />
+        </div>
+
+        <!-- Overlay gradient + blur -->
+        <div class=" absolute inset-0 backdrop-blur-[5px]" style="background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 1) 20%,    /* kiri: putih 60% */
+            rgba(20, 107, 107,0.40) 50%,   /* tengah kiri */
+            rgba(20, 107, 107, 0.71) 60%,   /* tengah */
+            rgba(255, 255, 255, 0.00) 90%    /* kanan bening */
+        );">
+        </div>
+
+        <!-- Content -->
+        <div class="relative z-10 space-y-8 pl-10">
+            <div class="flex flex-col">
+                <h1 class="text-2xl font-semibold">{{ classroom.nama_mapel }}</h1>
+                <h2 class="text-lg">{{ classroom.grade_lvl }} {{ classroom.name_rombel }}</h2>
+            </div>
+            <p>{{ classroom.guru_name }}</p>
+        </div>
+    </section>
+
+    <div class="space-y-4 mb-5 m-5">
         <Card v-for="forum in linkGrup" :key="forum.id">
             <template #header>
-                <div class="flex items-center justify-between">
-                    <div class="flex m-5 space-x-2 items-center">
-                        <Icon icon="heroicons:user-group-20-solid" width="20" height="20" />
-                        <h2 class="font-semibold">{{ forum.nama_grup }}</h2>
-                    </div>
+                <div class="text-xl font-bold flex items-center space-x-2 mx-5 my-2 mt-3">
+                    <h1>Whatsapp Group Links</h1>
                 </div>
             </template>
 
             <template #content>
-                <div class="text-sm px-5 py-2 text-blue-400 break-all">
-                    <a :href="forum.link_grup" target="_blank">{{ forum.link_grup }}</a>
+                <div class="flex items-center">
+                    <div class="flex space-x-2 items-center">
+                        <Icon icon="heroicons:user-group-20-solid" width="28" height="28" />
+                        <h2 class="font-semibold">{{ forum.nama_grup }}</h2> - <div
+                            class="text-sm px-2 py-2 text-blue-400 break-all">
+                            <a :href="forum.link_grup" target="_blank">{{ forum.link_grup }}</a>
+                        </div>
+                    </div>
                 </div>
             </template>
         </Card>
@@ -585,7 +631,7 @@ onMounted(async () => {
             No materials are available yet.
         </div>
 
-        <div v-else>
+        <div v-else class="m-5">
             <Panel toggleable v-for="materi in materiBelumSelesai" :collapsed="activePanel !== materi.id"
                 @toggle="() => activePanel = activePanel === materi.id ? null : materi.id" :key="materi.id">
                 <template #header>
@@ -762,3 +808,10 @@ onMounted(async () => {
     <Toast />
 
 </template>
+
+<style scoped>
+.background {
+    background: linear-gradient(90deg, rgba(20, 107, 107, 0.1)7%, rgba(244, 244, 244, 0.1)68%);
+    backdrop-filter: blur(8px)
+}
+</style>

@@ -197,14 +197,14 @@ const summaryPilgan = computed(() => {
 </script>
 
 <template>
-    <div class="mb-5">
+    <div class="m-5">
         <Button icon="pi pi-arrow-left" label="Back" @click="back" />
     </div>
 
     <div v-if="loading">Loading...</div>
     <div v-else-if="errorMessage" class="text-red-500">{{ errorMessage }}</div>
 
-    <div v-else class="space-y-4">
+    <div v-else class="space-y-4 m-10">
         <!-- Soal pilihan ganda -->
         <Card v-for="item in jawabanPilgan" :key="item.nomor">
             <template #content>

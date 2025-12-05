@@ -46,10 +46,10 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="mb-5 flex items-center justify-between">
+    <div class="m-5 flex items-center justify-between">
         <Button icon="pi pi-arrow-left" label="Back" @click="kembali" />
         <!-- <div v-for="kls in kelas" :key="kls.id" class=""> -->
-        <h1>Assignment List <b>{{ kelas.grade_lvl }} {{ kelas.name_rombel }}</b></h1>
+        <h1>Assignment List <b>{{ kelas.grade_lvl }} {{ kelas.rombel }}</b></h1>
         <!-- </div> -->
     </div>
 
@@ -61,7 +61,7 @@ onMounted(() => {
         <span>There are no questions at the moment.</span>
     </div>
     <div v-else>
-        <Card class="mb-5" v-for="soal in soalPembelajaran" :key="soal.id">
+        <Card class="mb-5 m-10" v-for="soal in soalPembelajaran" :key="soal.id">
             <template #header>
                 <div class="flex m-5">
                     <Icon icon="material-symbols:assignment" width="24" height="24" class="mr-2" />

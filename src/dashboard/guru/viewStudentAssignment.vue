@@ -73,10 +73,10 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="mb-5 flex justify-between">
+    <div class="m-5 flex justify-between">
         <Button icon="pi pi-arrow-left" label="Back" @click="back" />
     </div>
-    <div class="space-y-3">
+    <div class="space-y-3 m-10">
         <Card v-for="student in studentList" :key="student.id">
             <template #content>
                 <div class="flex items-center justify-between">
@@ -92,8 +92,8 @@ onMounted(async () => {
                     <div class="space-x-5">
                         <Tag :severity="student.status === 'Completed' ? 'success' : 'danger'"
                             :value="student.status === 'Completed' ? 'Task Completed' : 'Not Completed'" />
-                        <Tag v-if="student.status === 'Completed' && student.nilai !== null" severity="info"
-                            :value="`Score: ${student.nilai}`" />
+                        <Tag v-if="student.status === 'Completed' && student.nilai !== null" severity="secondary"
+                            :value="`${student.nilai} / 100`" />
                     </div>
                     <div>
                         <router-link v-if="student.assignmentId"

@@ -356,14 +356,6 @@ onMounted(() => {
               </template>
             </Column>
 
-            <Column field="major_name" header="Major" style="min-width: 12rem" :showFilterMenu="false">
-              <template #body="{ data }">{{ data.nama_jurusan }}</template>
-              <template #filter>
-                <Select v-model="filterMajor" :options="jurusanList" option-label="name" option-value="id"
-                  placeholder="Select Major" style="min-width: 14rem" :showClear="true" />
-              </template>
-            </Column>
-
             <Column field="grade_name" header="Grade" style="min-width: 12rem" :showFilterMenu="false">
               <template #body="{ data }" class="flex justify-center">
                 <Tag :value="data.grade_lvl" />
@@ -371,6 +363,15 @@ onMounted(() => {
               <template #filter>
                 <Select v-model="filterGrade" :options="gradeLevelList" optionLabel="name" optionValue="id"
                   placeholder="Select Grade" style="min-width: 12rem" :showClear="true" />
+              </template>
+            </Column>
+
+
+            <Column field="major_name" header="Major" style="min-width: 12rem" :showFilterMenu="false">
+              <template #body="{ data }">{{ data.nama_jurusan }}</template>
+              <template #filter>
+                <Select v-model="filterMajor" :options="jurusanList" option-label="name" option-value="id"
+                  placeholder="Select Major" style="min-width: 14rem" :showClear="true" />
               </template>
             </Column>
 

@@ -15,6 +15,7 @@ const guruId = ref(null);
 const menuMap = ref({});
 const selectedMateri = ref(null);
 const isLoading = ref(true);
+const classroom = ref(null);
 
 // ✅ ambil profile guru dulu
 const fetchGuruProfile = async () => {
@@ -102,19 +103,54 @@ const deleteMateri = async () => {
   }
 };
 
-const kembali = () => {
-  router.back();
-};
+const fetchClassroom = async () => {
+  try {
+    const res = await api.get(`/kelas/${targetKelasId}`);
+    classroom.value = res.data;
+    console.log("Classroom data:", classroom.value);
+    if (!res) {
+      toast.add({ severity: "error", summary: "Classroom not found!", life: 3000 });
+      return;
+    }
+
+  } catch (err) {
+    console.error('fetchClassroom', err);
+  }
+}
 
 onMounted(() => {
   fetchGuruProfile();
+  fetchClassroom();
 });
 </script>
 
 <template>
-  <div class=" mb-5 flex justify-between">
-    <Button icon="pi pi-arrow-left" label="Back" @click="kembali" />
-  </div>
+  <section v-if="classroom"
+    class="relative w-full h-[285px] rounded-b-3xl overflow-hidden flex items-center text-black mb-5 shadow-2xl">
+    <!-- Wallpaper -->
+    <div class="absolute inset-0 bg-cover bg-center">
+      <img :src="classroom.link_wallpaper_kelas" alt="" />
+    </div>
+
+    <!-- Overlay gradient + blur -->
+    <div class=" absolute inset-0 backdrop-blur-[5px]" style="background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 1) 20%,    /* kiri: putih 60% */
+            rgba(20, 107, 107,0.40) 50%,   /* tengah kiri */
+            rgba(20, 107, 107, 0.71) 60%,   /* tengah */
+            rgba(255, 255, 255, 0.00) 90%    /* kanan bening */
+        );">
+    </div>
+
+    <!-- Content -->
+    <div class="relative z-10 space-y-8 pl-10">
+      <div class="flex flex-col">
+        <h1 class="text-2xl font-semibold">{{ classroom.nama_mapel }}</h1>
+        <h2 class="text-lg">{{ classroom.grade_lvl }} {{ classroom.name_rombel }}</h2>
+      </div>
+      <p>{{ classroom.guru_name }}</p>
+    </div>
+  </section>
 
   <div v-if="isLoading" class="flex justify-center py-10">
     <ProgressSpinner />
@@ -125,7 +161,7 @@ onMounted(() => {
   </div>
 
   <div v-else>
-    <div v-for="materi in materiGuru" :key="materi.id" class="mb-4">
+    <div v-for="materi in materiGuru" :key="materi.id" class="m-5">
       <Panel toggleable>
         <template #header>
           <div class="flex items-center gap-2">

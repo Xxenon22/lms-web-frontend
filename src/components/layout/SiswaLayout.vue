@@ -40,79 +40,70 @@ onMounted(async () => {
 </script>
 <template>
     <!-- Fixed Navbar -->
-    <div class="">
-        <nav class="navbar fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center space-x-5">
-                <img src="../../assets/LOGO_SMK_METLAND.png" alt="Logo" width="65" />
-                <h1>
-                    <b>MILS</b> <br /> <b>M</b>etschoo <b>I</b>ntegrated <b>L</b>earning <b>S</b>ystem
-                </h1>
+    <nav class="navbar top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between rounded-lg shadow-lg">
+        <div class="flex items-center space-x-5">
+            <img src="../../assets/LOGO_SMK_METLAND.png" alt="Logo" width="65" />
+            <div class="flex flex-col">
+                <h1 class="text-2xl font-semibold">MILS</h1>
+                <p>
+                    Metschoo Integrated Learning System</p>
             </div>
-            <div class="flex">
-                <ConfirmPopup group="headless">
-                    <template #container="{ message, acceptCallback, rejectCallback }">
-                        <div class="rounded p-4">
-                            <span>{{ message.message }}</span>
-                            <div class="flex items-center gap-2 mt-4">
-                                <Button label="Sign Out" @click="handleLogout" severity="danger" size="small"
-                                    text></Button>
-                                <Button label="Cancel" @click="rejectCallback" size="small"></Button>
-                            </div>
+        </div>
+        <div class="flex items-center space-x-3">
+            <ConfirmPopup group="headless">
+                <template #container="{ message, acceptCallback, rejectCallback }">
+                    <div class="rounded p-4">
+                        <span>{{ message.message }}</span>
+                        <div class="flex items-center gap-2 mt-4">
+                            <Button label="Sign Out" @click="handleLogout" severity="danger" size="small" text></Button>
+                            <Button label="Cancel" @click="rejectCallback" size="small"></Button>
                         </div>
-                    </template>
-                </ConfirmPopup>
-                <!-- Photo Profile -->
-                <div @click="requireConfirmation($event)"
-                    class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 cursor-pointer">
-                    <img v-if="src" :src="src" alt="Photo Profile" class="w-full h-full object-cover" />
-                    <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem;"></i>
-                </div>
+                    </div>
+                </template>
+            </ConfirmPopup>
+            <!-- Notif -->
+            <!-- <div class="">
+                <Icon icon="mdi:bell" width="24" height="24" class="text-white items-center justify-center" />
+            </div> -->
+            <!-- Photo Profile -->
+            <div @click="requireConfirmation($event)"
+                class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 cursor-pointer">
+                <img v-if="src" :src="src" alt="Photo Profile" class="w-full h-full object-cover" />
+                <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem;"></i>
             </div>
-        </nav>
-
-        <div class="absolute z-0 overflow-hidden top-0 right-0">
-            <img src="/src/assets/Aset Mawar.png" width="130">
         </div>
-
-        <div class="absolute z-0">
-            <img src="/src/assets/Pesawat.png" width="500">
-        </div>
-
-        <div class="absolute z-0" style="top: -90px;">
-            <img src="/src/assets/pesawat_2.png" width="700">
-        </div>
-    </div>
+    </nav>
 
     <!-- Layout wrapper -->
-    <div class="flex h-screen pt-[96px]">
+    <div class="flex h-screen">
         <!-- Sidebar -->
-        <aside class="sidebar text-black flex flex-col overflow-y-auto">
-            <div class="relative z-50 logo flex items-center px-4 py-6">
+        <aside class="sidebar text-white flex flex-col overflow-y-auto rounded-lg shadow-lg ">
+            <div class="relative z-50 logo flex items-center border-b-2 border-white m-4 mt-8">
                 <Icon class="icon" icon="famicons:book-sharp" />
                 <h1 class="m-4 font-semibold">Enjoy your study time 😊</h1>
             </div>
-            <ul class="flex flex-col space-y-1 relative z-50">
+            <ul class="flex flex-col space-y-1 z-20">
                 <RouterLink to="/home-student">
                     <li>
-                        <Icon class="icon" icon="material-symbols:home-rounded" style="color: #797574" />
+                        <Icon class="icon" icon="material-symbols:home-rounded" style="color: #ffff" />
                         <span class="nav-item">Home</span>
                     </li>
                 </RouterLink>
                 <RouterLink to="/your-assignment">
                     <li>
-                        <Icon class="icon" icon="duo-icons:book" style="color: #797574" />
+                        <Icon class="icon" icon="material-symbols:assignment" style="color: #ffff" />
                         <span class="nav-item">Assignment</span>
                     </li>
                 </RouterLink>
                 <RouterLink to="/timetable-student">
                     <li>
-                        <Icon class="icon" icon="uis:schedule" style="color: #797574" />
+                        <Icon class="icon" icon="uis:schedule" style="color: #ffff" />
                         <span class="nav-item">Timetable</span>
                     </li>
                 </RouterLink>
                 <RouterLink to="/student-settings">
                     <li>
-                        <Icon class="icon" icon="mdi:cog" style="color: #797574" />
+                        <Icon class="icon" icon="mdi:cog" style="color: #ffff" />
                         <span class="nav-item">Settings</span>
                     </li>
                 </RouterLink>
@@ -130,13 +121,28 @@ onMounted(async () => {
 
 <style scoped>
 .navbar {
+    position: fixed;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 2300px;
     height: 96px;
+    z-index: 1000;
+    background: linear-gradient(90deg, rgba(245, 245, 245, 1) 0%, rgba(69, 139, 139, 1) 100%);
+    border-radius: 1rem;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
+
 
 .sidebar {
     position: fixed;
-    top: 96px;
-    left: 0;
+    top: 135px;
+    left: 20px;
     width: 60px;
     height: calc(100vh - 96px);
     transition: width 0.3s ease;
@@ -144,6 +150,7 @@ onMounted(async () => {
     scrollbar-width: none;
     -ms-overflow-style: none;
     z-index: 40;
+    background-color: #146B6B;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -151,16 +158,11 @@ onMounted(async () => {
     background: transparent;
 }
 
-
-.sidebar li:hover {
-    background-color: #dbdbdb;
-}
-
 .sidebar .icon {
     min-width: 30px;
     height: 30px;
     font-size: 20px;
-    color: #797574;
+    color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -168,10 +170,9 @@ onMounted(async () => {
 
 .nav-item {
     white-space: nowrap;
-    opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease;
-    color: black;
+    transition: opacity 0.8s ease;
+    color: #ffffff;
 }
 
 .sidebar:hover .nav-item {
@@ -194,29 +195,35 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 16px;
-    transition: background-color 0.2s ease;
+    padding: 12px 7px;
+    transition: background-color 0.8s ease;
     border-radius: 8px;
     cursor: pointer;
+    margin: 8px;
+
 }
 
 .sidebar li:hover {
-    background-color: #FFFCB8;
-    opacity: 0.7;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.45);
 }
 
 .main-content {
+    margin-top: 135px;
     flex-grow: 1;
-    margin-left: 60px;
+    margin-left: 100px;
+    /* padding: 1.5rem; */
+    margin-right: 20px;
     transition: margin-left 0.3s ease;
     background-color: white;
-    padding: 1.5rem;
     border-radius: 1.5rem;
     overflow-y: auto;
-    height: calc(100vh - 96px);
+    height: calc(100vh - 155px);
+
 }
 
 .sidebar:hover~.main-content {
-    margin-left: 230px;
+    margin-left: 270px;
 }
 </style>

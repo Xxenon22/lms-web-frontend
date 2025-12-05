@@ -3,7 +3,6 @@ import { ref } from "vue";
 import api from "../../services/api";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
-import bg from "../../assets/bg.vue";
 
 const email = ref("");
 const password = ref("");
@@ -58,46 +57,59 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <bg />
-  <div class="flex flex-col items-center bg-cover bg-center justify-center min-h-screen space-y-4 p-6">
-    <div
-      class="card w-full max-w-6xl min-h-[490px] bg-cover bg-center  p-4 rounded-md space-y-4 relative flex flex-col justify-center"
-      style="background-image: url(/images/bg_school.png);">
 
-      <div class="flex flex-row justify-center pt-20">
-        <div class="flex ">
-          <div class="logo flex absolute top-4 left-4 items-center space-x-2">
-            <img src="../../assets/Logo.png" alt="logo" class="w-15 h-15">
-            <img src="../../assets/LOGO_SMK_METLAND.png" class="w-12 h-12" alt="logo_sekolah">
+  <div class="logo flex absolute top-4 left-4 m-4 items-center space-x-2">
+    <img src="../../assets/LOGO_SMK_METLAND.png" class="w-15 h-15" alt="school's_logo">
+    <div class="flex flex-col">
+      <h1 class="text-2xl font-semibold">MILS</h1>
+      <p>
+        Metschoo Integrated Learning System</p>
+    </div>
+  </div>
+  <div class="flex flex-col items-center bg-cover bg-center justify-center min-h-screen p-30">
+    <div class="card rounded-2xl space-y-4 flex justify-center bg-white h-[500px] overflow-hidden">
+
+      <div class="w-1/2 h-full">
+        <img src="../../assets/smkmetland.png" class="w-full h-full object-cover rounded-l-2xl">
+      </div>
+
+      <div class=" w-1/2 flex flex-row justify-center">
+        <form class="space-y-15 w-full min-h-80 p-15 rounded-2xl" @submit.prevent="handleLogin">
+          <div class="header flex flex-col items-center space-y-2">
+            <h1 class="text-3xl font-bold">Welcome To MILS</h1>
+            <p>Please sign in to your account!</p>
           </div>
-        </div>
-
-        <form class="space-y-20 w-96 min-h-80 bg-white/30 backdrop-blur-sm p-5 rounded-2xl"
-          @submit.prevent="handleLogin">
-          <div class="space-y-6">
-            <FloatLabel variant="in">
+          <div class="space-y-10">
+            <FloatLabel variant="out">
               <InputText class="w-full bg-slate-900" name="email" type="text" v-model="email" />
               <label for="email">Email</label>
             </FloatLabel>
 
-            <FloatLabel variant="in">
+            <FloatLabel variant="out">
               <Password toggleMask class="w-full" input-class="w-full" :feedback="false" v-model="password" />
               <label for="password">Password</label>
             </FloatLabel>
           </div>
           <div class="text-center space-y-5">
-            <Button class="w-full" label="Sign In" type="submit" />
-            <span>Don't have an account yet? </span>
-            <RouterLink to="/sign-up">Sign up here!</RouterLink>
-
+            <Button class="button w-48" label="Sign In" type="submit" rounded variant="outlined" />
+            <p>Don't have an account?
+              <RouterLink to="/sign-up">Sign up here!</RouterLink>
+            </p>
           </div>
         </form>
       </div>
 
     </div>
-    <footer class="text-white">
+    <!-- <footer class="text-white">
       © 2025 Copyright PUSDALITBANGJAR - V.1.2.0
-    </footer>
+    </footer> -->
     <Toast />
   </div>
 </template>
+
+<style scoped>
+.button {
+  background-color: #E5F4F4;
+  border: 1px solid #B3D2D2;
+}
+</style>
