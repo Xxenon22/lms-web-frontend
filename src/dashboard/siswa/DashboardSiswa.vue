@@ -32,18 +32,23 @@ onMounted(async () => {
     isLoading.value = false;
 });
 
-// Ambil semua kelas dan format data guru
+// Ambil semua kelas
 const fetchSemuaKelas = async () => {
     try {
         const res = await api.get("/kelas/all/list");
         return res.data.map((kelas) => ({
             ...kelas,
-            guru_photo: kelas.teacher?.photo_profiles_user
-                ? `${import.meta.env.VITE_API_URL}${kelas.teacher.photo_profiles_user}`
+            guru_photo: kelas.guru_photo
+                ? `${import.meta.env.VITE_API_URL}${kelas.guru_photo}`
                 : null,
-            guru_name: kelas.teacher?.username || "Unknown",
 
+            // FIX NULL VALUE → EMPTY STRING
+            grade_lvl: kelas.grade_lvl || "",
+            rombel: kelas.rombel || "",
+            nama_mapel: kelas.nama_mapel || "",
+            guru_name: kelas.guru_name || "",
         }));
+
     } catch (err) {
         toast.add({
             severity: "error",
@@ -138,8 +143,8 @@ const search = (event) => {
         .filter((kelas) => {
             const mapel = kelas.nama_mapel?.toLowerCase() || "";
             const grade = kelas.rombel?.grade_lvl?.toLowerCase() || "";
-            const rombel = kelas.rombel?.rombel?.toLowerCase() || "";
-            const guru = kelas.guru_name?.toLowerCase() || "";
+            const rombel = kelas.rombel?.name_rombel?.toLowerCase() || "";
+            const guru = kelas.teacher?.username?.toLowerCase() || "";
             return (
                 mapel.includes(query) ||
                 grade.includes(query) ||
@@ -148,7 +153,7 @@ const search = (event) => {
             );
         })
         .map((kelas) => ({
-            name: `${kelas.nama_mapel} - ${kelas.rombel?.grade_lvl || ""} ${kelas.rombel?.rombel || ""}`,
+            name: `${kelas.nama_mapel} - ${kelas.rombel?.grade_lvl || ""} ${kelas.rombel?.major} ${kelas.rombel?.name_rombel || ""}`,
             id: kelas.id,
         }));
 };
@@ -231,8 +236,9 @@ const fetchGuruById = async (guruId) => {
                     <template #subtitle>
                         <div class="flex justify-between">
                             <div class="">
-                                {{ kelasHasilPencarian.rombel?.grade_lvl }}
-                                {{ kelasHasilPencarian.rombel?.rombel }}
+                                {{ kelasHasilPencarian.rombel?.grade_lvl || "" }}
+                                {{ kelasHasilPencarian.rombel?.major || "" }}
+                                {{ kelasHasilPencarian.rombel?.name_rombel || "" }}
                             </div>
 
                             <div class="flex gap-4 mt-1 text-white">
@@ -295,7 +301,8 @@ const fetchGuruById = async (guruId) => {
 
                     <template #title>{{ kelas.nama_mapel }}</template>
                     <template #subtitle>
-                        {{ kelas.rombel?.grade_lvl }} {{ kelas.rombel?.rombel }}
+                        {{ kelas.rombel?.grade_lvl || "" }} {{ kelas.rombel?.major }} {{ kelas.rombel?.name_rombel || ""
+                        }}
 
                         <div class="flex justify-end gap-4 mt-1 ">
                             <Button v-tooltip.bottom="'Following a Class'" class="no-border-btn button-join"
@@ -330,7 +337,7 @@ const fetchGuruById = async (guruId) => {
                     <template #subtitle>
                         <div class="flex justify-between">
                             <div class="">
-                                {{ kelas.rombel?.grade_lvl }} {{ kelas.rombel?.rombel }}
+                                {{ kelas.rombel?.grade_lvl }} {{ kelas.rombel?.major }} {{ kelas.rombel?.name_rombel }}
                             </div>
                             <div class="flex gap-4 mt-1 text-white">
                                 <Button :label="kelas.sudahDiikuti ? 'Following' : 'Add'"

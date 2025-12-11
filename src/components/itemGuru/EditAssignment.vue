@@ -254,12 +254,12 @@ onMounted(async () => {
 <template>
     <div class="space-y-8">
         <!-- Dropdown pilih penugasan -->
-        <div>
+        <div class="m-5">
             <Button icon="pi pi-arrow-left" class="mb-3" label="Back" @click="kembali"></Button>
         </div>
 
         <!-- Judul penugasan (bisa diedit) -->
-        <div>
+        <div class="m-5">
             <FloatLabel variant="in">
                 <InputText id="judul" v-model="judulBaru" class="w-full" />
                 <label for="judul">Title</label>
@@ -268,7 +268,7 @@ onMounted(async () => {
 
         <!-- List Soal -->
         <div v-for="(soal, index) in listSoal" :key="index">
-            <Card>
+            <Card class=m-5>
                 <template #header>
                     <div class="m-5 space-y-5">
                         <Tag value="Multiple Choice" severity="info" rounded class="mb-5"></Tag>
@@ -316,7 +316,7 @@ onMounted(async () => {
             </Card>
         </div>
         <div v-for="(essai, index) in listEssai" :key="index" class="">
-            <Card>
+            <Card class="m-5">
                 <template #header>
                     <div class="m-5 space-y-5">
                         <Tag value="Essay" severity="info" rounded class="mb-5"></Tag>
@@ -353,7 +353,7 @@ onMounted(async () => {
         </div>
 
         <!-- Submit -->
-        <div class="flex justify-end space-x-2">
+        <div class="flex justify-end space-x-2 m-5">
             <Button label="Submit" :loading="loading" @click="submitSemuaSoal" />
         </div>
         <Toast />

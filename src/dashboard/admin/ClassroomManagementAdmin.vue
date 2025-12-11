@@ -3,11 +3,14 @@ import { onMounted, ref } from "vue";
 import { useToast } from "primevue/usetoast";
 import api from "../../services/api";
 
-const rombel = ref("");
 const mapel = ref("");
 const guru = ref("");
 const gradeLvl = ref([]);
+const major = ref([]);
+const rombelNum = ref([]);
 const selectedGrade = ref(null);
+const selectMajor = ref(null);
+const selectRombel = ref(null);
 
 const toast = useToast();
 
@@ -21,9 +24,29 @@ const fetchGradeLevel = async () => {
     }
 };
 
+// Fetch Major
+const fetchMajor = async () => {
+    try {
+        const res = await api.get("/jurusan");
+        major.value = res.data;
+    } catch (err) {
+        console.error("Fetch Major:", err);
+    }
+};
+
+// Fetch NumRombel
+const fetchRombelNum = async () => {
+    try {
+        const res = await api.get("/number-rombel");
+        rombelNum.value = res.data;
+    } catch (err) {
+        console.error("Fetch Rombel Number:", err);
+    }
+};
+
 // Add new Rombel (Class)
 const submitNewRombel = async () => {
-    if (!rombel.value || !selectedGrade.value) {
+    if (!selectMajor.value || !selectedGrade.value) {
         toast.add({
             severity: "warn",
             summary: "Warning!",
@@ -34,8 +57,9 @@ const submitNewRombel = async () => {
     }
     try {
         await api.post("/rombel", {
-            name_rombel: rombel.value,
+            name_rombel: selectRombel.value,
             grade_id: selectedGrade.value,
+            jurusan_id: selectMajor.value,
         });
         toast.add({
             severity: "success",
@@ -43,8 +67,9 @@ const submitNewRombel = async () => {
             detail: "Study Group has been Saved",
             life: 3000,
         });
-        rombel.value = "";
         selectedGrade.value = "";
+        selectMajor.value = "";
+        selectRombel.value = "";
     } catch (err) {
         toast.add({
             severity: "error",
@@ -109,7 +134,11 @@ const submitNewTeacher = async () => {
     }
 };
 
-onMounted(fetchGradeLevel);
+onMounted(() => {
+    fetchGradeLevel();
+    fetchMajor();
+    fetchRombelNum();
+});
 </script>
 
 <template>
@@ -125,13 +154,21 @@ onMounted(fetchGradeLevel);
             </template>
 
             <template #content>
-                <div class="m-5 space-y-4">
-                    <Select v-model="selectedGrade" :options="gradeLvl" option-value="id" option-label="grade_lvl"
-                        placeholder="Select a Grade" class="w-full md:w-56" />
-                    <FloatLabel variant="in">
-                        <InputText type="text" class="w-full" v-model="rombel" />
-                        <label for="">New Class</label>
-                    </FloatLabel>
+                <div class="flex space-x-3 w-full overflow-hidden">
+                    <div class="w-3/5">
+                        <Select v-model="selectedGrade" :options="gradeLvl" option-value="id" option-label="grade_lvl"
+                            placeholder="Select a Grade" class="w-full" />
+                    </div>
+                    <div class="w-3/5">
+                        <Select v-model="selectMajor" :options="major" option-value="id" option-label="nama_jurusan"
+                            placeholder="Select a Major" class="w-full"></Select>
+                    </div>
+
+                    <div class="w-3/5">
+                        <Select v-model="selectRombel" :options="rombelNum" option-value="id" option-label="number"
+                            placeholder="Select a Class" class="w-full"></Select>
+                    </div>
+
                 </div>
             </template>
 

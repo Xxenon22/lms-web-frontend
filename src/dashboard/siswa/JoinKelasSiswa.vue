@@ -532,7 +532,7 @@ const fetchClassroom = async () => {
     try {
         const res = await api.get(`/kelas/${kelasId}`);
         classroom.value = res.data;
-        console.log("Classroom data:", classroom.value);
+        // console.log("Classroom data:", classroom.value);
         if (!res) {
             toast.add({ severity: "error", summary: "Classroom not found!", life: 3000 });
             return;
@@ -594,7 +594,7 @@ onMounted(async () => {
         <div class="relative z-10 space-y-8 pl-10">
             <div class="flex flex-col">
                 <h1 class="text-2xl font-semibold">{{ classroom.nama_mapel }}</h1>
-                <h2 class="text-lg">{{ classroom.grade_lvl }} {{ classroom.name_rombel }}</h2>
+                <h2 class="text-lg">{{ classroom.grade_lvl }} {{ classroom.major }} {{ classroom.name_rombel }}</h2>
             </div>
             <p>{{ classroom.guru_name }}</p>
         </div>

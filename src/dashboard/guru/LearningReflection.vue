@@ -25,7 +25,7 @@ const fetchSelectedRombel = async () => {
         const res = await api.get("/kelas");
         selectedRombel.value = res.data.map(b => ({
             id: b.rombel_id,
-            name: `${b.grade_lvl || ''} ${b.name_rombel} - ${b.nama_mapel}`
+            name: `${b.grade_lvl || ''} ${b.major} ${b.name_rombel || ''} - ${b.nama_mapel}`
         }));
     } catch (error) {
         console.error("fetch rombel :", error)
@@ -135,7 +135,7 @@ onMounted(async () => {
     <h1 class="m-5 text-2xl">Learning Reflection</h1>
 
     <!-- Identity Section -->
-    <Card class="mb-10">
+    <Card class="mb-10 m-5">
         <template #content>
             <div class="space-y-5">
                 <h1 class="text-lg font-semibold">Identity</h1>
@@ -170,7 +170,7 @@ onMounted(async () => {
     </Card>
 
     <!-- Reflection-->
-    <Card class="mb-10">
+    <Card class="mb-10 m-5">
         <template #header>
             <div class="m-5">
                 <h1 class="text-lg font-semibold">Reflection</h1>
@@ -213,7 +213,7 @@ onMounted(async () => {
         </template>
     </Card>
 
-    <div class="flex justify-end ">
+    <div class="flex justify-end m-5">
         <Button label="Submit" @click="submitRPK" class="!bg-[#008C95]" />
     </div>
     <Toast />

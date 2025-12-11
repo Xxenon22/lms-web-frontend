@@ -60,7 +60,7 @@ const fetchProfiles = async () => {
       api.get("/auth"),
       api.get("/jurusan"),
       api.get("/grade-level"),
-      api.get("/rombel")
+      api.get("/number-rombel"),
     ])
 
     // pastikan data dari server benar-benar array
@@ -108,7 +108,7 @@ const fetchProfiles = async () => {
     }))
     rombelList.value = rombel.map(r => ({
       id: r.id,
-      name: r.name_rombel
+      name: r.number
     }))
 
     applyFilters()
@@ -154,7 +154,7 @@ const applyFilters = () => {
 
     const matchesMajor = fMajor ? Number(user.jurusan_id) === fMajor : true
     const matchesGrade = fGrade ? Number(user.grade_id) === fGrade : true
-    const matchesRombel = fRombel ? Number(user.rombel_id) === fRombel : true
+    const matchesRombel = fRombel ? Number(user.name_rombel) === fRombel : true
 
     return matchesName && matchesMajor && matchesGrade && matchesRombel && matchesSubject && matchesPhone
   })
@@ -362,7 +362,7 @@ onMounted(() => {
               </template>
               <template #filter>
                 <Select v-model="filterGrade" :options="gradeLevelList" optionLabel="name" optionValue="id"
-                  placeholder="Select Grade" style="min-width: 12rem" :showClear="true" />
+                  placeholder="Select a Grade" style="min-width: 12rem" :showClear="true" />
               </template>
             </Column>
 
@@ -371,7 +371,7 @@ onMounted(() => {
               <template #body="{ data }">{{ data.nama_jurusan }}</template>
               <template #filter>
                 <Select v-model="filterMajor" :options="jurusanList" option-label="name" option-value="id"
-                  placeholder="Select Major" style="min-width: 14rem" :showClear="true" />
+                  placeholder="Select a Major" style="min-width: 14rem" :showClear="true" />
               </template>
             </Column>
 
@@ -379,7 +379,7 @@ onMounted(() => {
               <template #body="{ data }">{{ data.name_rombel }}</template>
               <template #filter>
                 <Select v-model="filterRombel" :options="rombelList" optionLabel="name" optionValue="id"
-                  placeholder="Select Class" style="min-width: 14rem" :showClear="true" />
+                  placeholder="Select a Class" style="min-width: 14rem" :showClear="true" />
               </template>
             </Column>
 

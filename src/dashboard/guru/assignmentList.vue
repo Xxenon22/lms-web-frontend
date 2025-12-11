@@ -12,6 +12,7 @@ const kelas = ref({})
 const soalPembelajaran = ref([])
 const toast = useToast()
 const isLoading = ref(true)
+const classroom = ref(null)
 
 const fetchKelas = async () => {
     const { data, error } = await api.get(`/kelas/${kelasId}`)
@@ -34,25 +35,56 @@ const formatDate = (created_at) => {
     }).format(new Date(created_at));
 };
 
-const kembali = () => {
-    router.back()
+const fetchClassroom = async () => {
+    try {
+        const res = await api.get(`/kelas/${kelasId}`);
+        classroom.value = res.data;
+        console.log("Classroom data:", classroom.value);
+        if (!res) {
+            toast.add({ severity: "error", summary: "Classroom not found!", life: 3000 });
+            return;
+        }
+
+    } catch (err) {
+        console.error('fetchClassroom', err);
+    }
 }
 
 onMounted(() => {
     // fetchSoalPembelajaran()
     fetchKelas()
+    fetchClassroom()
 })
 
 </script>
 
 <template>
-    <div class="m-5 flex items-center justify-between">
-        <Button icon="pi pi-arrow-left" label="Back" @click="kembali" />
-        <!-- <div v-for="kls in kelas" :key="kls.id" class=""> -->
-        <h1>Assignment List <b>{{ kelas.grade_lvl }} {{ kelas.rombel }}</b></h1>
-        <!-- </div> -->
-    </div>
+    <section v-if="classroom"
+        class="relative w-full h-[285px] rounded-b-3xl overflow-hidden flex items-center text-black mb-5 shadow-2xl">
+        <!-- Wallpaper -->
+        <div class="absolute inset-0 bg-cover bg-center">
+            <img :src="classroom.link_wallpaper_kelas" alt="" />
+        </div>
 
+        <!-- Overlay gradient + blur -->
+        <div class=" absolute inset-0 backdrop-blur-[5px]" style="background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 1) 20%,    /* kiri: putih 60% */
+            rgba(20, 107, 107,0.40) 50%,   /* tengah kiri */
+            rgba(20, 107, 107, 0.71) 60%,   /* tengah */
+            rgba(255, 255, 255, 0.00) 90%    /* kanan bening */
+        );">
+        </div>
+
+        <!-- Content -->
+        <div class="relative z-10 space-y-8 pl-10">
+            <div class="flex flex-col">
+                <h1 class="text-2xl font-semibold">{{ classroom.nama_mapel }}</h1>
+                <h2 class="text-lg">{{ classroom.grade_lvl }} {{ classroom.major }} {{ classroom.name_rombel }}</h2>
+            </div>
+            <p>{{ classroom.guru_name }}</p>
+        </div>
+    </section>
     <div v-if="isLoading" class="flex justify-center py-10">
         <ProgressSpinner />
     </div>
@@ -61,7 +93,7 @@ onMounted(() => {
         <span>There are no questions at the moment.</span>
     </div>
     <div v-else>
-        <Card class="mb-5 m-10" v-for="soal in soalPembelajaran" :key="soal.id">
+        <Card class="mb-5 m-5" v-for="soal in soalPembelajaran" :key="soal.id">
             <template #header>
                 <div class="flex m-5">
                     <Icon icon="material-symbols:assignment" width="24" height="24" class="mr-2" />

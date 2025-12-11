@@ -79,7 +79,7 @@ const fetchSelectedRombel = async () => {
         });
         selectedRombel.value = res.data.map(b => ({
             id: b.rombel_id,
-            name: `${b.grade_lvl || ''} ${b.name_rombel} - ${b.nama_mapel}`
+            name: `${b.grade_lvl || ''} ${b.major} ${b.name_rombel || ''} - ${b.nama_mapel}`
         }));
     } catch (error) {
         console.error("fetch rombel :", error);

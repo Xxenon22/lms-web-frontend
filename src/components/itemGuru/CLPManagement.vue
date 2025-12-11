@@ -84,7 +84,7 @@ onMounted(async () => {
                                             formatDate(rpk.hari_tanggal) }}</span>
                                         <div class="text-lg font-medium mt-2">
                                             <span>
-                                                {{ rpk.name_grade }} {{ rpk.name_rombel }}
+                                                {{ rpk.name_grade }} {{ rpk.major }} {{ rpk.name_rombel }}
                                             </span>
                                         </div>
                                     </div>

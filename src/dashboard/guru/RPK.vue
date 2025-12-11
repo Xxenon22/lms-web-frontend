@@ -117,7 +117,7 @@ const fetchSelectedRombel = async () => {
         });
         selectedRombel.value = res.data.map(b => ({
             id: b.rombel_id,
-            name: `${b.grade_lvl || ''} ${b.name_rombel} - ${b.nama_mapel}`
+            name: `${b.grade_lvl || ''} ${b.major} ${b.name_rombel || ''} - ${b.nama_mapel}`
         }));
     } catch (error) {
         console.error("fetch rombel :", error)
@@ -198,8 +198,7 @@ const submitRPK = async () => {
             dpl_8: dpl8.value,
             memahami_id: memahamiId,
             mengaplikasikan_id: mengaplikasikanId,
-            merefleksi_id: merefleksiId,
-            guru_id: parseInt(guruId.value)
+            merefleksi_id: merefleksiId
 
         }, {
             headers: {
@@ -238,7 +237,7 @@ onMounted(() => {
 <template>
     <h1 class="m-5 text-2xl">Learning Plan</h1>
     <!-- Identity Section -->
-    <Card class="mb-10">
+    <Card class="mb-10 m-5">
         <template #content>
             <div class="space-y-5">
                 <h1 class="text-lg font-semibold">Identity</h1>
@@ -281,7 +280,7 @@ onMounted(() => {
     </Card>
 
     <!-- Instructional Design -->
-    <Card class="mb-10">
+    <Card class="mb-10 m-5">
         <template #header>
             <div class="m-5">
                 <h1 class="text-lg font-semibold">Instructional Design</h1>
@@ -319,7 +318,7 @@ onMounted(() => {
     </Card>
 
     <!-- Graduate Profile Dimensions -->
-    <Card class="mb-10">
+    <Card class="mb-10 m-5">
         <template #header>
             <div class="m-5">
                 <h1 class="text-lg font-semibold">Dimensi Profil Lulusan</h1>
@@ -364,7 +363,7 @@ onMounted(() => {
         </template>
     </Card>
 
-    <Card>
+    <Card class="m-5">
         <template #content>
             <div class="flex flex-row space-x-5">
                 <div class="w-1/3 space-y-5">
@@ -386,44 +385,50 @@ onMounted(() => {
                     <h1 class="mb-10 text-lg font-semibold">Prinsip Pembelajaran</h1>
                     <div class="flex flex-col space-y-2 ">
                         <div class="flex space-x-1 items-center">
-                            <Checkbox v-model="berkesadaranMemahami" :binary="true" inputId="gpd8" />
-                            <label for="gpd8">Berkesadaran</label>
+                            <Checkbox v-model="berkesadaranMemahami" :binary="true" inputId="berkesadaranMemahami" />
+                            <label for="berkesadaranMemahami">Berkesadaran</label>
                         </div>
                         <div class="flex space-x-1 items-center">
-                            <Checkbox v-model="bermaknaMemahami" :binary="true" inputId="gpd8" />
-                            <label for="gpd8">Bermakna</label>
+                            <Checkbox v-model="bermaknaMemahami" :binary="true" inputId="bermaknaMemahami" />
+                            <label for="bermaknaMemahami">Bermakna</label>
                         </div>
                         <div class="flex space-x-1 items-center mb-2">
-                            <Checkbox v-model="menggembirakanMemahami" :binary="true" inputId="gpd8" />
-                            <label for="gpd8">Menggembirakan</label>
+                            <Checkbox v-model="menggembirakanMemahami" :binary="true"
+                                inputId="menggembirakanMemahami" />
+                            <label for="men">Menggembirakan</label>
                         </div>
                     </div>
                     <div class="flex flex-col space-y-2">
                         <div class="flex space-x-1 items-center">
-                            <Checkbox v-model="berkesadaranMengaplikasikan" :binary="true" inputId="gpd8" />
-                            <label for="gpd8">Berkesadaran</label>
+                            <Checkbox v-model="berkesadaranMengaplikasikan" :binary="true"
+                                inputId="berkesadaranMengaplikasikan" />
+                            <label for="berkesadaranMengaplikasikan">Berkesadaran</label>
                         </div>
                         <div class="flex space-x-1 items-center">
-                            <Checkbox v-model="bermaknaMengaplikasikan" :binary="true" inputId="gpd8" />
-                            <label for="gpd8">Bermakna</label>
+                            <Checkbox v-model="bermaknaMengaplikasikan" :binary="true"
+                                inputId="bermaknaMengaplikasikan" />
+                            <label for="bermaknaMengaplikasikan">Bermakna</label>
                         </div>
                         <div class="flex space-x-1 items-center mb-3">
-                            <Checkbox v-model="menggembirakanMengaplikasikan" :binary="true" inputId="gpd8" />
-                            <label for="gpd8">Menggembirakan</label>
+                            <Checkbox v-model="menggembirakanMengaplikasikan" :binary="true"
+                                inputId="menggembirakanMengaplikasikan" />
+                            <label for="menggembirakanMengaplikasikan">Menggembirakan</label>
                         </div>
                     </div>
                     <div class="flex flex-col space-y-2">
                         <div class="flex space-x-1 items-center">
-                            <Checkbox v-model="berkesadaranMerefleksi" :binary="true" inputId="gpd8" />
-                            <label for="gpd8">Berkesadaran</label>
+                            <Checkbox v-model="berkesadaranMerefleksi" :binary="true"
+                                inputId="berkesadaranMerefleksi" />
+                            <label for="berkesadaranMerefleksi">Berkesadaran</label>
                         </div>
                         <div class="flex space-x-1 items-center">
-                            <Checkbox v-model="bermaknaMerefleksi" :binary="true" inputId="gpd8" />
-                            <label for="gpd8">Bermakna</label>
+                            <Checkbox v-model="bermaknaMerefleksi" :binary="true" inputId="bermaknaMerefleksi" />
+                            <label for="bermaknaMerefleksi">Bermakna</label>
                         </div>
                         <div class="flex space-x-1 items-center">
-                            <Checkbox v-model="menggembirakanMerefleksi" :binary="true" inputId="gpd8" />
-                            <label for="gpd8">Menggembirakan</label>
+                            <Checkbox v-model="menggembirakanMerefleksi" :binary="true"
+                                inputId="menggembirakanMerefleksi" />
+                            <label for="menggembirakanMerefleksi">Menggembirakan</label>
                         </div>
                     </div>
                 </div>
@@ -446,7 +451,7 @@ onMounted(() => {
         </template>
     </Card>
 
-    <div class="flex justify-end mt-10">
+    <div class="flex justify-end m-5">
         <Button label="Submit" @click="submitRPK" class="!bg-[#008C95]" />
     </div>
 </template>

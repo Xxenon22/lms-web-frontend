@@ -68,7 +68,7 @@ const updateMateri = async () => {
             });
             fileToSave = res.data.url;
         }
-        if (!materi.judul || !materi.video_url || !fileToSave || !materi.deskripsi || !materi.link_zoom || !materi.pass_code) {
+        if (!materi.judul || !materi.video_url || !fileToSave) {
             toast.add({ severity: "warn", summary: "Check the Form", detail: "Please ensure all fields are filled.", life: 3000 });
             return;
         }

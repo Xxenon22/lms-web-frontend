@@ -319,7 +319,7 @@ onMounted(() => {
     <div class="space-y-8">
         <div class="flex justify-between items-center">
 
-            <div class="">
+            <div class="m-5">
                 <FloatLabel variant="in">
                     <InputText id="judul" v-model="judulBaru" class="w-full" />
                     <label for="judul">Title</label>
@@ -328,7 +328,7 @@ onMounted(() => {
         </div>
 
         <div v-for="(soal, index) in listSoal" :key="index">
-            <Card>
+            <Card class="m-5">
                 <template #header>
                     <div class="m-5 space-y-5">
                         <Tag value="Multiple Choice" severity="info" rounded></Tag>
@@ -378,7 +378,7 @@ onMounted(() => {
         </div>
 
         <div v-for="(soal, index) in listSoalEssai" :key="index">
-            <Card>
+            <Card class="m-5">
                 <template #header>
                     <div class="m-5 space-y-5">
                         <Tag value="Essay" severity="info" rounded class="mb-5"></Tag>
@@ -416,7 +416,7 @@ onMounted(() => {
         </div>
 
 
-        <div class="flex justify-end space-x-2">
+        <div class="flex justify-end space-x-2 m-5">
             <Button label="Submit" :loading="loading" @click="submitSemuaSoal" />
         </div>
         <Toast />

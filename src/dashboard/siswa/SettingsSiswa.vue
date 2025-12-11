@@ -24,7 +24,7 @@ const isSubmitting = ref(false);
 const hasChanges = ref(false);
 const initialData = ref({});
 
-// Dropdown Fetch
+// Dropdown Jurusan
 const fetchJurusan = async () => {
     try {
         const res = await api.get("/jurusan");
@@ -40,6 +40,7 @@ const fetchJurusan = async () => {
     }
 };
 
+// Dropdown Kelas
 const fetchKelas = async () => {
     try {
         const res = await api.get("/grade-level");
@@ -53,16 +54,12 @@ const fetchKelas = async () => {
     }
 };
 
+// Dropdown Rombel
 const fetchRombel = async () => {
     try {
-        const res = await api.get("/rombel");
+        const res = await api.get("/number-rombel");
         if (Array.isArray(res.data)) {
-            selectedStudyGroup.value = res.data.map(b => ({
-                id: b.id,
-                name: `${b.grade_lvl || ''} ${b.name_rombel}`,
-                grade_id: b.grade_id,
-                grade_lvl: b.grade_lvl || ''
-            }));
+            selectedStudyGroup.value = res.data.map(b => ({ id: b.id, name: b.number }));
         } else {
             console.warn("Response rombel bukan array:", res.data);
         }
@@ -136,7 +133,7 @@ function onFileSelect(event) {
     reader.readAsDataURL(file);
 }
 
-// Upload photo ke Supabase Storage
+// Upload photo
 const uploadPhoto = async () => {
     if (!imageFile.value) return photoProfile.value; // tidak upload baru
 
@@ -227,19 +224,19 @@ onMounted(async () => {
                     <div>
                         <h2 class="mb-2 font-semibold">Grade</h2>
                         <Select v-model="kelasId" :options="selectedGrade" option-label="name" option-value="id"
-                            class="w-full" placeholder="Select Grade" />
+                            class="w-full" placeholder="Select a Grade" />
                     </div>
 
                     <div>
                         <h2 class="mb-2 font-semibold">Major</h2>
                         <Select v-model="jurusanId" :options="selectedMajor" option-label="name" option-value="id"
-                            class="w-full" placeholder="Select Major" />
+                            class="w-full" placeholder="Select a Major" />
                     </div>
 
                     <div>
                         <h2 class="mb-2 font-semibold">Class</h2>
                         <Select v-model="rombelId" :options="selectedStudyGroup" option-label="name" option-value="id"
-                            class="w-full" placeholder="Select Study Group" />
+                            class="w-full" placeholder="Select a Class" />
                     </div>
 
                     <div>

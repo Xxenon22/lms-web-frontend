@@ -44,7 +44,7 @@ const fetchDaftarKelas = async () => {
     const res = await api.get("/kelas");
     daftarKelas.value = (res.data || []).map((k) => ({
       id: k.id,
-      name: `${k.grade_lvl || ""} ${k.name_rombel || ""} - ${k.nama_mapel || ""}`,
+      name: `${k.grade_lvl || ""} ${k.major} ${k.name_rombel || ""} - ${k.nama_mapel || ""}`,
     }));
 
   } catch (err) {
@@ -144,7 +144,7 @@ onMounted(async () => {
 <template>
   <Card class="m-5">
     <template #header>
-      <h1 class="m-4">Create Material</h1>
+      <h1 class="m-4 text-2xl">Create Material</h1>
     </template>
 
     <template #content>

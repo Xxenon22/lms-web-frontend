@@ -48,7 +48,7 @@ const fetchDataKelas = async () => {
     const res = await api.get("/rombel")
     rombel.value = res.data.map(b => ({
       id: b.id,
-      name: `${b.grade_name || ''} ${b.name_rombel} `, // tampilkan gabungan
+      name: `${b.grade_name || ''} ${b.major} ${b.name_rombel || ''} `, // tampilkan gabungan
     }));
   } catch (error) {
     console.error("Fetch data kelas: ", error)

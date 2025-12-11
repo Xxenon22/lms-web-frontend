@@ -76,9 +76,8 @@ onMounted(async () => {
                                     <div>
                                         <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{
                                             formatDate(lr.hari_tanggal) }}</span>
-                                        <div class="text-lg font-medium mt-2"><span>{{ lr.name_grade
-                                                }} {{
-                                                    lr.name_rombel }}</span></div>
+                                        <div class="text-lg font-medium mt-2"><span>{{ lr.name_grade }} {{ lr.major }}
+                                                {{ lr.name_rombel }}</span></div>
                                     </div>
                                 </div>
                                 <div class="flex flex-col md:items-end gap-8">

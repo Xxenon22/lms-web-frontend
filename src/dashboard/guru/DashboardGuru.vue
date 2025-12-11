@@ -70,7 +70,7 @@ onMounted(async () => {
           </div>
         </template>
         <template #title>{{ kls.nama_mapel }}</template>
-        <template #subtitle>{{ kls.grade_lvl }} {{ kls.name_rombel }}</template>
+        <template #subtitle>{{ kls.grade_lvl }} {{ kls.major }} {{ kls.name_rombel }}</template>
         <template #footer>
           <div class="flex gap-4 mt-1">
             <router-link :to="{ name: 'Assignment-List', params: { kelasId: kls.id } }" class="w-full">
