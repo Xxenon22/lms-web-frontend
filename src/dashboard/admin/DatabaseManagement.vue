@@ -245,7 +245,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="space-y-5">
+    <div class="space-y-5 m-5">
 
         <!-- Class Management -->
         <div class="w-full">

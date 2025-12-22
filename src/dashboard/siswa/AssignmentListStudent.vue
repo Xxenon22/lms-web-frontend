@@ -49,7 +49,6 @@ const fetchMateriByUserClass = async () => {
     }
 };
 
-
 const isCompleted = (m) => {
     const pdf = m.pdf_selesai ?? m.progress_materi?.[0]?.pdf_selesai;
     const vid = m.video_selesai ?? m.progress_materi?.[0]?.video_selesai;
@@ -70,7 +69,7 @@ onMounted(() => {
         <ProgressSpinner />
     </div>
 
-    <div v-else-if="materiList.length === 0" class="text-center text-gray-400 mb-8">
+    <div v-else-if="materiList.length === 0" class="text-center text-gray-400 mb-8 m-15">
         You have not enrolled in any classes yet.
     </div>
     <div v-else>

@@ -68,38 +68,40 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="flex justify-between">
-        <Button label="Back" icon="pi pi-arrow-left" @click="back" />
-        <AutoComplete v-model="searchText" optionLabel="name" :suggestions="suggestions" @complete="searchClp"
-            @item-select="onSelectClass" @clear="onClear" placeholder="Search Reflection..." />
-    </div>
+    <section class="m-5">
+        <div class="flex justify-between">
+            <Button label="Back" icon="pi pi-arrow-left" @click="back" />
+            <AutoComplete v-model="searchText" optionLabel="name" :suggestions="suggestions" @complete="searchClp"
+                @item-select="onSelectClass" @clear="onClear" placeholder="Search Reflection..." />
+        </div>
 
-    <div v-if="isLoading" class="flex justify-center py-10">
-        <ProgressSpinner />
-    </div>
+        <div v-if="isLoading" class="flex justify-center py-10">
+            <ProgressSpinner />
+        </div>
 
-    <div v-else-if="learningReflection.length === 0" class="text-center text-gray-400 mb-8">
-        No Reflection has been created at this time.
-    </div>
+        <div v-else-if="learningReflection.length === 0" class="text-center text-gray-400 mb-8">
+            No Reflection has been created at this time.
+        </div>
 
-    <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 m-5">
-        <Card class="w-80" v-for="rpk in learningReflection" :key="rpk.id">
-            <template #header>
-                <div class="flex items-center m-5">
-                    <Icon icon="material-symbols:assignment" width="24" height="24" class="mr-2" />
-                    <span>{{ rpk.kelas }}</span>
-                </div>
-                <div class="m-5">
-                    <p>{{ formatDate(rpk.hari_tanggal) }}</p>
-                </div>
-            </template>
-            <template #content>
-                <div class="flex justify-center items-center ">
-                    <RouterLink class="w-full" :to="{ name: 'Reflection-View', params: { id: rpk.id } }">
-                        <Button label="View Reflection" class="w-full" />
-                    </RouterLink>
-                </div>
-            </template>
-        </Card>
-    </div>
+        <div v-else class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8 m-5">
+            <Card class="w-80" v-for="rpk in learningReflection" :key="rpk.id">
+                <template #header>
+                    <div class="flex items-center m-5">
+                        <Icon icon="material-symbols:assignment" width="24" height="24" class="mr-2" />
+                        <span>{{ rpk.kelas }}</span>
+                    </div>
+                    <div class="m-5">
+                        <p>{{ formatDate(rpk.hari_tanggal) }}</p>
+                    </div>
+                </template>
+                <template #content>
+                    <div class="flex justify-center items-center ">
+                        <RouterLink class="w-full" :to="{ name: 'Reflection-View', params: { id: rpk.id } }">
+                            <Button label="View Reflection" class="w-full" />
+                        </RouterLink>
+                    </div>
+                </template>
+            </Card>
+        </div>
+    </section>
 </template>

@@ -11,6 +11,8 @@ const dataKelas = ref([]);
 const mapel = ref([]);
 const rombel = ref([]);
 const visible = ref(false);
+const isirombel = ref(null);
+const isiMapel = ref(null);
 const selectedKelas = ref({
     id: null,
     rombel_id: "",
@@ -20,6 +22,8 @@ const selectedKelas = ref({
 const userId = ref(null)
 const images = ref([]);
 const activeIndex = ref(0);
+const filteredClass = ref([]);
+const filteredMapel = ref([]);
 const fetchUserId = async () => {
     try {
         const res = await api.get("/auth/profile")
@@ -61,6 +65,20 @@ const fetchMapel = async () => {
     }
 };
 
+const search = (event) => {
+    const query = event.query.toLowerCase();
+    filteredClass.value = rombel.value.filter((r) =>
+        r.name.toLowerCase().includes(query)
+    );
+};
+
+const searchMapel = (event) => {
+    const query = event.query.toLowerCase();
+    filteredMapel.value = mapel.value.filter(m =>
+        m.nama_mapel.toLowerCase().includes(query)
+    );
+};
+
 onMounted(async () => {
     images.value = [
         { itemImageSrc: '/wallpapers/w1.jpg', thumbnailImageSrc: '/wallpapers/w1.jpg' },
@@ -85,10 +103,19 @@ watch(activeIndex, (newIndex) => {
 
 // Simpan perubahan
 const updateKelas = async () => {
+    if (!isirombel.value || !isiMapel.value) {
+        toast.add({
+            severity: "warn",
+            summary: "Warning!",
+            detail: "Please fill all fields before submitting",
+            life: 3000,
+        });
+        return;
+    }
     try {
         await api.put(`/kelas/${selectedKelas.value.id}`, {
-            rombel_id: selectedKelas.value.rombel_id,
-            id_mapel: selectedKelas.value.id_mapel,
+            rombel_id: isirombel.value?.id || null,
+            id_mapel: isiMapel.value?.id || null,
             link_wallpaper_kelas: selectedKelas.value.link_wallpaper_kelas,
         });
 
@@ -114,6 +141,17 @@ const openEditDialog = (kelas) => {
         rombel_id: kelas.rombel_id,
         link_wallpaper_kelas: kelas.link_wallpaper_kelas
     };
+
+    // SET ROMBEL OBJECT
+    isirombel.value = rombel.value.find(
+        r => r.id === kelas.rombel_id
+    ) || null;
+
+    // SET MAPEL OBJECT
+    isiMapel.value = mapel.value.find(
+        m => m.id === kelas.id_mapel
+    ) || null;
+
     const idx = images.value.findIndex(img => img.itemImageSrc === kelas.link_wallpaper_kelas);
     activeIndex.value = idx !== -1 ? idx : 0;
 
@@ -220,17 +258,18 @@ const deleteKelas = async (id) => {
                                 </div>
                             </div>
 
-                            <div class="flex flex-col justify-center items-center  w-1/2">
-                                <div class="flex items-center gap-4 mb-4">
-                                    <label for="mata pelajaran" class="font-semibold w-24">Subject</label>
-                                    <Select v-model="selectedKelas.id_mapel" :options="mapel" option-value="id"
-                                        option-label="nama_mapel" placeholder="Enter the Subject"
-                                        class="w-full md:w-56" />
-                                </div>
-                                <div class="flex items-center gap-4 mb-8">
+                            <div class="flex flex-col mt-0 m-auto p-5 w-1/2 space-y-8">
+                                <div class="flex flex-col space-y-1">
                                     <label for="rombel" class="font-semibold w-24">Class</label>
-                                    <Select v-model="selectedKelas.rombel_id" :options="rombel" option-value="id"
-                                        option-label="name" placeholder="Enter the Class" class="w-full md:w-56" />
+                                    <AutoComplete v-model="isirombel" optionLabel="name" @complete="search"
+                                        :suggestions="filteredClass" placeholder="Enter the Class" class="w-full"
+                                        dropdown />
+                                </div>
+                                <div class=" flex flex-col space-y-1 ">
+                                    <label for=" mata pelajaran" class="font-semibold w-24">Subject</label>
+                                    <AutoComplete v-model="isiMapel" optionLabel="nama_mapel"
+                                        :suggestions="filteredMapel" @complete="searchMapel"
+                                        placeholder="Enter the Subject" class="w-full" dropdown />
                                 </div>
                                 <div class="flex justify-end gap-2">
                                     <Button type="button" label="Cancel" severity="secondary"

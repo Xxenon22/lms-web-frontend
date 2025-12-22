@@ -1,8 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useToast } from 'primevue';
+import { useToast } from 'primevue/usetoast';
 import api from '../../services/api';
-import { isDataScheme } from 'pdfjs-dist';
 
 const toast = useToast()
 const username = ref("")
@@ -24,7 +23,7 @@ const addAccTeacher = async () => {
         });
         toast.add({
             severity: "success",
-            detail: "Success",
+            summary: "Success",
             detail: res.data.message,
             life: 3000
         })
@@ -34,13 +33,21 @@ const addAccTeacher = async () => {
         password.value = "";
         confirmPassword.value = "";
     } catch (error) {
-        console.error("Error add teacher account :", error)
+        console.error("Error add teacher account :", error.response?.data);
+
+        toast.add({
+            severity: "error",
+            summary: "Error",
+            detail: error.response?.data?.message || "Failed to add teacher account",
+            life: 4000
+        });
+
     }
 }
 </script>
 
 <template>
-    <Card>
+    <Card class="m-5">
         <template #header>
             <h1 class="m-5">Add Teacher Account</h1>
         </template>
@@ -73,5 +80,6 @@ const addAccTeacher = async () => {
                 </div>
             </form>
         </template>
+        <Toast />
     </Card>
 </template>

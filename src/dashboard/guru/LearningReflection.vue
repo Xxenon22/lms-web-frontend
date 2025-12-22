@@ -5,7 +5,7 @@ import { useToast } from 'primevue/usetoast';
 
 const toast = useToast();
 
-const namaGuru = ref("")
+const namaGuru = ref(null)
 const tanggal = ref("")
 const rombel = ref("")
 const studyTime = ref("")
@@ -19,12 +19,17 @@ const notes = ref("")
 
 const selectedRombel = ref([])
 const selectedInstructor = ref([])
+const filteredInstructor = ref([])
+const selectedKelas = ref(null)
+
 
 const fetchSelectedRombel = async () => {
     try {
         const res = await api.get("/kelas");
         selectedRombel.value = res.data.map(b => ({
-            id: b.rombel_id,
+            id: b.id,
+            rombel_id: b.rombel_id,
+            nama_mapel: b.nama_mapel,
             name: `${b.grade_lvl || ''} ${b.major} ${b.name_rombel || ''} - ${b.nama_mapel}`
         }));
     } catch (error) {
@@ -53,11 +58,14 @@ const fetchSelectedInstructor = async (order = "asc") => {
 
 const submitRPK = async () => {
     try {
-        const selectedRombelStudent = selectedRombel.value.find(b => b.id === rombel.value);
-        const selectedInstructorRpk = selectedInstructor.value.find(b => b.id === namaGuru.value);
 
-        if (!selectedRombelStudent || !selectedInstructorRpk) {
-            toast.add({ severity: 'error', summary: 'Invalid Selection', detail: 'Please fill out all fields correctly.', life: 3000 });
+        if (!selectedKelas.value) {
+            toast.add({
+                severity: 'error',
+                summary: 'Class Required',
+                detail: 'Please select a class.',
+                life: 3000
+            });
             return;
         }
 
@@ -88,9 +96,10 @@ const submitRPK = async () => {
 
         // Data yang akan dikirim ke backend
         const insertData = {
-            rombel_id: selectedRombelStudent.id,
-            hari_tanggal: tanggal.value,
-            instructor: selectedInstructorRpk.id,
+            kelas_id: selectedKelas.value.id,
+            rombel_id: selectedKelas.value.rombel_id,
+            hari_tanggal: formatDateOnly(tanggal.value),
+            instructor: namaGuru.value.id,
             waktu: studyTime.value,
             refleksi_siswa: refleksiSiswa.value,
             refleksi_guru: refleksiGuru.value,
@@ -99,7 +108,6 @@ const submitRPK = async () => {
             follow_up: followUp.value,
             pendampingan_siswa: pendampinganSiswa.value,
             keterangan: notes.value
-            // ⚡ guru_id jangan dikirim dari frontend → backend ambil dari JWT
         };
 
         await api.post("/rpk-refleksi", insertData);
@@ -117,13 +125,30 @@ const submitRPK = async () => {
         pendampinganSiswa.value = "";
         notes.value = "";
         rombel.value = "";
-        namaGuru.value = "";
+        namaGuru.value = null;
+        selectedKelas.value = null;
 
     } catch (err) {
         console.error("Submit RPK error:", err);
         toast.add({ severity: 'error', summary: 'Failed', detail: err.message, life: 3000 });
     }
 };
+
+const searchInstructor = (event) => {
+    const query = event.query.toLowerCase();
+    filteredInstructor.value = selectedInstructor.value.filter(i =>
+        i.name.toLowerCase().includes(query)
+    );
+};
+
+const formatDateOnly = (date) => {
+    if (!date) return null
+    const d = new Date(date)
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, "0")
+    const day = String(d.getDate()).padStart(2, "0")
+    return `${year}-${month}-${day}`
+}
 
 onMounted(async () => {
     await fetchSelectedRombel()
@@ -143,7 +168,7 @@ onMounted(async () => {
                     <div class="w-1/2 space-y-5">
                         <div class="flex flex-col space-y-2">
                             <Label> Class </Label>
-                            <Select v-model="rombel" :options="selectedRombel" option-label="name" option-value="id"
+                            <Select v-model="selectedKelas" :options="selectedRombel" option-label="name"
                                 placeholder="-- Select Class --" class="w-full" />
                         </div>
                         <div class="flex flex-col space-y-2">
@@ -160,8 +185,11 @@ onMounted(async () => {
                         </div>
                         <div class="flex flex-col space-y-2">
                             <Label> Instructor</Label>
-                            <Select v-model="namaGuru" :options="selectedInstructor" option-label="name"
-                                option-value="id" placeholder="-- Select Instructor --" class="w-full" />
+                            <AutoComplete v-model="namaGuru" :suggestions="filteredInstructor" optionLabel="name"
+                                dropdown @complete="searchInstructor" placeholder="-- Select Instructor --"
+                                class="w-full" />
+
+
                         </div>
                     </div>
                 </div>

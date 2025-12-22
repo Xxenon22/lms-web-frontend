@@ -92,7 +92,15 @@ const uploadPhoto = async () => {
 
 // Submit profile
 const submitProfile = async () => {
-    if (!hasChanges.value) return;
+    if (!hasChanges.value || !nama.value || !subject.value || !noTelp.value) {
+        toast.add({
+            severity: 'warn',
+            summary: 'Warning',
+            detail: 'No changes to submit or incomplete data',
+            life: 3000
+        })
+        return;
+    }
 
     isSubmitting.value = true;
     const photoUrl = await uploadPhoto();

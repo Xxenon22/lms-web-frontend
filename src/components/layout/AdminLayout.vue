@@ -1,8 +1,11 @@
 <script setup>
+import { onMounted, ref } from "vue";
 import { useConfirm } from "primevue/useconfirm";
 import { useRouter } from "vue-router";
+import api from "../../services/api";
 
 const router = useRouter()
+const profileAdmin = ref("")
 
 const handleLogout = () => {
     localStorage.removeItem("token"); // hapus JWT
@@ -18,17 +21,32 @@ const requireConfirmation = (event) => {
     });
 };
 
+const fetchProfileAdmin = async () => {
+    try {
+        const res = await api.get("/auth/profile")
+        profileAdmin.value = res.data
+    } catch (error) {
+        console.error("Error to retrieve profile data", error)
+    }
+}
+
+onMounted(async () => {
+    await fetchProfileAdmin();
+})
+
 </script>
 
 <template>
     <!-- Fixed Navbar -->
     <div class="">
-        <nav class="navbar fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
+        <nav class="navbar top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between">
             <div class="flex items-center space-x-5">
                 <img src="../../assets/LOGO_SMK_METLAND.png" alt="Logo" width="65" />
-                <h1>
-                    <b>MILS</b> <br /> <b>M</b>etschoo <b>I</b>ntegrated <b>L</b>earning <b>S</b>ystem
-                </h1>
+                <div class="flex flex-col">
+                    <h1 class="text-2xl font-semibold">MILS</h1>
+                    <p>
+                        Metschoo Integrated Learning System</p>
+                </div>
             </div>
             <div class="flex items-center space-x-4">
 
@@ -44,33 +62,24 @@ const requireConfirmation = (event) => {
                         </div>
                     </template>
                 </ConfirmPopup>
+
+                <!-- profile admin -->
                 <img src="../../assets/Logo.png" alt="Foto Profil"
                     class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center border-1 bg-gray-200 cursor-pointer"
                     @click="requireConfirmation($event)" />
             </div>
         </nav>
-        <div class="absolute z-0 overflow-hidden top-0 right-0">
-            <img src="/src/assets/Aset Mawar.png" width="130">
-        </div>
-
-        <div class="absolute z-0">
-            <img src="/src/assets/Pesawat.png" width="500">
-        </div>
-
-        <div class="absolute z-0" style="top: -90px;">
-            <img src="/src/assets/pesawat_2.png" width="700">
-        </div>
     </div>
 
     <!-- Layout wrapper -->
-    <div class="flex h-screen pt-[96px]">
+    <div class="flex h-screen">
         <!-- Sidebar -->
-        <aside class="sidebar text-black flex flex-col overflow-y-auto">
-            <div class="logo flex items-center px-4 py-6">
+        <aside class="sidebar text-white flex flex-col overflow-y-auto rounded-lg">
+            <div v-if="profileAdmin" class="relative z-50 logo flex items-center border-b-2 border-white m-4 mt-8">
                 <Icon class="icon" icon="eos-icons:admin-outlined" />
-                <h1 class="m-4 font-semibold">Hello, Admin!</h1>
+                <h1 class="m-4 font-semibold">Hello, {{ profileAdmin.username }}!</h1>
             </div>
-            <ul class="flex flex-col space-y-1">
+            <ul class="flex flex-col space-y-1 z-20">
                 <RouterLink to="/home-admin">
                     <li>
                         <Icon class="icon" icon="material-symbols:home-rounded" /><span class="nav-item">Home</span>
@@ -125,13 +134,27 @@ const requireConfirmation = (event) => {
 
 <style scoped>
 .navbar {
+    position: fixed;
+    top: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px);
+    max-width: 2300px;
     height: 96px;
+    z-index: 1000;
+    background: linear-gradient(90deg, rgba(245, 245, 245, 1) 0%, rgba(69, 139, 139, 1) 100%);
+    border-radius: 1rem;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 .sidebar {
     position: fixed;
-    top: 96px;
-    left: 0;
+    top: 135px;
+    left: 20px;
     width: 60px;
     height: calc(100vh - 96px);
     transition: width 0.3s ease;
@@ -139,6 +162,7 @@ const requireConfirmation = (event) => {
     scrollbar-width: none;
     -ms-overflow-style: none;
     z-index: 40;
+    background-color: #146B6B;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -146,8 +170,30 @@ const requireConfirmation = (event) => {
     background: transparent;
 }
 
+.sidebar .icon {
+    min-width: 30px;
+    height: 30px;
+    font-size: 20px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-item {
+    white-space: nowrap;
+    visibility: hidden;
+    transition: opacity 0.8s ease;
+    color: #ffffff;
+}
+
+.sidebar:hover .nav-item {
+    opacity: 1;
+    visibility: visible;
+}
+
 .sidebar:hover {
-    width: 250px;
+    width: 270px;
 }
 
 .sidebar ul {
@@ -167,45 +213,25 @@ const requireConfirmation = (event) => {
 }
 
 .sidebar li:hover {
-    background-color: #FFFCB8;
-    opacity: 0.7;
-}
-
-.sidebar .icon {
-    min-width: 30px;
-    height: 30px;
-    font-size: 20px;
-    color: #797574;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.nav-item {
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease;
-    color: black;
-}
-
-.sidebar:hover .nav-item {
-    opacity: 1;
-    visibility: visible;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.45);
 }
 
 .main-content {
+    margin-top: 135px;
     flex-grow: 1;
-    margin-left: 60px;
+    margin-left: 100px;
+    margin-right: 20px;
     transition: margin-left 0.3s ease;
     background-color: white;
-    padding: 1.5rem;
     border-radius: 1.5rem;
     overflow-y: auto;
-    height: calc(100vh - 96px);
+    height: calc(100vh - 155px);
+
 }
 
 .sidebar:hover~.main-content {
-    margin-left: 250px;
+    margin-left: 310px;
 }
 </style>

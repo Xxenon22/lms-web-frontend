@@ -153,7 +153,15 @@ const uploadPhoto = async () => {
 
 // Simpan profile
 const submitProfileStudent = async () => {
-    if (!hasChanges.value) return;
+    if (!nama.value || !noTelp.value || !kelasId.value || !jurusanId.value || !rombelId.value || !hasChanges.value) {
+        toast.add({
+            severity: "warn",
+            summary: "warning",
+            detail: "Profile cannot be empty",
+            life: 4000
+        })
+        return
+    };
 
     isSubmitting.value = true;
     const photoUrl = await uploadPhoto();

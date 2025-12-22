@@ -33,10 +33,10 @@ const fetchRpk = async () => {
         }
 
         const item = res.data;
-
+        console.log("Fetched RPK Data:", item);
         // Jika item bukan object, hindari error
         if (typeof item !== "object" || Array.isArray(item)) {
-            console.error("❌ Data tidak valid:", item);
+            console.error("Invalid Data:", item);
             rpk.value = {};
             return;
         }

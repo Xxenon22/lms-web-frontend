@@ -13,7 +13,20 @@ const id = route.params.id
 const fetchRpkReflection = async () => {
     try {
         const res = await api.get(`/rpk-refleksi/${id}`)
-        clpRefleksi.value = res.data
+        if (!res || !res.data) {
+            console.warn("⚠️ Response kosong:", res);
+            clpRefleksi.value = {};
+            return;
+        }
+        const item = res.data;
+        console.log("Fetched RPK Data:", item);
+        if (typeof item !== "object" || Array.isArray(item)) {
+            console.error("Invalid Data:", item);
+            clpRefleksi.value = {};
+            return;
+        }
+
+        clpRefleksi.value = item;
     } catch (error) {
         console.error("Error Fetch RPK Reflection :", error)
     }
@@ -21,17 +34,28 @@ const fetchRpkReflection = async () => {
 
 // === Fungsi Export PDF ===
 const exportPDF = () => {
-    if (!clpRefleksi.value || Object.keys(clpRefleksi.value).length === 0) return;
+    if (!clpRefleksi.value || Object.keys(clpRefleksi.value).length === 0) {
+        console.warn("⚠️ Tidak ada data untuk diekspor.");
+        return;
+    }
 
     const data = clpRefleksi.value;
     const doc = new jsPDF();
 
+    // Format tanggal
+    const formatDateForPDF = (hari_tanggal) => {
+        if (!hari_tanggal) return "Date not available";
+        return new Intl.DateTimeFormat("id-ID", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            timeZone: "Asia/Jakarta",
+        }).format(new Date(hari_tanggal));
+    };
+
     // Judul
     doc.setFontSize(16);
     doc.text("Learning Reflection", 105, 15, { align: "center" });
-
-    // Format tanggal pakai formatDate()
-    const formattedDate = formatDate(data.hari_tanggal);
 
     // Data utama dalam bentuk tabel
     autoTable(doc, {
@@ -42,8 +66,8 @@ const exportPDF = () => {
             ["Subject", data.subject || ""],
             ["Teacher", data.teacher_name || ""],
             ["Instructor", data.instructor_name || ""],
-            ["Grade", `${data.name_grade || ""} ${data.name_rombel || ""}`],
-            ["Day / Date", formattedDate], // tanggal diformat
+            ["Grade", `${data.name_grade || ""} ${data.major} ${data.name_rombel || ""}`],
+            ["Day / Date", formatDateForPDF(data.hari_tanggal)],
             ["Time", data.waktu || ""],
             ["Student's Reflection", data.refleksi_siswa || ""],
             ["Teacher's Reflection", data.refleksi_guru || ""],
@@ -89,7 +113,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="" v-if="clpRefleksi">
+    <div class="m-5" v-if="Object.keys(clpRefleksi).length">
         <div class="m-5 flex justify-between">
             <Button icon="pi pi-arrow-left" label="Back" @click="back" />
             <Button icon="pi pi-file-pdf" label="Export PDF" @click="exportPDF" />
@@ -151,7 +175,7 @@ onMounted(async () => {
                 </div>
                 <div class="w-2/3 space-y-5 m-4">
                     <div class="flex items-center space-x-2">
-                        <span>{{ clpRefleksi.name_grade }} {{ clpRefleksi.name_rombel }}</span>
+                        <span>{{ clpRefleksi.name_grade }} {{ clpRefleksi.major }} {{ clpRefleksi.name_rombel }}</span>
                     </div>
                 </div>
             </div>

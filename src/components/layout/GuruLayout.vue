@@ -7,8 +7,8 @@ import api from "../../services/api";
 
 const visible = ref(false); //untuk Dialog
 const loading = ref(false);
-const isirombel = ref("");
-const isiMapel = ref("");
+const isirombel = ref(null);
+const isiMapel = ref(null);
 const toast = useToast();
 const rombel = ref([]);
 const mapel = ref([]);
@@ -16,6 +16,8 @@ const src = ref(null)
 const router = useRouter()
 const images = ref([]);
 const activeIndex = ref(0);
+const filteredClass = ref([]);
+const filteredMapel = ref([]);
 
 const handleLogout = () => {
   localStorage.removeItem("token"); // hapus JWT
@@ -75,11 +77,12 @@ const tambahKelas = async () => {
     });
     return;
   }
+
   try {
     await api.post("/kelas", {
-      rombel_id: isirombel.value,
+      rombel_id: isirombel.value.id,
       link_wallpaper_kelas: images.value[activeIndex.value]?.itemImageSrc || null,
-      id_mapel: isiMapel.value,
+      id_mapel: isiMapel.value.id,
     }, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -95,6 +98,19 @@ const tambahKelas = async () => {
   }
 };
 
+const search = (event) => {
+  const query = event.query.toLowerCase();
+  filteredClass.value = rombel.value.filter(k =>
+    k.name.toLowerCase().includes(query)
+  );
+};
+
+const searchMapel = (event) => {
+  const query = event.query.toLowerCase();
+  filteredMapel.value = mapel.value.filter(m =>
+    m.nama_mapel.toLowerCase().includes(query)
+  );
+};
 
 onMounted(async () => {
   images.value = [
@@ -106,9 +122,11 @@ onMounted(async () => {
     { itemImageSrc: '/wallpapers/w6.jpg', thumbnailImageSrc: '/wallpapers/w6.jpg' },
     { itemImageSrc: '/wallpapers/w7.jpg', thumbnailImageSrc: '/wallpapers/w7.jpg' },
   ];
-  await fetchDataKelas();
+
   await fetchDataMapel();
   await fetchPhotoProfile();
+  await fetchDataKelas();
+
 });
 
 </script>
@@ -152,15 +170,15 @@ onMounted(async () => {
             </div>
 
             <div class="flex flex-col mt-0 m-auto p-5 w-1/2 space-y-8">
-              <div class="flex flex-col space-y-1">
-                <label for="rombel">Class</label>
-                <Select v-model="isirombel" :options="rombel" option-value="id" option-label="name"
-                  placeholder="Select Class" class="w-full" />
+              <div class="flex flex-col space-y-1 ">
+                <label for="rombel" class="font-semibold w-24">Class</label>
+                <AutoComplete v-model="isirombel" optionLabel="name" :suggestions="filteredClass" @complete="search"
+                  placeholder="Select Class" class="w-full" dropdown />
               </div>
               <div class="flex flex-col space-y-1">
-                <label for="mataPelajaran">Subject</label>
-                <Select v-model="isiMapel" :options="mapel" option-value="id" option-label="nama_mapel"
-                  placeholder="Select Subject" class="w-full" />
+                <label for="mataPelajaran" class="font-semibold w-24">Subject</label>
+                <AutoComplete v-model="isiMapel" :suggestions="filteredMapel" @complete="searchMapel"
+                  optionLabel="nama_mapel" placeholder="Select Subject" class="w-full" dropdown />
               </div>
               <div class="flex justify-end gap-2 mt-35">
                 <Button type="button" label="Cancel" severity="secondary" @click="visible = false"></Button>
@@ -188,7 +206,6 @@ onMounted(async () => {
           <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem;"></i>
         </div>
       </div>
-
     </nav>
   </div>
 
@@ -250,7 +267,7 @@ onMounted(async () => {
             <Icon class="icon" icon="material-symbols:archive" /><span class="nav-item">Archive</span>
           </li>
         </RouterLink> -->
-        <RouterLink to="/teacher-settings">
+        <RouterLink to="/teacher-settings" class="mb-10">
           <li>
             <Icon class="icon" icon="mdi:cog" /><span class="nav-item">Settings</span>
           </li>

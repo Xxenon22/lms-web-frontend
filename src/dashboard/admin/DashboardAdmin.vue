@@ -91,12 +91,13 @@ const fetchProfiles = async () => {
         : null,
       teacher_subject: p.teacher_subject,
       jurusan_id: p.jurusan_id,
-      grade_id: p.grade_id,
-      rombel_id: p.rombel_id,
       nama_jurusan: p.nama_jurusan,
+      grade_id: p.grade_id,
       grade_lvl: p.grade_lvl,
-      name_rombel: p.name_rombel
+      rombel_id: p.rombel_id,
+      number: p.number
     }))
+    console.log("Profile", allProfiles.value)
 
     jurusanList.value = jurusan.map(j => ({
       id: j.id,
@@ -154,7 +155,7 @@ const applyFilters = () => {
 
     const matchesMajor = fMajor ? Number(user.jurusan_id) === fMajor : true
     const matchesGrade = fGrade ? Number(user.grade_id) === fGrade : true
-    const matchesRombel = fRombel ? Number(user.name_rombel) === fRombel : true
+    const matchesRombel = fRombel ? Number(user.rombel_id) === fRombel : true
 
     return matchesName && matchesMajor && matchesGrade && matchesRombel && matchesSubject && matchesPhone
   })
@@ -286,11 +287,11 @@ const fetchKelas = async () => {
 
 const fetchRombel = async () => {
   try {
-    const res = await api.get("/rombel");
+    const res = await api.get("/number-rombel");
     if (Array.isArray(res.data)) {
       selectedStudyGroup.value = res.data.map(b => ({
         id: b.id,
-        name: b.name_rombel,
+        name: b.number?.trim() ?? ""
       }));
     } else {
       console.warn("Response rombel bukan array:", res.data);
@@ -310,7 +311,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section class="flex flex-col">
+  <section class="flex flex-col m-5">
     <div class="flex justify-between">
       <div class="m-5">
         <h1 class="font-bold">All User Profiles</h1>
@@ -376,7 +377,7 @@ onMounted(() => {
             </Column>
 
             <Column field="rombel_name" header="Class" style="min-width: 14rem" :showFilterMenu="false">
-              <template #body="{ data }">{{ data.name_rombel }}</template>
+              <template #body="{ data }">{{ data.number }}</template>
               <template #filter>
                 <Select v-model="filterRombel" :options="rombelList" optionLabel="name" optionValue="id"
                   placeholder="Select a Class" style="min-width: 14rem" :showClear="true" />

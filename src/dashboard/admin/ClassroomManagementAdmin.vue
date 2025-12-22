@@ -143,9 +143,9 @@ onMounted(() => {
 
 <template>
     <div class="m-5">
-        <h1>Database</h1>
+        <h1 class="font-2xl font-bold">Admin Management</h1>
     </div>
-    <div class="flex flex-col space-y-3">
+    <div class="flex flex-col space-y-3 m-5">
         <Card>
             <template #header>
                 <div class="m-5">
@@ -178,6 +178,7 @@ onMounted(() => {
                 </div>
             </template>
         </Card>
+
         <Card>
             <template #header>
                 <div class="m-5">
@@ -198,6 +199,7 @@ onMounted(() => {
                 </div>
             </template>
         </Card>
+
         <Card>
             <template #header>
                 <h1 class="m-5">New Teacher</h1>

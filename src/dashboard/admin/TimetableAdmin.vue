@@ -5,7 +5,7 @@ import timetableStudentXI from './timetableStudentXI.vue';
 </script>
 
 <template>
-    <div class="card">
+    <div class="m-5">
         <Tabs value="0">
             <TabList>
                 <Tab value="0">Teacher Timetable</Tab>

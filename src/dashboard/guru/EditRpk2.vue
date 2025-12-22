@@ -10,9 +10,9 @@ const id = route.params.id
 const router = useRouter()
 
 
-const namaGuru = ref("")
-const tanggal = ref("")
 const rombel = ref("")
+const namaGuru = ref(null)
+const tanggal = ref("")
 const studyTime = ref("")
 const refleksiSiswa = ref("")
 const refleksiGuru = ref("")
@@ -24,6 +24,7 @@ const notes = ref("")
 
 const selectedRombel = ref([])
 const selectedInstructor = ref([])
+const filteredInstructor = ref([])
 
 const fetchSelectedRombel = async () => {
     try {
@@ -42,11 +43,10 @@ const fetchSelectedRombel = async () => {
 const fetchSelectedInstructor = async (order = "asc") => {
     try {
         const res = await api.get("/teacher")
-        selectedInstructor.value = res.data
-            .map(t => ({
-                id: t.id,
-                name: t.name || "No Name"
-            }))
+        selectedInstructor.value = res.data.map(i => ({
+            id: Number(i.id),
+            name: i.name
+        }))
             .sort((a, b) => {
                 if (order === "asc") {
                     return a.name.localeCompare(b.name) // A-Z
@@ -65,8 +65,11 @@ const fetchExistingLr = async () => {
         const data = res.data;
 
         rombel.value = data.rombel_id
+        filteredInstructor.value = [...selectedInstructor.value];
+        namaGuru.value = selectedInstructor.value.find(
+            i => i.id === data.instructor
+        );
         tanggal.value = data.hari_tanggal ? new Date(data.hari_tanggal) : null
-        namaGuru.value = String(data.instructor)
         studyTime.value = data.waktu
         refleksiSiswa.value = data.refleksi_siswa
         refleksiGuru.value = data.refleksi_guru
@@ -116,10 +119,19 @@ const updateLr = async () => {
     }
 };
 
+const searchInstructor = (event) => {
+    const query = event.query.toLowerCase();
+    filteredInstructor.value = selectedInstructor.value.filter(i =>
+        i.name.toLowerCase().includes(query)
+    );
+};
+
 onMounted(async () => {
-    await fetchSelectedRombel()
-    await fetchExistingLr()
-    await fetchSelectedInstructor("asc")
+    await fetchSelectedRombel();
+    await fetchSelectedInstructor("asc");
+    filteredInstructor.value = [...selectedInstructor.value];
+    await fetchExistingLr();
+
 })
 
 const back = () => {
@@ -165,8 +177,9 @@ const back = () => {
                                 </div>
                                 <div class="flex flex-col space-y-2">
                                     <Label> Instructor</Label>
-                                    <Select v-model="namaGuru" :options="selectedInstructor" option-label="name"
-                                        option-value="id" placeholder="-- Select Instructor --" class="w-full" />
+                                    <AutoComplete v-model="namaGuru" :suggestions="filteredInstructor"
+                                        optionLabel="name" dataKey="id" @complete="searchInstructor" dropdown
+                                        forceSelection placeholder="-- Select Instructor --" class="w-full" />
                                 </div>
                             </div>
                         </div>

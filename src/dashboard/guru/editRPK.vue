@@ -11,7 +11,7 @@ const router = useRouter();
 
 // Form fields
 const rombel = ref("");
-const namaGuru = ref("");
+const namaGuru = ref(null);
 const tutor = ref("");
 const tanggal = ref("");
 const fase = ref("");
@@ -62,6 +62,8 @@ const currentMemahamiId = ref(null);
 const currentMengaplikasikanId = ref(null);
 const currentMerefleksiId = ref(null);
 
+const filteredInstructor = ref([])
+
 // ================== FETCH SECTION ===================
 
 const fetchSelectedFase = async () => {
@@ -89,11 +91,10 @@ const fetchSelectedRombel = async () => {
 const fetchSelectedInstructor = async (order = "asc") => {
     try {
         const res = await api.get("/teacher");
-        selectedInstructor.value = res.data
-            .map(t => ({
-                id: t.id,
-                name: t.name || "No Name"
-            }))
+        selectedInstructor.value = res.data.map(i => ({
+            id: Number(i.id),
+            name: i.name
+        }))
             .sort((a, b) => order === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
     } catch (error) {
         console.error("fetch instructor :", error);
@@ -103,13 +104,15 @@ const fetchSelectedInstructor = async (order = "asc") => {
 // ================== MAIN FIX SECTION ===================
 const fetchExistingRPK = async () => {
     try {
+
         const res = await api.get(`/rpk/${id}`);
         const data = res.data;
-
         // === Parent table ===
         rombel.value = data.rombel_id;
-        namaGuru.value = data.instructor ? String(data.instructor) : null,
-            tutor.value = data.tutor;
+        filteredInstructor.value = [...selectedInstructor.value];
+        namaGuru.value = selectedInstructor.value.find(
+            i => i.id === data.instructor
+        );
         tanggal.value = data.hari_tanggal ? new Date(data.hari_tanggal) : null;
         fase.value = data.phase_id;
         studyTime.value = data.waktu;
@@ -150,6 +153,7 @@ const fetchExistingRPK = async () => {
         bermaknaMerefleksi.value = data.merefleksi_bermakna || false;
         menggembirakanMerefleksi.value = data.merefleksi_menggembirakan || false;
         asesmenMerefleksi.value = data.asesmen_merefleksi || "";
+
     } catch (err) {
         toast.add({ severity: 'error', summary: 'Failed', detail: 'Failed to load RPK data.', life: 3000 });
         console.error(err);
@@ -201,7 +205,7 @@ const updateRPK = async () => {
 
         await api.put(`/rpk/${id}`, {
             rombel_id: rombel.value,
-            instructor: namaGuru.value,
+            instructor: namaGuru.value?.id,
             tutor: tutor.value,
             hari_tanggal: adjustedDate,
             phase_id: fase.value,
@@ -239,10 +243,19 @@ const updateRPK = async () => {
         console.error(err);
     }
 };
+
+const searchInstructor = (event) => {
+    const query = event.query.toLowerCase();
+    filteredInstructor.value = selectedInstructor.value.filter(i =>
+        i.name.toLowerCase().includes(query)
+    );
+};
+
 onMounted(async () => {
     await fetchSelectedFase();
     await fetchSelectedRombel();
     await fetchSelectedInstructor("asc");
+    filteredInstructor.value = [...selectedInstructor.value];
     await fetchExistingRPK();
 });
 
@@ -256,7 +269,7 @@ const back = () => router.back();
     </div>
     <Card>
         <template #header>
-            <h1 class="m-5">Edit Learning Plan</h1>
+            <h1 class="font-xl font-bold m-5">Edit Learning Plan</h1>
         </template>
 
         <template #content>
@@ -287,8 +300,10 @@ const back = () => router.back();
                             <div class="w-1/2 space-y-5">
                                 <div class="flex flex-col space-y-2">
                                     <Label>Instructor</Label>
-                                    <Select v-model="namaGuru" :options="selectedInstructor" option-label="name"
-                                        option-value="id" placeholder="-- Select Instructor --" class="w-full" />
+                                    <AutoComplete v-model="namaGuru" :suggestions="filteredInstructor"
+                                        optionLabel="name" dataKey="id" dropdown forceSelection
+                                        @complete="searchInstructor" placeholder="-- Select Instructor --"
+                                        class="w-full" />
                                 </div>
                                 <div class="flex flex-col space-y-2">
                                     <Label>Tutor (optional)</Label>

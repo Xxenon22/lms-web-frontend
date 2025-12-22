@@ -9,7 +9,6 @@ const activeTab = ref("0");
 
 <template>
     <div class="m-10">
-
         <!-- Tabs -->
         <div class="flex gap-3 mb-6 shadow-2xl p-5 rounded-xl">
             <button class="px-5 py-2 rounded-xl font-medium transition-all" :class="activeTab === '0'
@@ -50,6 +49,5 @@ const activeTab = ref("0");
             </div>
 
         </div>
-
     </div>
 </template>
