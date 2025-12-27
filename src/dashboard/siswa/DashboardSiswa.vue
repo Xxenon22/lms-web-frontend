@@ -38,8 +38,8 @@ const fetchSemuaKelas = async () => {
         const res = await api.get("/kelas/all/list");
         return res.data.map((kelas) => ({
             ...kelas,
-            guru_photo: kelas.guru_photo
-                ? `${import.meta.env.VITE_API_URL}${kelas.guru_photo}`
+            guru_photo: kelas.guru_id
+                ? `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${kelas.guru_id}?t=${Date.now()}`
                 : null,
 
             // FIX NULL VALUE → EMPTY STRING
@@ -174,8 +174,8 @@ const fetchGuruById = async (guruId) => {
     try {
         const res = await api.get(`/auth/teacher/${guruId}`);
         profile.value = res.data;
-        src.value = profile.value.photo_profiles_user
-            ? `${import.meta.env.VITE_API_URL}${profile.value.photo_profiles_user}`
+        src.value = profile.value.id
+            ? `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${profile.value.id}?t=${Date.now()}`
             : null;
         visible.value = true;
     } catch (error) {
@@ -358,8 +358,7 @@ const fetchGuruById = async (guruId) => {
         <div v-if="profile" class="flex flex-col items-center gap-4">
             <div
                 class="w-32 h-32 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow">
-                <img v-if="profile.photo_profiles_user" :src="src" alt="Photo Profile"
-                    class="w-full h-full object-cover" />
+                <img v-if="src" :src="src" alt="Photo Profile" class="w-full h-full object-cover" />
                 <i v-else class="pi pi-user text-gray-500" style="font-size: 3.5rem"></i>
             </div>
             <h2 class="text-xl font-semibold">

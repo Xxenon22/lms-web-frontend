@@ -11,11 +11,11 @@ const toast = useToast();
 const nama = ref("");
 const subject = ref("");
 const noTelp = ref("");
-const photoProfile = ref(null);
-
 const initialData = ref({});
 const isSubmitting = ref(false);
 const hasChanges = ref(false);
+const userId = ref(null);
+const photoKey = ref(Date.now());
 
 // Fetch user profile
 const fetchProfile = async () => {
@@ -26,15 +26,14 @@ const fetchProfile = async () => {
         nama.value = data.username;
         subject.value = data.teacher_subject;
         noTelp.value = data.phone_number;
-        photoProfile.value = data.photo_profiles_user;
-        src.value = data.photo_profiles_user
-            ? `${import.meta.env.VITE_API_URL}${data.photo_profiles_user}`
-            : null;
+
+        userId.value = data.id;
+
+        src.value = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${data.id}?t=${photoKey.value}`;
         initialData.value = {
             username: data.username,
             teacher_subject: data.teacher_subject,
             phone_number: data.phone_number,
-            photo: data.photo_profiles_user,
         };
     } catch (err) {
         console.error("fetchProfile error:", err);
@@ -62,32 +61,36 @@ function onFileSelect(event) {
         return;
     }
 
+    const maxSize = 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+        error.value = 'Maximum photo size is 10 MB.';
+        return;
+    }
+
+
     imageFile.value = file;
+    error.value = null;
 
     const reader = new FileReader();
     reader.onload = (e) => {
         src.value = e.target.result;
-        error.value = null;
     };
     reader.readAsDataURL(file);
 }
 
-// TODO: ganti ini dengan upload ke server kamu (Express multer)
 const uploadPhoto = async () => {
-    if (!imageFile.value) return photoProfile.value; // tidak upload baru
+    if (!imageFile.value) return; // tidak upload baru
 
     const formData = new FormData();
     formData.append("profile", imageFile.value);
-    if (photoProfile.value) {
-        // kirim path lama supaya bisa dihapus backend
-        formData.append("oldImagePath", photoProfile.value);
-    }
 
     const res = await api.put("/uploads/photo-profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },
     });
 
-    return res.data.imageUrl;
+    // refresh image (anti cache)
+    photoKey.value = Date.now();
+    src.value = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${userId.value}?t=${photoKey.value}`;
 };
 
 // Submit profile
@@ -102,30 +105,35 @@ const submitProfile = async () => {
         return;
     }
 
-    isSubmitting.value = true;
-    const photoUrl = await uploadPhoto();
+    try {
+        isSubmitting.value = true;
 
-    const updateData = {
-        username: nama.value,
-        teacher_subject: subject.value,
-        phone_number: noTelp.value,
-        photo_profiles_user: photoUrl,
+        await uploadPhoto()
+        // Update data text
+        await api.put("/auth/profile", {
+            username: nama.value,
+            teacher_subject: subject.value,
+            phone_number: noTelp.value,
+        });
+
+        toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Profile updated successfully',
+            life: 3000
+        });
+
+
+        imageFile.value = null;
+        hasChanges.value = false;
+        await fetchProfile();
+
+    } catch (error) {
+        console.error(error);
+    } finally {
+        isSubmitting.value = false;
     };
-
-    await api.put("/auth/profile", updateData);
-
-    toast.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Profile updated successfully',
-        life: 3000
-    });
-
-    imageFile.value = null;
-    hasChanges.value = false;
-    isSubmitting.value = false;
-    await fetchProfile();
-};
+}
 
 onMounted(fetchProfile);
 </script>
@@ -150,7 +158,9 @@ onMounted(fetchProfile);
 
                     <FileUpload mode="basic" @select="onFileSelect" customUpload auto accept="image/*"
                         chooseLabel="Choose Profile Photo" class="p-button-outlined" />
-
+                    <p class="text-gray-500 text-xs mt-2">
+                        Maximum photo size: <strong>10 MB</strong> (JPG, JPEG, PNG)
+                    </p>
                     <p v-if="error" class="text-red-500 mt-2 text-sm">{{ error }}</p>
                 </div>
 

@@ -7,7 +7,7 @@ const toast = useToast();
 const loading = ref(false);
 
 // ambil guruId dari localStorage (hasil login)
-const guruId = ref(localStorage.getItem("id"));
+// const guruId = ref(localStorage.getItem("id"));
 const judulBaru = ref("");
 
 // Soal pilihan ganda
@@ -152,10 +152,10 @@ const submitSemuaSoal = async () => {
         return;
     }
 
-    if (!guruId.value) {
-        toast.add({ severity: "error", summary: "Failed", detail: "Teacher ID not found" });
-        return;
-    }
+    // if (!guruId.value) {
+    //     toast.add({ severity: "error", summary: "Failed", detail: "Teacher ID not found" });
+    //     return;
+    // }
 
     // 🔹 Cek apakah ada minimal 1 soal valid (PG atau Essai)
     let adaPGValid = false;
@@ -216,7 +216,7 @@ const submitSemuaSoal = async () => {
         }
     }
 
-    // 🔹 Validasi detail Essai (hanya kalau ada Essai yang diisi)
+    //  Validasi detail Essai (hanya kalau ada Essai yang diisi)
     if (adaEssaiValid) {
         for (let i = 0; i < listSoalEssai.value.length; i++) {
             const soal = listSoalEssai.value[i];
@@ -231,12 +231,14 @@ const submitSemuaSoal = async () => {
 
     try {
         // Buat bank soal
-        const res = await api.post("/bank-soal", {
-            judul_penugasan: judulBaru.value,
-            guru_id: parseInt(guruId.value)
-        }, {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-        })
+        const res = await api.post("/bank-soal", { judul_penugasan: judulBaru.value },
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                }
+            }
+        );
+
 
         const bankSoalId = res.data.id;
 
@@ -267,15 +269,17 @@ const submitSemuaSoal = async () => {
         }
 
         // Submit soal ke API
-        await api.post("/soal", {
-            bank_soal_id: bankSoalId,
-            guru_id: parseInt(guruId.value),
-            soal_list: allData
-        }, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("token")}`
+        await api.post("/soal",
+            {
+                bank_soal_id: bankSoalId,
+                soal_list: allData
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`
+                }
             }
-        });
+        );
 
         toast.add({
             severity: "success",
@@ -309,9 +313,9 @@ const submitSemuaSoal = async () => {
     loading.value = false;
 };
 
-onMounted(() => {
-    guruId.value = localStorage.getItem("id");
-});
+// onMounted(() => {
+//     guruId.value = localStorage.getItem("id");
+// });
 
 </script>
 

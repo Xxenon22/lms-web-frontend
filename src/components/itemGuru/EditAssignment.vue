@@ -163,6 +163,7 @@ const submitSemuaSoal = async () => {
 
         await api.put(`/soal/${soalId}`, {
             guru_id: guruId.value,
+            judul_penugasan: judulBaru.value,
             soal_list: soalList
         });
 

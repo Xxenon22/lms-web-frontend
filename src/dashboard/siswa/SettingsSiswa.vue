@@ -13,8 +13,8 @@ const kelasId = ref(null);
 const jurusanId = ref(null);
 const rombelId = ref(null);
 const noTelp = ref("");
-const photoProfile = ref(null);
 const userId = ref(null);
+const photoKey = ref(Date.now());
 
 const selectedGrade = ref([]);
 const selectedMajor = ref([]);
@@ -76,9 +76,8 @@ const fetchProfile = async () => {
 
         nama.value = data.username;
         noTelp.value = data.phone_number;
-        photoProfile.value = data.photo_profiles_user;
-        src.value = data.photo_profiles_user
-            ? `${import.meta.env.VITE_API_URL}${data.photo_profiles_user}` : null;
+        userId.value = data.id;
+        src.value = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${data.id}?t=${photoKey.value}`;
         kelasId.value = data.grade_id;
         jurusanId.value = data.jurusan_id;
         rombelId.value = data.rombel_id;
@@ -90,7 +89,6 @@ const fetchProfile = async () => {
             grade_id: data.grade_id,
             jurusan_id: data.jurusan_id,
             rombel_id: data.rombel_id,
-            photo: data.photo_profiles_user,
         };
 
 
@@ -133,22 +131,19 @@ function onFileSelect(event) {
     reader.readAsDataURL(file);
 }
 
-// Upload photo
 const uploadPhoto = async () => {
-    if (!imageFile.value) return photoProfile.value; // tidak upload baru
+    if (!imageFile.value) return; // tidak upload baru
 
     const formData = new FormData();
     formData.append("profile", imageFile.value);
-    if (photoProfile.value) {
-        // kirim path lama supaya bisa dihapus backend
-        formData.append("oldImagePath", photoProfile.value);
-    }
 
     const res = await api.put("/uploads/photo-profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },
     });
 
-    return res.data.imageUrl;
+    // refresh image (anti cache)
+    photoKey.value = Date.now();
+    src.value = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${userId.value}?t=${photoKey.value}`;
 };
 
 // Simpan profile
@@ -163,32 +158,35 @@ const submitProfileStudent = async () => {
         return
     };
 
-    isSubmitting.value = true;
-    const photoUrl = await uploadPhoto();
+    try {
+        isSubmitting.value = true;
+        await uploadPhoto();
+        const updateData = {
+            username: nama.value,
+            phone_number: noTelp.value,
+            grade_id: kelasId.value,
+            jurusan_id: jurusanId.value,
+            rombel_id: rombelId.value,
+        };
+        await api.put("/auth/profile", updateData);
 
-    const updateData = {
-        username: nama.value,
-        phone_number: noTelp.value,
-        photo_profiles_user: photoUrl,
-        grade_id: kelasId.value,
-        jurusan_id: jurusanId.value,
-        rombel_id: rombelId.value,
+        toast.add({
+            severity: "success",
+            summary: "Success",
+            detail: "Profile updated successfully",
+            life: 3000,
+        });
+
+        imageFile.value = null;
+        hasChanges.value = false;
+        await fetchProfile();
+
+    } catch (error) {
+        console.error(error)
+    } finally {
+        isSubmitting.value = false;
     };
-
-    await api.put("/auth/profile", updateData);
-
-    toast.add({
-        severity: "success",
-        summary: "Success",
-        detail: "Profile updated successfully",
-        life: 3000,
-    });
-
-    imageFile.value = null;
-    hasChanges.value = false;
-    isSubmitting.value = false;
-    await fetchProfile();
-};
+}
 
 
 onMounted(async () => {

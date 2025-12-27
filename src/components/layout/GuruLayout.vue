@@ -28,9 +28,8 @@ const fetchPhotoProfile = async () => {
   try {
     const res = await api.get("/auth/profile")
     const data = res.data
-    src.value = data.photo_profiles_user
-      ? `${import.meta.env.VITE_API_URL}${data.photo_profiles_user}`
-      : null;
+    src.value = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${data.id}`
+
   } catch (error) {
     console.error("Error fetch profile :", error)
   }
