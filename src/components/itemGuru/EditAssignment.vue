@@ -2,259 +2,129 @@
 import api from "../../services/api";
 import { ref, onMounted } from "vue";
 import { useToast } from "primevue/usetoast";
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter, useRoute } from "vue-router";
 
 const toast = useToast();
-const loading = ref(false);
 const router = useRouter();
 const route = useRoute();
 
 const soalId = route.params.id;
-const guruId = ref(null);
 const judulBaru = ref("");
 const listSoal = ref([]);
 const listEssai = ref([]);
-const selectedPenugasan = ref(null);
 
-// Ambil profil guru
-const fetchGuruProfile = async () => {
-    try {
-        const res = await api.get("/auth/profile");
-        guruId.value = res.data.id;
-    } catch (error) {
-        console.error("error fetch guru ID :", error);
-    }
-};
+/* ================= FETCH DATA ================= */
 
-// Ambil judul + soal dari backend Express
 const fetchSoalDariAssignment = async () => {
-    if (!soalId) return;
+    const res = await api.get(`/soal/${soalId}`);
+    const data = res.data;
 
-    try {
-        const res = await api.get(`/soal/${soalId}`);
-        const semuaSoal = res.data;
+    judulBaru.value = data[0]?.judul_penugasan ?? "";
 
-        if (!semuaSoal || semuaSoal.length === 0) {
-            toast.add({
-                severity: "warn",
-                summary: "Empty",
-                detail: "Assignment Not found",
+    listSoal.value = data
+        .filter(d => d.pertanyaan)
+        .map(d => ({
+            id: d.id,
+            pertanyaan: d.pertanyaan,
+            jawaban: {
+                a: d.pg_a,
+                b: d.pg_b,
+                c: d.pg_c,
+                d: d.pg_d,
+                e: d.pg_e
+            },
+            kunci: d.kunci_jawaban,
 
-            });
-            return;
-        }
+            // BASE64 EXISTING
+            gambar: d.gambar,
+            gambar_mimetype: d.gambar_mimetype,
 
-        judulBaru.value = semuaSoal[0]?.judul_penugasan ?? "";
+            previewUrl: d.gambar
+                ? `data:${d.gambar_mimetype};base64,${d.gambar}`
+                : null
+        }));
 
-        listSoal.value = semuaSoal
-            .filter(soal => soal.pertanyaan)
-            .map(soal => ({
-                id: soal.id,
-                pertanyaan: soal.pertanyaan,
-                jawaban: {
-                    a: soal.pg_a,
-                    b: soal.pg_b,
-                    c: soal.pg_c,
-                    d: soal.pg_d,
-                    e: soal.pg_e,
-                },
-                kunci: soal.kunci_jawaban,
-
-                gambar: null,
-
-                uploadedUrl: soal.gambar,
-                previewUrl: soal.gambar
-                    ? `data:${soal.gambar_mimetype};base64,${soal.gambar}`
-                    : null,
-            }));
-
-        listEssai.value = semuaSoal
-            .filter(soal => soal.pertanyaan_essai)
-            .map(soal => ({
-                id: soal.id,
-                pertanyaan_essai: soal.pertanyaan_essai,
-
-                gambar_soal_essai: null,
-                uploadedUrlEssai: soal.gambar_soal_essai,
-
-                previewUrlEssai: soal.gambar_soal_essai
-                    ? `data:${soal.gambar_essai_mimetype};base64,${soal.gambar_soal_essai}`
-                    : null,
-            }));
-
-
-        if (listSoal.value.length === 0) {
-            listSoal.value.push({
-                pertanyaan: "",
-                jawaban: { a: "", b: "", c: "", d: "", e: "" },
-                kunci: "",
-                gambar: null,
-                uploadedUrl: null,
-                previewUrl: null,
-            });
-        }
-
-        if (listEssai.value.length === 0) {
-            listEssai.value.push({
-                pertanyaan_essai: "",
-                gambar_soal_essai: null,
-                uploadedUrlEssai: null,
-                previewUrlEssai: null,
-            });
-        }
-    } catch (error) {
-        console.error("Gagal ambil soal:", error);
-        toast.add({ severity: "error", summary: "Failed", detail: "Tidak bisa ambil soal dari server" });
-    }
+    listEssai.value = data
+        .filter(d => d.pertanyaan_essai)
+        .map(d => ({
+            id: d.id,
+            pertanyaan_essai: d.pertanyaan_essai,
+            gambar_soal_essai: d.gambar_soal_essai,
+            gambar_essai_mimetype: d.gambar_essai_mimetype,
+            previewUrlEssai: d.gambar_soal_essai
+                ? `data:${d.gambar_essai_mimetype};base64,${d.gambar_soal_essai}`
+                : null
+        }));
 };
 
-// 🔹 Upload gambar (Express pakai multer / storage API)
-const uploadGambar = async (file) => {
-    try {
-        const formData = new FormData();
-        formData.append("gambar", file); // <-- backend multer.single("gambar")
+/* ================= FILE HANDLER ================= */
 
-        const uploadRes = await api.post("/gambar-soal", formData, {
-            headers: { "Content-Type": "multipart/form-data" }
-        });
-
-        // backend balikin { filePath: "gambarSoal/xxx.png" }
-        return uploadRes.data.filePath;
-    } catch (error) {
-        console.error("Upload gagal:", error);
-        toast.add({ severity: "error", summary: "Upload Failed", detail: error.message });
-        return null;
-    }
+const readBase64 = (file, cb) => {
+    const reader = new FileReader();
+    reader.onload = e => cb(e.target.result.split(",")[1]);
+    reader.readAsDataURL(file);
 };
 
-// 🔹 Submit semua soal
+const onFileSelect = (e, index) => {
+    const file = e.files?.[0];
+    if (!file) return;
+
+    readBase64(file, base64 => {
+        listSoal.value[index].gambar = base64;
+        listSoal.value[index].gambar_mimetype = file.type;
+        listSoal.value[index].previewUrl = `data:${file.type};base64,${base64}`;
+    });
+};
+
+const onFileSelectEssai = (e, index) => {
+    const file = e.files?.[0];
+    if (!file) return;
+
+    readBase64(file, base64 => {
+        listEssai.value[index].gambar_soal_essai = base64;
+        listEssai.value[index].gambar_essai_mimetype = file.type;
+        listEssai.value[index].previewUrlEssai = `data:${file.type};base64,${base64}`;
+    });
+};
+
+/* ================= SUBMIT ================= */
+
 const submitSemuaSoal = async () => {
-    try {
-        const soalList = [];
+    const soal_list = [];
 
-        // 🔹 Multiple Choice
-        for (let soal of listSoal.value) {
-            let uploadedUrl = soal.uploadedUrl;
-            if (soal.gambar instanceof File) {
-                uploadedUrl = await uploadGambar(soal.gambar);
-            }
-
-            soalList.push({
-                id: soal.id || null,
-                pertanyaan: soal.pertanyaan,
-                pg_a: soal.jawaban.a,
-                pg_b: soal.jawaban.b,
-                pg_c: soal.jawaban.c,
-                pg_d: soal.jawaban.d,
-                pg_e: soal.jawaban.e,
-                kunci_jawaban: soal.kunci,
-                gambar: uploadedUrl || null
-            });
-        }
-
-        // 🔹 Essay
-        for (let es of listEssai.value) {
-            let uploadedUrlEssai = es.uploadedUrlEssai;
-            if (es.gambar_soal_essai instanceof File) {
-                uploadedUrlEssai = await uploadGambar(es.gambar_soal_essai);
-            }
-
-            soalList.push({
-                id: es.id || null,
-                pertanyaan_essai: es.pertanyaan_essai,
-                gambar_soal_essai: uploadedUrlEssai || null
-            });
-        }
-
-        await api.put(`/soal/${soalId}`, {
-            guru_id: guruId.value,
-            judul_penugasan: judulBaru.value,
-            soal_list: soalList
+    listSoal.value.forEach(s => {
+        soal_list.push({
+            id: s.id,
+            pertanyaan: s.pertanyaan,
+            pg_a: s.jawaban.a,
+            pg_b: s.jawaban.b,
+            pg_c: s.jawaban.c,
+            pg_d: s.jawaban.d,
+            pg_e: s.jawaban.e,
+            kunci_jawaban: s.kunci,
+            gambar: s.gambar,
+            gambar_mimetype: s.gambar_mimetype
         });
-
-        toast.add({
-            severity: "success",
-            summary: "Success",
-            detail: "Semua soal berhasil disimpan",
-        });
-    } catch (error) {
-        console.error("Error saat submit soal:", error.response?.data || error.message);
-        toast.add({
-            severity: "error",
-            summary: "Failed",
-            detail: error.response?.data?.message || "Terjadi error saat update soal",
-        });
-    }
-};
-
-const tambahSoal = () => {
-    listSoal.value.push({
-        pertanyaan: "",
-        jawaban: { a: "", b: "", c: "", d: "", e: "" },
-        kunci: "",
-        gambar: null,
-        uploadedUrl: null,
-        previewUrl: null
     });
-};
 
-const hapusSoal = (index) => {
-    if (listSoal.value.length === 1) {
-        toast.add({ severity: "warn", summary: "At least 1 question", life: 3000 });
-        return;
-    }
-    listSoal.value.splice(index, 1);
-};
-
-const tambahSoalEssai = () => {
-    listEssai.value.push({
-        pertanyaan_essai: "",
-        gambar_soal_essai: null,
-        uploadedUrlEssai: null,
-        previewUrlEssai: null
+    listEssai.value.forEach(e => {
+        soal_list.push({
+            id: e.id,
+            pertanyaan_essai: e.pertanyaan_essai,
+            gambar_soal_essai: e.gambar_soal_essai,
+            gambar_essai_mimetype: e.gambar_essai_mimetype
+        });
     });
+
+    await api.put(`/soal/${soalId}`, {
+        judul_penugasan: judulBaru.value,
+        soal_list
+    });
+
+    toast.add({ severity: "success", summary: "Success", detail: "Soal tersimpan" });
 };
 
-const hapusSoalEssai = (index) => {
-    if (listEssai.value.length === 1) {
-        toast.add({ severity: "warn", summary: "At least 1 question", life: 3000 });
-        return;
-    }
-    listEssai.value.splice(index, 1);
-};
-
-const onFileSelect = (event, index) => {
-    const file = event.files?.[0];
-    if (!file) return;
-
-    listSoal.value[index].gambar = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        listSoal.value[index].previewUrl = e.target.result;
-    };
-    reader.readAsDataURL(file);
-};
-
-const onFileSelectEssai = (event, index) => {
-    const file = event.files?.[0];
-    if (!file) return;
-
-    listEssai.value[index].gambar_soal_essai = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        listEssai.value[index].previewUrlEssai = e.target.result;
-    };
-    reader.readAsDataURL(file);
-};
-
-const kembali = () => {
-    router.back();
-};
-
-onMounted(async () => {
-    await fetchGuruProfile();
-    await fetchSoalDariAssignment();
-});
+onMounted(fetchSoalDariAssignment);
 </script>
 
 <template>
