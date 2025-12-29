@@ -66,6 +66,8 @@ const updateMateri = async () => {
             const res = await api.post("/uploads", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
+
+            console.log("UPLOAD RESPONSE:", res.data); // 👈 CEK INI
             fileToSave = res.data.url;
         }
         if (!materi.judul || !materi.video_url || !fileToSave) {
@@ -128,19 +130,20 @@ const getEmbedUrl = (url) => {
 };
 
 const bukaPdf = (materi) => {
-    if (materi.file_url) {
-        let fileUrl = materi.file_url;
-
-        // kalau masih relative "/uploads/xxx.pdf", tambahin host
-        if (fileUrl.startsWith("/uploads")) {
-            fileUrl = `${import.meta.env.VITE_API_URL}${fileUrl}`;
-        }
-
-        window.open(fileUrl, "_blank");
-    } else {
-        toast.add({ severity: "warn", summary: "File Not Found", detail: "PDF URL not available", life: 3000 });
+    if (!materi.id) {
+        toast.add({
+            severity: "warn",
+            summary: "File Not Found",
+            detail: "PDF tidak tersedia",
+            life: 3000,
+        });
+        return;
     }
+
+    const pdfUrl = `${import.meta.env.VITE_API_URL}api/module-pembelajaran/${materi.id}/pdf`;
+    window.open(pdfUrl, "_blank");
 };
+
 
 onMounted(async () => {
     await fetchUserId()

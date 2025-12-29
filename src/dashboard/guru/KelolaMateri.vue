@@ -3,142 +3,140 @@ import api from "../../services/api";
 import { ref, onMounted } from "vue";
 import { useToast } from "primevue";
 
+const toast = useToast();
+const loading = ref(false);
+
+// form state
 const judulMateri = ref("");
-const fileUrl = ref("");
 const linkYtb = ref("");
 const linkZoom = ref("");
 const passcode = ref("");
 const deskripsi = ref("");
-const guruName = ref("...");
 const judul_penugasan = ref(null);
-const daftarBankSoal = ref([]);
-const guruId = ref(null);
-const loading = ref(false);
-const toast = useToast();
-const daftarKelas = ref([]);
 const selectedKelas = ref([]);
+const selectedFile = ref(null);
+
+// data
+const guruName = ref("...");
+const guruId = ref(null);
+const daftarKelas = ref([]);
+const daftarBankSoal = ref([]);
+
 const fileUploadRef = ref(null);
 
-// Ambil profil guru dari backend
+// ================= FETCH DATA =================
 const fetchGuruProfile = async () => {
-  try {
-    const res = await api.get("/auth/profile");
-    guruName.value = res.data.username;
-    guruId.value = res.data.id;
-
-    return true;
-  } catch (err) {
-    console.warn("fetchGuruProfile:", err);
-    if (err.response && err.response.status === 404) {
-      toast.add({ severity: "error", summary: "Error", detail: "Endpoint /profile tidak ditemukan (404)", life: 4000 });
-    } else {
-      toast.add({ severity: "error", summary: "Error", detail: "Gagal mengambil profil guru", life: 4000 });
-    }
-    return false;
-  }
+  const res = await api.get("/auth/profile");
+  guruName.value = res.data.username;
+  guruId.value = res.data.id;
 };
 
-// Ambil daftar kelas khusus guru (pastikan backend punya route ini)
 const fetchDaftarKelas = async () => {
-  try {
-    const res = await api.get("/kelas");
-    daftarKelas.value = (res.data || []).map((k) => ({
-      id: k.id,
-      name: `${k.grade_lvl || ""} ${k.major} ${k.name_rombel || ""} - ${k.nama_mapel || ""}`,
-    }));
-
-  } catch (err) {
-    console.error("fetchDaftarKelas:", err);
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: "Gagal mengambil daftar kelas",
-      life: 4000,
-    });
-  }
+  const res = await api.get("/kelas");
+  daftarKelas.value = (res.data || []).map(k => ({
+    id: k.id,
+    name: `${k.grade_lvl || ""} ${k.major || ""} ${k.name_rombel || ""} - ${k.nama_mapel || ""}`
+  }));
 };
 
-
-// Ambil bank soal guru
 const fetchBankSoal = async () => {
-  try {
-    const res = await api.get("/bank-soal");
-    daftarBankSoal.value = (res.data || []).map((b) => ({ id: b.id, name: b.judul_penugasan }));
-  } catch (err) {
-    console.error("fetchBankSoal:", err);
-    toast.add({ severity: "error", summary: "Error", detail: "Gagal mengambil bank soal", life: 4000 });
-  }
+  const res = await api.get("/bank-soal");
+  daftarBankSoal.value = (res.data || []).map(b => ({
+    id: b.id,
+    name: b.judul_penugasan
+  }));
 };
 
-// Upload file: kirim FormData ke backend (multer)
-const handleFileUpload = async (event) => {
-
+// ================= FILE HANDLER =================
+const handleFileSelect = (event) => {
   const file = event.files?.[0];
   if (!file) return;
-  loading.value = true;
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
 
-    const res = await api.post("/uploads", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
+  if (file.type !== "application/pdf") {
+    toast.add({ severity: "warn", summary: "Invalid File", detail: "Only PDF allowed" });
+    return;
+  }
+
+  selectedFile.value = file;
+};
+
+// ================= SUBMIT =================
+const submitMateri = async () => {
+  try {
+    if (
+      !judulMateri.value ||
+      !selectedKelas.value.length ||
+      !selectedFile.value
+    ) {
+      toast.add({
+        severity: "warn",
+        summary: "Incomplete",
+        detail: "Judul, kelas, dan PDF wajib diisi",
+      });
+      return;
+    }
+
+    loading.value = true;
+
+    const selectedSoal = daftarBankSoal.value.find(
+      b => b.id === judul_penugasan.value
+    );
+
+    for (const kelasId of selectedKelas.value) {
+      const formData = new FormData();
+
+      formData.append("judul", judulMateri.value);
+      formData.append("video_url", linkYtb.value);
+      formData.append("deskripsi", deskripsi.value);
+      formData.append("guru_id", guruId.value);
+      formData.append("bank_soal_id", judul_penugasan.value || "");
+      formData.append("judul_penugasan", selectedSoal?.name || "");
+      formData.append("link_zoom", linkZoom.value);
+      formData.append("kelas_id", kelasId);
+      formData.append("pass_code", passcode.value);
+      formData.append("file", selectedFile.value); // ✅ PDF
+
+      await api.post("/module-pembelajaran", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    }
+
+    toast.add({
+      severity: "success",
+      summary: "Success",
+      detail: "Material successfully saved",
     });
-    fileUrl.value = res.data.url;
-    toast.add({ severity: "success", summary: "Success", detail: "File Uploaded Successfully", life: 3000 });
+
+    resetForm();
   } catch (err) {
-    console.error("handleFileUpload:", err);
-    toast.add({ severity: "error", summary: "Upload Failed", detail: err?.message || "Upload error", life: 4000 });
+    console.error("submitMateri:", err);
+    toast.add({
+      severity: "error",
+      summary: "Failed",
+      detail: "Failed to save material",
+    });
   } finally {
     loading.value = false;
   }
 };
 
-// Submit materi ke backend
-const submitMateri = async () => {
-  try {
-    if (!selectedKelas.value.length || !judulMateri.value.trim() || !fileUrl.value) {
-      toast.add({ severity: "warn", summary: "Check Form", detail: "All fields must be filled", life: 3000 });
-      return;
-    }
-    const selectedSoal = daftarBankSoal.value.find((b) => b.id === judul_penugasan.value);
-    const inserts = selectedKelas.value.map((kelasId) => ({
-      judul: judulMateri.value,
-      video_url: linkYtb.value,
-      file_url: fileUrl.value,
-      deskripsi: deskripsi.value,
-      guru_id: guruId.value,
-      link_zoom: linkZoom.value,
-      pass_code: passcode.value,
-      judul_penugasan: selectedSoal?.name,
-      kelas_id: kelasId,
-      bank_soal_id: selectedSoal?.id,
-    }));
-
-    for (const data of inserts) {
-      await api.post("/module-pembelajaran", data);
-    }
-    toast.add({ severity: "success", summary: "Success", detail: "Material Saved successfully", life: 3000 });
-    // reset form
-    selectedKelas.value = [];
-    judulMateri.value = "";
-    fileUrl.value = "";
-    linkYtb.value = "";
-    linkZoom.value = "";
-    passcode.value = "";
-    deskripsi.value = "";
-    judul_penugasan.value = null;
-    if (fileUploadRef.value) fileUploadRef.value.clear();
-  } catch (err) {
-    console.error("submitMateri:", err);
-    toast.add({ severity: "error", summary: "Failed", detail: err?.message || "Submit error", life: 3000 });
-  }
+const resetForm = () => {
+  judulMateri.value = "";
+  linkYtb.value = "";
+  linkZoom.value = "";
+  passcode.value = "";
+  deskripsi.value = "";
+  judul_penugasan.value = null;
+  selectedKelas.value = [];
+  selectedFile.value = null;
+  fileUploadRef.value?.clear();
 };
-onMounted(async () => {
-  await fetchGuruProfile()
-  await fetchDaftarKelas()
-  await fetchBankSoal()
-});
 
+onMounted(async () => {
+  await fetchGuruProfile();
+  await fetchDaftarKelas();
+  await fetchBankSoal();
+});
 </script>
 
 <template>
@@ -164,12 +162,13 @@ onMounted(async () => {
           </div>
 
           <div>
-            <FileUpload ref="fileUploadRef" mode="basic" name="file" accept=".pdf" chooseLabel="Choose File"
-              :customUpload="true" class="w-full mb-2" @select="handleFileUpload" />
-            <p v-if="fileUrl" class="text-sm text-green-500">
-              File Uploaded Successfully:
-              <a :href="fileUrl" class="underline" target="_blank">View File</a>
+            <FileUpload ref="fileUploadRef" mode="basic" accept=".pdf" chooseLabel="Choose PDF" :customUpload="true"
+              @select="handleFileSelect" />
+
+            <p v-if="selectedFile" class="text-sm text-green-600">
+              Selected file: {{ selectedFile.name }}
             </p>
+
           </div>
 
           <div>
@@ -239,7 +238,7 @@ onMounted(async () => {
         </div>
       </div>
       <div class="mt-5">
-        <Button :loading="loading" @click="submitMateri" icon="pi pi-upload" label="Upload" :disabled="!fileUrl" />
+        <Button :loading="loading" @click="submitMateri" icon="pi pi-upload" label="Upload" />
       </div>
     </template>
   </Card>
