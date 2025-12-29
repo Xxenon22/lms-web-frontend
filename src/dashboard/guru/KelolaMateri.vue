@@ -204,19 +204,19 @@ onMounted(async () => {
           <Card>
             <template #header>
               <div class="m-5">
-                Link Zoom
+                Zoom Link (optional)
               </div>
             </template>
             <template #content>
               <div class="space-y-10">
                 <FloatLabel>
                   <InputText id="link_zoom" v-model="linkZoom" class="w-full" />
-                  <label for="link_zoom">Enter Link Zoom</label>
+                  <label for="link_zoom">Enter Zoom Link</label>
                 </FloatLabel>
 
                 <FloatLabel>
                   <InputText id="passcode" v-model="passcode" class="w-full" />
-                  <label for="pass_code">Enter Link Zoom Passcode</label>
+                  <label for="pass_code">Enter Zoom Link Passcode</label>
                 </FloatLabel>
               </div>
             </template>

@@ -208,14 +208,16 @@ const fetchMateriById = async () => {
             pdfSelesai.value[materi.id] = p?.pdf_selesai ?? false;
             activeSteps.value[materi.id] = p?.langkah_aktif ?? "1";
             refleksi.value[materi.id] = p?.refleksi ?? "";
+            materi.pdf_url = `${import.meta.env.VITE_API_URL}api/module-pembelajaran/${materi.id}/pdf`;
 
-            // prefix foto guru kalau ada path
-            if (materi.guru_foto) {
-                // jika sudah full URL, skip; jika path like '/uploads/photo-profile/xxx' tambahkan base
-                if (!materi.guru_foto.startsWith('http')) {
+            if (typeof materi.guru_foto === "string" && materi.guru_foto.length > 0) {
+                if (!materi.guru_foto.startsWith("http")) {
                     materi.guru_foto = `${import.meta.env.VITE_API_URL}${materi.guru_foto}`;
                 }
+            } else {
+                materi.guru_foto = null;
             }
+
 
             // jika backend module tidak include soal, tapi punya bank_soal_id -> fetch dari /soal/:id
             // check both shapes: materi.bank_soal_id or materi.bank_soal?.id or materi.bank_soal_id
@@ -543,6 +545,29 @@ const fetchClassroom = async () => {
     }
 }
 
+const createPdfUrl = (materi) => {
+    if (!materi.file_pdf || !materi.file_mime) return null;
+
+    try {
+        // PostgreSQL bytea biasanya dikirim sebagai base64
+        const byteCharacters = atob(materi.file_pdf);
+        const byteNumbers = new Array(byteCharacters.length);
+
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: materi.file_mime });
+
+        return URL.createObjectURL(blob);
+    } catch (err) {
+        console.error("Failed create PDF URL", err);
+        return null;
+    }
+};
+
+
 onMounted(async () => {
     try {
         const res = await api.get("/auth/profile", {
@@ -696,23 +721,31 @@ onMounted(async () => {
                             </Step>
                             <StepPanel v-if="activeSteps[materi.id] === '2'">
                                 <div class="flex flex-col h-full">
+
                                     <div :ref="el => pdfContainerRefs[materi.id] = el"
                                         @scroll="() => handleScroll(materi.id)"
                                         class="overflow-y-scroll h-[500px] border rounded bg-white">
-                                        <iframe v-if="materi.file_url"
-                                            :src="`https://metschoo-ils.my.id//${materi.file_url}`"
-                                            class="w-full h-[800px]" allow="fullscreen" allowfullscreen
-                                            frameborder="0" />
+                                        <iframe v-if="materi.pdf_url" :src="materi.pdf_url" class="w-full h-[800px]"
+                                            frameborder="0" allowfullscreen />
+
+                                        <div v-else class="text-center text-gray-500 py-6">
+                                            PDF tidak tersedia
+                                        </div>
                                     </div>
+
                                     <div class="flex py-6 gap-2">
                                         <Button label="Back" severity="secondary"
                                             @click="() => activeSteps[materi.id] = '1'" />
-                                        <Button label="Next"
-                                            @click="() => { activeSteps[materi.id] = '3'; simpanProgress(materi.id); }"
-                                            :disabled="!canActivateNextStep(materi.id, '3')" />
+
+                                        <Button label="Next" @click="() => {
+                                            activeSteps[materi.id] = '3';
+                                            simpanProgress(materi.id);
+                                        }" :disabled="!canActivateNextStep(materi.id, '3')" />
                                     </div>
+
                                 </div>
                             </StepPanel>
+
                         </StepItem>
 
                         <StepItem value="3">
