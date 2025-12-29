@@ -67,7 +67,7 @@ const updateMateri = async () => {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
-            console.log("UPLOAD RESPONSE:", res.data); // 👈 CEK INI
+            // console.log("UPLOAD RESPONSE:", res.data); // 👈 CEK INI
             fileToSave = res.data.url;
         }
         if (!materi.judul || !materi.video_url || !fileToSave) {

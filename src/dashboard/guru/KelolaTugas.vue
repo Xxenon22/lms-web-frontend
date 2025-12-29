@@ -129,21 +129,35 @@ const onFileSelectEssai = (event, index) => {
 
 const uploadGambar = async (file) => {
     try {
-        const formData = new FormData();
-        formData.append("gambar", file); // <-- backend multer.single("gambar")
+        console.log("📤 Uploading image:", {
+            name: file.name,
+            size: file.size,
+            type: file.type,
+        });
 
-        const uploadRes = await api.post("/gambar-soal", formData, {
+        const formData = new FormData();
+        formData.append("gambar", file);
+
+        const res = await api.post("/gambar-soal", formData, {
             headers: { "Content-Type": "multipart/form-data" }
         });
 
-        // backend balikin { filePath: "gambarSoal/xxx.png" }
-        return uploadRes.data.filePath;
+        console.log("✅ Image uploaded, backend response:", {
+            mimetype: res.data.mimetype,
+            bufferLength: res.data.buffer?.length,
+        });
+
+        return {
+            data: res.data.buffer,
+            mimetype: res.data.mimetype
+        };
     } catch (error) {
-        console.error("Upload gagal:", error);
-        toast.add({ severity: "error", summary: "Upload Failed", detail: error.message });
-        return null;
+        console.error("❌ Upload image failed:", error);
+        throw error;
     }
 };
+
+
 
 // Submit semua soal
 const submitSemuaSoal = async () => {
@@ -250,8 +264,8 @@ const submitSemuaSoal = async () => {
             const pg = listSoal.value[i] || {};
             const es = listSoalEssai.value[i] || {};
 
-            const pgImageUrl = pg.gambar ? await uploadGambar(pg.gambar) : null;
-            const essaiImageUrl = es.gambar_soal_essai ? await uploadGambar(es.gambar_soal_essai) : null;
+            const pgImage = pg.gambar ? await uploadGambar(pg.gambar) : null;
+            const essaiImage = es.gambar_soal_essai ? await uploadGambar(es.gambar_soal_essai) : null;
 
             allData.push({
                 bank_soal_id: bankSoalId,
@@ -262,9 +276,11 @@ const submitSemuaSoal = async () => {
                 pg_d: pg.jawaban?.d || null,
                 pg_e: pg.jawaban?.e || null,
                 kunci_jawaban: pg.kunci || null,
-                gambar: pgImageUrl,
                 pertanyaan_essai: es.pertanyaan_essai || null,
-                gambar_soal_essai: essaiImageUrl,
+                gambar: pgImage?.data || null,
+                gambar_mimetype: pgImage?.mimetype || null,
+                gambar_soal_essai: essaiImage?.data || null,
+                gambar_essai_mimetype: essaiImage?.mimetype || null,
             });
         }
 

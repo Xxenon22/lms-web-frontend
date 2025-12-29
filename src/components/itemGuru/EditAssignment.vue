@@ -47,8 +47,8 @@ const fetchSoalDariAssignment = async () => {
         judulBaru.value = semuaSoal[0]?.judul_penugasan ?? "";
 
         listSoal.value = semuaSoal
-            .filter((soal) => soal.pertanyaan && soal.pertanyaan.trim() !== "")
-            .map((soal) => ({
+            .filter(soal => soal.pertanyaan)
+            .map(soal => ({
                 id: soal.id,
                 pertanyaan: soal.pertanyaan,
                 jawaban: {
@@ -59,24 +59,29 @@ const fetchSoalDariAssignment = async () => {
                     e: soal.pg_e,
                 },
                 kunci: soal.kunci_jawaban,
+
                 gambar: null,
+
                 uploadedUrl: soal.gambar,
                 previewUrl: soal.gambar
-                    ? `${import.meta.env.VITE_API_URL}/uploads/gambar-soal/${soal.gambar}`
+                    ? `data:${soal.gambar_mimetype};base64,${soal.gambar}`
                     : null,
             }));
 
         listEssai.value = semuaSoal
-            .filter((soal) => soal.pertanyaan_essai && soal.pertanyaan_essai.trim() !== "")
-            .map((soal) => ({
+            .filter(soal => soal.pertanyaan_essai)
+            .map(soal => ({
                 id: soal.id,
                 pertanyaan_essai: soal.pertanyaan_essai,
+
                 gambar_soal_essai: null,
                 uploadedUrlEssai: soal.gambar_soal_essai,
+
                 previewUrlEssai: soal.gambar_soal_essai
-                    ? `${import.meta.env.VITE_API_URL}/uploads/gambar-soal/${soal.gambar_soal_essai}`
+                    ? `data:${soal.gambar_essai_mimetype};base64,${soal.gambar_soal_essai}`
                     : null,
             }));
+
 
         if (listSoal.value.length === 0) {
             listSoal.value.push({
