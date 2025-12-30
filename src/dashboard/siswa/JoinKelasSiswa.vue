@@ -716,7 +716,7 @@ onMounted(async () => {
 
                         <StepItem value="2">
                             <Step>
-                                <span>Learnin Unit 2</span>
+                                <span>Learning Unit 2</span>
                                 <i v-if="pdfSelesai[materi.id]" class="pi pi-check-circle text-green-500"></i>
                             </Step>
                             <StepPanel v-if="activeSteps[materi.id] === '2'">

@@ -33,11 +33,21 @@ const fetchUserId = async () => {
 
 // Ambil data materi
 const fetchModulePembelajaran = async () => {
+    loading.value = true;
     try {
-        const res = await api.get("/module-pembelajaran");
+        const res = await api.get("/module-pembelajaran", {
+            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        });
         materiPembelajaran.value = res.data;
     } catch (error) {
+        if (error.code === "ECONNABORTED") {
+            toast.add({ severity: "error", summary: "Timeout", detail: "Server terlalu lambat merespon", life: 3000 });
+        } else {
+            toast.add({ severity: "error", summary: "Error", detail: error.message, life: 3000 });
+        }
         console.error("fetchModulePembelajaran:", error);
+    } finally {
+        loading.value = false;
     }
 };
 
@@ -164,7 +174,7 @@ onMounted(async () => {
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
                                     <div class="grid gap-3">
                                         <span class="text-xl text-surface-500 dark:text-surface-400">{{ materi.judul
-                                            }}</span>
+                                        }}</span>
                                         <div class="flex space-x-3 text-lg max-h-40 overflow-auto break-words">
                                             <span v-tooltip.bottom="'Link Meeting'">{{ materi.link_zoom }}</span>
                                         </div>

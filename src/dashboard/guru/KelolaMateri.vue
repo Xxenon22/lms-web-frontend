@@ -78,7 +78,7 @@ const submitMateri = async () => {
       b => b.id === judul_penugasan.value
     );
 
-    for (const kelasId of selectedKelas.value) {
+    const promises = selectedKelas.value.map((kelasId) => {
       const formData = new FormData();
       formData.append("judul", judulMateri.value);
       formData.append("video_url", linkYtb.value);
@@ -89,11 +89,12 @@ const submitMateri = async () => {
       formData.append("link_zoom", linkZoom.value);
       formData.append("kelas_id", kelasId);
       formData.append("pass_code", passcode.value);
-      formData.append("file", selectedFile.value); // ✅ PDF
+      formData.append("file", selectedFile.value);
 
-      // ❌ Jangan set Content-Type manual, biarkan browser otomatis
-      await api.post("/module-pembelajaran", formData);
-    }
+      return api.post("/module-pembelajaran", formData);
+    })
+
+    await Promise.all(promises); // tunggu semua request selesai sekaligus
 
     toast.add({
       severity: "success",

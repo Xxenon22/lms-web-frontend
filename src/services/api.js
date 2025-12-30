@@ -2,6 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
     baseURL: "https://metschoo-ils.my.id/api",
+    timeout: 30000, // 30 detik
 });
 
 api.interceptors.request.use((config) => {
