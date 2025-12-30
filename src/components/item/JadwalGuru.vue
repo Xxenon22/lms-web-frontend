@@ -3,6 +3,7 @@ import api from '../../services/api'
 import { ref, onMounted } from 'vue'
 
 const file = ref(null)
+const API_URL = import.meta.env.VITE_API_URL
 
 const fetchFiles = async () => {
     try {
@@ -21,9 +22,8 @@ onMounted(fetchFiles)
 <template>
     <div>
         <div v-if="file" class="mt-6">
-            <iframe :src="`https://metschoo-ils.my.id//uploads/timetables/${file.file_name}`" width="100%"
-                height="600px" allow="fullscreen; autoplay; encrypted-media" allowfullscreen
-                style="border:none;"></iframe>
+            <iframe :src="`${API_URL}api/timetables/${file.id}/file`" width="100%" height="600px"
+                allow="fullscreen; autoplay; encrypted-media" allowfullscreen style="border:none;"></iframe>
         </div>
     </div>
 </template>
