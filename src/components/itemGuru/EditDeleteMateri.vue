@@ -20,7 +20,7 @@ const selectedMateri = ref({
     pass_code: "",
     deskripsi: "",
 });
-
+const isSaving = ref(false);
 // Ambil user ID
 const fetchUserId = async () => {
     try {
@@ -62,38 +62,87 @@ const handleFileSelect = (event) => {
 
 const updateMateri = async () => {
     try {
+        isSaving.value = true;
         const materi = selectedMateri.value;
-        let fileToSave = materi.file_url;
 
-        if (newFile.value) {
-            const formData = new FormData();
-            formData.append("file", newFile.value);
-            formData.append("judul", materi.judul);
-            formData.append("video_url", materi.video_url);
-            formData.append("deskripsi", materi.deskripsi);
-            formData.append("guru_id", userId.value); // <= wajib dikirim
-
-            const res = await api.post("/uploads", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-
-            fileToSave = res.data.url;
-        }
-
-        await api.put(`/module-pembelajaran/${materi.id}`, {
+        const res = await api.put(`/module-pembelajaran/${materi.id}`, {
             judul: materi.judul,
             video_url: materi.video_url,
-            file_url: fileToSave,
             deskripsi: materi.deskripsi,
             link_zoom: materi.link_zoom,
             pass_code: materi.pass_code,
-            guru_id: userId.value // <= wajib juga dikirim saat update
         });
 
+        // 🔥 UPDATE DATA DI ARRAY TANPA FETCH ULANG
+        const index = materiPembelajaran.value.findIndex(
+            m => m.id === materi.id
+        );
+
+        if (index !== -1) {
+            materiPembelajaran.value[index] = {
+                ...materiPembelajaran.value[index],
+                ...res.data
+            };
+        }
+
+        // upload PDF di background
+        if (newFile.value) {
+            uploadPdf(materi.id);
+        }
+
+        toast.add({
+            severity: "success",
+            summary: "Updated",
+            detail: "Materi berhasil diupdate",
+            life: 1500,
+        });
+
+        visible.value = false;
+        newFile.value = null;
+
     } catch (error) {
-        console.error("UPLOAD PDF ERROR:", error);
+        if (error.code === "ECONNABORTED") return;
+
+        toast.add({
+            severity: "error",
+            summary: "Error",
+            detail: "Failed to update material",
+            life: 3000,
+        });
+    } finally {
+        isSaving.value = false;
     }
 };
+
+const uploadPdf = async (materiId) => {
+    try {
+        const fd = new FormData();
+        fd.append("file", newFile.value);
+
+        await api.put(
+            `/module-pembelajaran/${materiId}/pdf`,
+            fd,
+            { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        toast.add({
+            severity: "info",
+            summary: "PDF Updated",
+            detail: "File PDF berhasil diperbarui",
+            life: 2000,
+        });
+
+    } catch (err) {
+        toast.add({
+            severity: "warn",
+            summary: "PDF Error",
+            detail: "Gagal upload PDF",
+            life: 3000,
+        });
+    }
+};
+
+
 
 // Buka dialog edit
 const openEditDialog = (materi) => {
@@ -174,7 +223,7 @@ onMounted(async () => {
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
                                     <div class="grid gap-3">
                                         <span class="text-xl text-surface-500 dark:text-surface-400">{{ materi.judul
-                                        }}</span>
+                                            }}</span>
                                         <div class="flex space-x-3 text-lg max-h-40 overflow-auto break-words">
                                             <span v-tooltip.bottom="'Link Meeting'">{{ materi.link_zoom }}</span>
                                         </div>
@@ -256,7 +305,8 @@ onMounted(async () => {
                                             <div class="flex justify-end gap-2">
                                                 <Button type="button" label="Cancel" severity="secondary"
                                                     @click="visible = false"></Button>
-                                                <Button label="Save" @click="updateMateri" />
+                                                <Button label="Save" :loading="isSaving" :disabled="isSaving"
+                                                    @click="updateMateri" />
                                             </div>
                                         </Dialog>
 
