@@ -63,15 +63,11 @@ const handleFileSelect = (event) => {
 // ================= SUBMIT =================
 const submitMateri = async () => {
   try {
-    if (
-      !judulMateri.value ||
-      !selectedKelas.value.length ||
-      !selectedFile.value
-    ) {
+    if (!judulMateri.value || !selectedKelas.value.length || !selectedFile.value) {
       toast.add({
         severity: "warn",
         summary: "Incomplete",
-        detail: "Judul, kelas, dan PDF wajib diisi",
+        detail: "Title, Class, dan PDF are required",
       });
       return;
     }
@@ -84,7 +80,6 @@ const submitMateri = async () => {
 
     for (const kelasId of selectedKelas.value) {
       const formData = new FormData();
-
       formData.append("judul", judulMateri.value);
       formData.append("video_url", linkYtb.value);
       formData.append("deskripsi", deskripsi.value);
@@ -96,9 +91,8 @@ const submitMateri = async () => {
       formData.append("pass_code", passcode.value);
       formData.append("file", selectedFile.value); // ✅ PDF
 
-      await api.post("/module-pembelajaran", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      // ❌ Jangan set Content-Type manual, biarkan browser otomatis
+      await api.post("/module-pembelajaran", formData);
     }
 
     toast.add({

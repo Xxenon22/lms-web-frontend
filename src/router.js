@@ -427,23 +427,23 @@ router.beforeEach((to, from, next) => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
-    const tempToken = localStorage.getItem("tempToken");
-    const pending = localStorage.getItem("pendingVerification");
-    const isVerified = localStorage.getItem("is_verified");
+    // const tempToken = localStorage.getItem("tempToken");
+    // const pending = localStorage.getItem("pendingVerification");
+    // const isVerified = localStorage.getItem("is_verified");
 
-    if (pending === "true" || isVerified === "false") {
-        if (to.path !== "/verify-code") {
-            return next("/verify-code")
-        }
-        return next();
-    }
+    // if (pending === "true" || isVerified === "false") {
+    //     if (to.path !== "/verify-code") {
+    //         return next("/verify-code")
+    //     }
+    //     return next();
+    // }
 
-    if (to.path === "/verify-code" && isVerified === "true") {
-        if (role === "student") return next("/home-student");
-        if (role === "teacher") return next("/home-teacher");
-        if (role === "admin") return next("/home-admin");
-        return next("/");
-    }
+    // if (to.path === "/verify-code" && isVerified === "true") {
+    //     if (role === "student") return next("/home-student");
+    //     if (role === "teacher") return next("/home-teacher");
+    //     if (role === "admin") return next("/home-admin");
+    //     return next("/");
+    // }
 
     if (to.meta.requiresAuth) {
         if (!token) {

@@ -8,9 +8,8 @@ const toast = useToast();
 const materiPembelajaran = ref([]);
 const visible = ref(false);
 const loading = ref(false);
-// const fileUrl = ref("");
-const newFile = ref(null)
-const userId = ref(null)
+const newFile = ref(null);
+const userId = ref(null);
 const selectedMateri = ref({
     id: null,
     guru_id: null,
@@ -22,17 +21,17 @@ const selectedMateri = ref({
     deskripsi: "",
 });
 
-// FETCH DATA SESUAI ID NYA (AMBIL USER ID NYA DULU PAKAI ENDPOINT INI)
+// Ambil user ID
 const fetchUserId = async () => {
     try {
-        const res = await api.get("/auth/profile")
-        userId.value = res.data.id
+        const res = await api.get("/auth/profile");
+        userId.value = res.data.id;
     } catch (error) {
-        console.error("Error fetch user ID :", error)
+        console.error("Error fetch user ID :", error);
     }
-}
+};
 
-//  ambil data materi
+// Ambil data materi
 const fetchModulePembelajaran = async () => {
     try {
         const res = await api.get("/module-pembelajaran");
@@ -42,37 +41,33 @@ const fetchModulePembelajaran = async () => {
     }
 };
 
-// Handle pilih file → simpan di frontend dulu
+// Pilih file → simpan di frontend
 const handleFileSelect = (event) => {
     const file = event.files?.[0];
     if (file) {
-        newFile.value = file; // simpan di memory
+        newFile.value = file;
         toast.add({ severity: "info", summary: "File Selected", detail: file.name, life: 2000 });
     }
 };
 
-
-//  update materi
 const updateMateri = async () => {
     try {
         const materi = selectedMateri.value;
-        let fileToSave = materi.file_url; // pakai file lama kalau tidak upload baru
-
+        let fileToSave = materi.file_url;
 
         if (newFile.value) {
             const formData = new FormData();
             formData.append("file", newFile.value);
+            formData.append("judul", materi.judul);
+            formData.append("video_url", materi.video_url);
+            formData.append("deskripsi", materi.deskripsi);
+            formData.append("guru_id", userId.value); // <= wajib dikirim
 
             const res = await api.post("/uploads", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
 
-            // console.log("UPLOAD RESPONSE:", res.data); // 👈 CEK INI
             fileToSave = res.data.url;
-        }
-        if (!materi.judul || !materi.video_url || !fileToSave) {
-            toast.add({ severity: "warn", summary: "Check the Form", detail: "Please ensure all fields are filled.", life: 3000 });
-            return;
         }
 
         await api.put(`/module-pembelajaran/${materi.id}`, {
@@ -81,25 +76,23 @@ const updateMateri = async () => {
             file_url: fileToSave,
             deskripsi: materi.deskripsi,
             link_zoom: materi.link_zoom,
-            pass_code: materi.pass_code
+            pass_code: materi.pass_code,
+            guru_id: userId.value // <= wajib juga dikirim saat update
         });
 
-        toast.add({ severity: "success", summary: "Berhasil", detail: "Materi berhasil diperbarui", life: 2000 });
-        visible.value = false;
-        await fetchModulePembelajaran();
     } catch (error) {
-        toast.add({ severity: "error", summary: "Gagal Edit", detail: error.message, life: 3000 });
+        console.error("UPLOAD PDF ERROR:", error);
     }
 };
 
-// 🔹 buka dialog edit
+// Buka dialog edit
 const openEditDialog = (materi) => {
     selectedMateri.value = { ...materi }; // copy data lama
-    newFile.value = null; // reset upload baru
+    newFile.value = null;
     visible.value = true;
 };
 
-//  hapus materi
+// Hapus materi
 const deleteMateri = async (id) => {
     const confirm = await Swal.fire({
         title: "Are you sure, you want to delete this Material?",
@@ -122,6 +115,7 @@ const deleteMateri = async (id) => {
     }
 };
 
+// Embed YouTube
 const getEmbedUrl = (url) => {
     if (!url) return "";
     const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w\-]{11})/);
@@ -129,6 +123,7 @@ const getEmbedUrl = (url) => {
     return videoId ? `https://www.youtube.com/embed/${videoId}` : "";
 };
 
+// Buka PDF
 const bukaPdf = (materi) => {
     if (!materi.id) {
         toast.add({
@@ -144,10 +139,9 @@ const bukaPdf = (materi) => {
     window.open(pdfUrl, "_blank");
 };
 
-
 onMounted(async () => {
-    await fetchUserId()
-    await fetchModulePembelajaran()
+    await fetchUserId();
+    await fetchModulePembelajaran();
 });
 </script>
 
@@ -169,24 +163,23 @@ onMounted(async () => {
                             <div class="flex flex-col md:flex-row justify-between md:items-center flex-1 gap-6">
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
                                     <div class="grid gap-3">
-                                        <span class="text-xl text-surface-500 dark:text-surface-400">{{
-                                            materi.judul }}</span>
+                                        <span class="text-xl text-surface-500 dark:text-surface-400">{{ materi.judul
+                                            }}</span>
                                         <div class="flex space-x-3 text-lg max-h-40 overflow-auto break-words">
                                             <span v-tooltip.bottom="'Link Meeting'">{{ materi.link_zoom }}</span>
                                         </div>
                                         <div class="flex space-x-3 text-lg max-h-40 overflow-auto break-words">
-                                            <i v-tooltip.bottom="'Passcode Meeting'">{{
-                                                materi.pass_code }}</i>
+                                            <i v-tooltip.bottom="'Passcode Meeting'">{{ materi.pass_code }}</i>
                                         </div>
-                                        <div class="text-sm  max-h-40 overflow-auto break-words"
+                                        <div class="text-sm max-h-40 overflow-auto break-words"
                                             v-html="materi.deskripsi"></div>
 
                                         <div class="footer">
                                             <Button icon="pi pi-file-pdf" label="File PDF" @click="bukaPdf(materi)" />
                                         </div>
                                     </div>
-
                                 </div>
+
                                 <div class="flex flex-col md:items-end gap-8">
                                     <div class="flex flex-row-reverse md:flex-row gap-2">
                                         <Button icon="pi pi-trash" severity="danger" outlined
@@ -197,27 +190,29 @@ onMounted(async () => {
                                             :style="{ width: '50rem' }"
                                             :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" v-if="selectedMateri">
                                             <span class="text-surface-500 dark:text-surface-400 block mb-8">
-                                                Updating Material.</span>
-                                            <div class="flex items-center gap-4 mb-4 ">
-                                                <label for="judulMateri" class="font-semibold w-50">Material
-                                                    Title</label>
+                                                Updating Material.
+                                            </span>
+
+                                            <div class="flex items-center gap-4 mb-4">
+                                                <label class="font-semibold w-50">Material Title</label>
                                                 <InputText v-model="selectedMateri.judul" class="w-full"
                                                     placeholder="Enter Material Title" />
                                             </div>
+
                                             <div class="flex items-center gap-4 mb-4">
-                                                <label for="urlVideo" class="font-semibold w-50">Video URL</label>
+                                                <label class="font-semibold w-50">Video URL</label>
                                                 <InputText v-model="selectedMateri.video_url"
                                                     placeholder="Enter Youtube link" class="w-full" />
                                             </div>
+
                                             <div class="flex items-center gap-4 mb-4">
-                                                <label for="mata pelajaran" class="font-semibold w-50">
-                                                    PDF File</label>
+                                                <label class="font-semibold w-50">PDF File</label>
                                                 <div class="flex flex-col w-full">
                                                     <FileUpload mode="basic" name="file" accept=".pdf"
                                                         chooseLabel="Select File" :customUpload="true"
                                                         class="w-full mb-2" @select="handleFileSelect" />
 
-                                                    <!-- tampilkan file lama -->
+                                                    <!-- File lama -->
                                                     <div v-if="selectedMateri.file_url && !newFile"
                                                         class="text-sm text-gray-500 mt-1">
                                                         Current File:
@@ -225,31 +220,36 @@ onMounted(async () => {
                                                             class="text-blue-500 underline">Open File</a>
                                                     </div>
 
-                                                    <!-- tampilkan file baru yang dipilih -->
+                                                    <!-- File baru -->
                                                     <div v-if="newFile" class="text-sm text-green-600 mt-1">
-                                                        New File Selected: {{ newFile.name }}
+                                                        New File Selected: {{ newFile?.name }}
                                                     </div>
                                                 </div>
                                             </div>
+
                                             <div class="flex items-center gap-4 mb-8">
-                                                <label for="description" class="font-semibold w-50">Description</label>
+                                                <label class="font-semibold w-50">Description</label>
                                                 <Textarea v-model="selectedMateri.deskripsi"
                                                     placeholder="Enter Description" class="w-full" />
                                             </div>
+
                                             <div class="flex items-center gap-4 mb-8">
-                                                <label for="linkZoom" class="font-semibold w-50">Link Zoom</label>
+                                                <label class="font-semibold w-50">Link Zoom</label>
                                                 <InputText v-model="selectedMateri.link_zoom" class="w-full" />
                                             </div>
+
                                             <div class="flex items-center gap-4 mb-8">
-                                                <label for="passcode" class="font-semibold w-50">Passcode Zoom</label>
+                                                <label class="font-semibold w-50">Passcode Zoom</label>
                                                 <InputText v-model="selectedMateri.pass_code" class="w-full" />
                                             </div>
+
                                             <div class="flex justify-end gap-2">
                                                 <Button type="button" label="Cancel" severity="secondary"
                                                     @click="visible = false"></Button>
                                                 <Button label="Save" @click="updateMateri" />
                                             </div>
                                         </Dialog>
+
                                         <Button icon="pi pi-pencil" label="Edit Material"
                                             @click="openEditDialog(materi)" />
                                     </div>
