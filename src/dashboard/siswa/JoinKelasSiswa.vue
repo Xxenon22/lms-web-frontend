@@ -142,16 +142,22 @@ const kirimSemuaData = async (materiId) => {
 
 const fetchSoalByBankSoalId = async (bankSoalId, materiId) => {
     try {
-        const { data } = await api.get(`/soal/${bankSoalId}`, {
+        const { data } = await api.get(`/soal/soal-siswa/${bankSoalId}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
 
         // data adalah array soal
         const mapped = (data || []).map(s => ({
             ...s,
-            gambar_url: s.gambar ? `${import.meta.env.VITE_API_URL}/uploads/gambar-soal/${s.gambar}` : null,
-            gambarEssai_url: s.gambar_soal_essai ? `${import.meta.env.VITE_API_URL}/uploads/gambar-soal/${s.gambar_soal_essai}` : null,
+            gambar_url: s.gambar
+                ? `data:${s.gambar_mimetype};base64,${s.gambar}`
+                : null,
+
+            gambarEssai_url: s.gambar_soal_essai
+                ? `data:${s.gambar_essai_mimetype};base64,${s.gambar_soal_essai}`
+                : null,
         }));
+
 
         const soalPG = mapped.filter(s => s.pertanyaan && String(s.pertanyaan).trim() !== '');
         const soalEssai = mapped.filter(s => (s.pertanyaan_essai && String(s.pertanyaan_essai).trim() !== '') || s.gambar_soal_essai);
