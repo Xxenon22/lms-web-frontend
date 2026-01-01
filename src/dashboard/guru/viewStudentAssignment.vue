@@ -8,6 +8,8 @@ const router = useRouter()
 const studentList = ref([])
 const kelasId = route.params.kelasId
 const currentAssignmentId = route.params.assignmentId
+const photoKey = ref(Date.now());
+
 
 // daftar materi di kelas ini
 const materiKelas = ref([])
@@ -50,8 +52,8 @@ const fetchStudentList = async () => {
                 status: hasProgress && hasJawaban ? "Completed" : "Not Completed",
                 assignmentId: jawabanSiswa?.bank_soal_id || null,
                 nilai: jawabanSiswa?.nilai || null,
-                photo_profiles_user: student.photo_profiles_user
-                    ? `${import.meta.env.VITE_API_URL}${student.photo_profiles_user}`
+                photo_profile: student.id
+                    ? `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${student.id}`
                     : null
             })
         }
