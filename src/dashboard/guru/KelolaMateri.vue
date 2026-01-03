@@ -87,11 +87,11 @@ const submitMateri = async () => {
 
     await api.post("/module-pembelajaran", formData);
 
-    toast.add({ severity: "success", summary: "Success" });
+    toast.add({ severity: "success", summary: "Success", life: 3000 });
     resetForm();
   } catch (err) {
     console.error(err);
-    toast.add({ severity: "error", summary: "Failed" });
+    toast.add({ severity: "error", summary: "Failed", life: 3000 });
   } finally {
     loading.value = false;
   }

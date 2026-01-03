@@ -167,7 +167,7 @@ const updateMateri = async () => {
         toast.add({
             severity: "success",
             summary: "Updated",
-            detail: "Materi berhasil diupdate",
+            detail: "Material successfully updated",
             life: 1500,
         });
 
@@ -202,7 +202,7 @@ const uploadPdf = async (materiId) => {
         toast.add({
             severity: "info",
             summary: "PDF Updated",
-            detail: "File PDF berhasil diperbarui",
+            detail: "PDF file uploaded successfully",
             life: 2000,
         });
 
@@ -210,7 +210,7 @@ const uploadPdf = async (materiId) => {
         toast.add({
             severity: "warn",
             summary: "PDF Error",
-            detail: "Gagal upload PDF",
+            detail: "Failed to upload PDF",
             life: 3000,
         });
     }
@@ -275,7 +275,7 @@ const deleteMateri = async (materiUuid) => {
         toast.add({
             severity: "success",
             summary: "Deleted",
-            detail: "Materi berhasil dihapus dari semua kelas",
+            detail: "Material successfully removed from all classes",
             life: 2000
         });
 
@@ -288,7 +288,7 @@ const deleteMateri = async (materiUuid) => {
         toast.add({
             severity: "error",
             summary: "Failed",
-            detail: "Gagal menghapus materi",
+            detail: "failed to delete material",
             life: 3000
         });
     }
@@ -345,7 +345,7 @@ onMounted(async () => {
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
                                     <div class="grid gap-3">
                                         <span class="text-xl text-surface-500 dark:text-surface-400">{{ materi.judul
-                                            }}</span>
+                                        }}</span>
                                         <div class="flex space-x-3 text-lg max-h-40 overflow-auto break-words">
                                             <span v-tooltip.bottom="'Link Meeting'">{{ materi.link_zoom }}</span>
                                         </div>

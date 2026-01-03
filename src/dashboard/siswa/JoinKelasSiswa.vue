@@ -33,8 +33,10 @@ const isLoading = ref(true)
 // const fileUrl = ref(null);
 // const uploaded = ref(false);
 const isHistory = (materi) => {
-    return materi?.status_selesai === true
-}
+    const p = progressMateriMap[materi.id];
+    return materi?.status_selesai === true || p?.langkah_aktif === "4";
+};
+
 const uploadedFiles = ref({})
 
 // map soal_id -> jawaban (dari jawaban_siswa) untuk user ini
@@ -66,7 +68,8 @@ const fetchProgressMateri = async () => {
             progressMateriMap[item.materi_id] = item;
 
             if (item.langkah_aktif === "4") {
-                const materiId = Number(item.materi_id); // pastikan number
+                const materiId = Number(item.materi_id);
+
                 if (!selesaiMateri.value.includes(materiId)) {
                     selesaiMateri.value.push(materiId);
                 }
@@ -196,8 +199,18 @@ const fetchSoalByBankSoalId = async (bankSoalId, materiId) => {
 
 const fetchMateriById = async () => {
     try {
-        const res = await api.get(`/module-pembelajaran/kelas/${kelasId}`);
-        const materiData = res.data || [];
+        const res = await api.get(`/module-pembelajaran/siswa/${userId.value}/kelas/${kelasId}`);
+        const materiRaw = res.data || [];
+
+        console.log("Materi Raw:", materiRaw);
+        const materiData = materiRaw;
+
+
+        daftarMateri.value = materiData;
+
+        activePanel.value = materiData[0]?.id ?? null;
+
+        // const materiData = Object.values(materiMap);
 
         // ambil jawaban siswa dulu
         const jawabanRes = await api.get("/jawaban-siswa", {
@@ -215,6 +228,7 @@ const fetchMateriById = async () => {
         for (const materi of materiData) {
             // inisialisasi progress-related state
             const p = progressMateriMap[materi.id];
+            materi.status_selesai = p?.langkah_aktif === "4";
             videoSelesai.value[materi.id] = p?.video_selesai ?? false;
             pdfSelesai.value[materi.id] = p?.pdf_selesai ?? false;
             activeSteps.value[materi.id] = p?.langkah_aktif ?? "1";
@@ -275,7 +289,11 @@ const fetchMateriById = async () => {
         if (daftarMateri.value.length > 0) {
             activePanel.value = daftarMateri.value[0].id;
         }
+
+        isLoading.value = false;
+        console.log("Daftar Materi:", daftarMateri.value);
     } catch (err) {
+        isLoading.value = false;
         console.error('fetchMateriById', err);
         toast.add({ severity: 'error', summary: 'Failed to retrieve Material', detail: err.message || err, life: 4000 });
     }
@@ -627,6 +645,90 @@ const fetchUploadedFiles = async (materi) => {
     }
 };
 
+const downloadFile = async (url) => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+
+    const blobUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = blobUrl;
+    a.download = url.split("/").pop(); // nama file otomatis
+    document.body.appendChild(a);
+    a.click();
+
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(blobUrl);
+};
+
+
+const openFile = (url) => {
+    window.open(url, '_blank');
+};
+
+const deleteFile = async (fileId, materiId) => {
+    try {
+        await api.delete(`/jawaban-siswa/file/${fileId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`
+            }
+        });
+
+        uploadedFiles.value[materiId] =
+            uploadedFiles.value[materiId].filter(f => f.id !== fileId);
+
+        toast.add({
+            severity: "success",
+            summary: "File deleted",
+            life: 2000
+        });
+    } catch (err) {
+        console.error(err);
+        toast.add({
+            severity: "error",
+            summary: "Failed to delete file",
+            life: 3000
+        });
+    }
+};
+
+const editFile = async (fileId, newFile, materiId) => {
+    try {
+        const formData = new FormData();
+        formData.append("file", newFile);
+
+        const res = await api.put(
+            `/jawaban-siswa/file/${fileId}`,
+            formData,
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "multipart/form-data"
+                }
+            }
+        );
+
+        const updated = res.data.file;
+
+        uploadedFiles.value[materiId] =
+            uploadedFiles.value[materiId].map(f =>
+                f.id === fileId ? updated : f
+            );
+
+        toast.add({
+            severity: "success",
+            summary: "File updated",
+            life: 2000
+        });
+    } catch (err) {
+        console.error(err);
+        toast.add({
+            severity: "error",
+            summary: "Failed to update file",
+            life: 3000
+        });
+    }
+};
 
 
 onMounted(async () => {
@@ -648,9 +750,9 @@ onMounted(async () => {
         await fetchProgressMateri();
         await fetchClassroom();
         await fetchMateriById();
-        for (const materi of daftarMateri.value) {
-            await fetchUploadedFiles(materi);
-        }
+        // for (const materi of daftarMateri.value) {
+        //     await fetchUploadedFiles(materi);
+        // }
         await fetchLinkGroupById();
         await nextTick();
         setupYouTubePlayers();
@@ -723,6 +825,7 @@ onMounted(async () => {
         <div v-else class="m-5">
             <Panel toggleable v-for="materi in daftarMateri" :collapsed="activePanel !== materi.id"
                 @toggle="() => activePanel = activePanel === materi.id ? null : materi.id" :key="materi.id">
+
                 <template #header>
                     <div class="flex items-center justify-between w-full">
                         <div class="flex items-center gap-2">
@@ -730,7 +833,8 @@ onMounted(async () => {
                                 <i v-if="!materi.guru_foto" class="pi pi-user"></i>
                             </Avatar>
                             <span class="font-bold">Educational Objectives: {{ materi.judul }}</span>
-                            <Tag v-if="selesaiMateri[materi.id]" severity="success" value="Selesai" class="ml-2" />
+                            <Tag v-if="selesaiMateri.includes(Number(materi.id))
+                            " severity="success" value="Finished" class="ml-2" />
                         </div>
 
                         <Button label="Join Meeting" @click="bukaLinkZoom(materi)" />
@@ -739,29 +843,62 @@ onMounted(async () => {
 
                 <template #footer>
                     <!-- UPLOAD GAMBAR / PDF JAWABAN SISWA -->
-                    <FileUpload ref="fileUpload" mode="advanced" name="files" customUpload :multiple="true"
-                        accept="image/*,application/pdf" :maxFileSize="5000000"
-                        @uploader="(e) => onAdvancedUpload(e, materi.id)" v-if="!isHistory(materi)">
+                    <FileUpload mode="advanced" customUpload multiple accept="image/*,application/pdf"
+                        :maxFileSize="5000000" @uploader="e => onAdvancedUpload(e, materi.id)">
                         <template #empty>
                             <span>Drag & drop image or PDF here</span>
                         </template>
                     </FileUpload>
 
-                    <!-- PREVIEW FILE YANG SUDAH DIUPLOAD -->
-                    <div v-for="file in uploadedFiles[materi.id]" :key="file.id" class="mb-4">
-                        <!-- PDF -->
-                        <iframe v-if="file.file_mime === 'application/pdf'" :src="file.url" width="100%" height="500"
-                            style="border:none" />
+                    <!-- LIST FILE JAWABAN SISWA -->
 
-                        <!-- IMAGE -->
-                        <img v-else-if="file.file_mime?.startsWith('image/')" :src="file.url"
-                            class="w-full max-w-md rounded shadow mx-auto" />
 
-                        <!-- FALLBACK -->
-                        <p v-else class="text-center text-gray-500">
-                            File tidak dapat ditampilkan
-                        </p>
+                    <div v-if="uploadedFiles[materi.id]?.length" class="space-y-3 mt-4">
+                        <div v-for="file in uploadedFiles[materi.id]" :key="file.id"
+                            class="flex items-center justify-between p-4 border rounded-lg bg-surface-50 hover:shadow transition">
+
+                            <!-- LEFT -->
+                            <div class="flex items-center gap-4">
+                                <!-- ICON -->
+                                <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-primary-100">
+                                    <i v-if="file.file_mime === 'application/pdf'"
+                                        class="pi pi-file-pdf text-red-500 text-xl"></i>
+
+                                    <i v-else-if="file.file_mime?.startsWith('image/')"
+                                        class="pi pi-image text-blue-500 text-xl"></i>
+
+                                    <i v-else class="pi pi-file text-gray-500 text-xl"></i>
+                                </div>
+
+                                <!-- FILE INFO -->
+                                <div class="flex flex-col">
+                                    <span class="font-semibold break-all">
+                                        {{ file.file_name }}
+                                    </span>
+
+                                    <span class="text-sm text-gray-500">
+                                        {{ formatDate(file.created_at) }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- ACTION -->
+                            <div class="flex gap-2">
+                                <Button icon="pi pi-download" severity="secondary" size="small"
+                                    @click="downloadFile(file.url)" />
+
+                                <Button icon="pi pi-external-link" size="small" @click="openFile(file.url)" />
+                                <Button icon="pi pi-trash" size="small" severity="danger"
+                                    @click="deleteFile(file.id, materi.id)" />
+                            </div>
+                        </div>
                     </div>
+
+                    <!-- EMPTY STATE -->
+                    <div v-else class="text-gray-400 text-sm mt-4 italic">
+                        No uploaded files yet.
+                    </div>
+
 
                     <div class="flex justify-end mt-3">
                         <span class="text-surface-500 dark:text-surface-400">
@@ -831,74 +968,78 @@ onMounted(async () => {
                         <StepItem value="3">
                             <Step>Learning Unit 3</Step>
                             <StepPanel v-if="activeSteps[materi.id] === '3'">
-                                <div class="flex flex-col h-full space-y-5">
-                                    <h1 class="font-bold">{{ materi.judul_penugasan }}</h1>
-                                    <div v-for="(soal, index) in soalList[materi.id]?.pg || []" :key="soal.id"
-                                        class="mb-6">
-                                        <Card class="space-y-2">
-                                            <template #header>
-                                                <div class="flex items-center m-3">
-                                                    <Tag severity="info" :value="`${index + 1}`" />
-                                                    <div class="ml-2 font-semibold overflow-auto break-all"
-                                                        v-html="soal.pertanyaan"></div>
-                                                </div>
-                                            </template>
-                                            <template #content>
-                                                <div class="flex flex-col gap-4">
-                                                    <div class="flex justify-center items-center">
-                                                        <img v-if="soal.gambar_url" :src="soal.gambar_url"
-                                                            alt="Gambar Soal" class="w-64 rounded" />
-                                                    </div>
-                                                    <div v-for="(opsi, key) in { A: soal.pg_a, B: soal.pg_b, C: soal.pg_c, D: soal.pg_d, E: soal.pg_e }"
-                                                        :key="key" class="flex items-center gap-2" :class="{
-                                                            'bg-green-100': isHistory && key === soal.kunci_jawaban,
-                                                            'bg-red-100': isHistory && key === soal.jawaban_siswa && key !== soal.kunci_jawaban
-                                                        }">
-                                                        <RadioButton :inputId="`${soal.id}-${key}`"
-                                                            v-model="selectedAnswers[materi.id][soal.id]" :value="key"
-                                                            :name="`soal-${soal.id}`" :disabled="isHistory(materi)" />
-                                                        <label :for="`${soal.id}-${key}`">{{ key }}. {{ opsi }}</label>
-                                                    </div>
-                                                </div>
+                                <div v-if="soalList[materi.id]">
 
-
-                                            </template>
-                                        </Card>
-                                    </div>
-
-                                    <div v-for="(soal, index) in soalList[materi.id]?.essai || []" :key="soal.id"
-                                        class="mb-6">
-                                        <Card class="space-y-2">
-                                            <template #header>
-                                                <div class="flex flex-col">
+                                    <div class="flex flex-col h-full space-y-5">
+                                        <h1 class="font-bold">{{ materi.judul_penugasan }}</h1>
+                                        <div v-for="(soal, index) in soalList[materi.id].pg || []" :key="soal.id"
+                                            class="mb-6">
+                                            <Card class="space-y-2">
+                                                <template #header>
                                                     <div class="flex items-center m-3">
                                                         <Tag severity="info" :value="`${index + 1}`" />
-                                                        <div class="ml-2 font-semibold flex overflow-auto break-all"
-                                                            v-html="soal.pertanyaan_essai">
+                                                        <div class="ml-2 font-semibold overflow-auto break-all"
+                                                            v-html="soal.pertanyaan"></div>
+                                                    </div>
+                                                </template>
+                                                <template #content>
+                                                    <div class="flex flex-col gap-4">
+                                                        <div class="flex justify-center items-center">
+                                                            <img v-if="soal.gambar_url" :src="soal.gambar_url"
+                                                                alt="Gambar Soal" class="w-64 rounded" />
+                                                        </div>
+                                                        <div v-for="(opsi, key) in { A: soal.pg_a, B: soal.pg_b, C: soal.pg_c, D: soal.pg_d, E: soal.pg_e }"
+                                                            :key="key" class="flex items-center gap-2" :class="{
+                                                                'bg-green-100': isHistory && key === soal.kunci_jawaban,
+                                                                'bg-red-100': isHistory && key === soal.jawaban_siswa && key !== soal.kunci_jawaban
+                                                            }">
+                                                            <RadioButton :inputId="`${soal.id}-${key}`"
+                                                                v-model="selectedAnswers[materi.id][soal.id]"
+                                                                :value="key" :name="`soal-${soal.id}`"
+                                                                :disabled="isHistory(materi)" />
+                                                            <label :for="`${soal.id}-${key}`">{{ key }}. {{ opsi
+                                                            }}</label>
                                                         </div>
                                                     </div>
-                                                    <div class="flex justify-center">
-                                                        <img v-if="soal.gambarEssai_url" :src="soal.gambarEssai_url"
-                                                            alt="Gambar Soal" class="w-64 rounded" />
+
+
+                                                </template>
+                                            </Card>
+                                        </div>
+
+                                        <div v-for="(soal, index) in soalList[materi.id].essai || []" :key="soal.id"
+                                            class="mb-6">
+                                            <Card class="space-y-2">
+                                                <template #header>
+                                                    <div class="flex flex-col">
+                                                        <div class="flex items-center m-3">
+                                                            <Tag severity="info" :value="`${index + 1}`" />
+                                                            <div class="ml-2 font-semibold flex overflow-auto break-all"
+                                                                v-html="soal.pertanyaan_essai">
+                                                            </div>
+                                                        </div>
+                                                        <div class="flex justify-center">
+                                                            <img v-if="soal.gambarEssai_url" :src="soal.gambarEssai_url"
+                                                                alt="Gambar Soal" class="w-64 rounded" />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </template>
-                                            <template #content>
-                                                <div class="flex flex-col gap-4">
-                                                    <Textarea v-model="jawabanEssaiSiswa[materi.id][soal.id]"
-                                                        placeholder="Submit your Answer"
-                                                        :disabled="selesaiMateri.includes(materi.id)"
-                                                        :readonly="isHistory(materi)" />
-                                                </div>
-                                            </template>
-                                        </Card>
-                                    </div>
-                                    <div class="flex py-6 gap-2">
-                                        <Button label="Back" severity="secondary"
-                                            @click="() => activeSteps[materi.id] = '2'" />
-                                        <Button label="Next"
-                                            @click="() => { activeSteps[materi.id] = '4'; simpanProgress(materi.id); }"
-                                            :disabled="isHistory(materi)" />
+                                                </template>
+                                                <template #content>
+                                                    <div class="flex flex-col gap-4">
+                                                        <Textarea v-model="jawabanEssaiSiswa[materi.id][soal.id]"
+                                                            placeholder="Submit your Answer"
+                                                            :disabled="selesaiMateri.includes(materi.id)"
+                                                            :readonly="isHistory(materi)" />
+                                                    </div>
+                                                </template>
+                                            </Card>
+                                        </div>
+                                        <div class="flex py-6 gap-2">
+                                            <Button label="Back" severity="secondary"
+                                                @click="() => activeSteps[materi.id] = '2'" />
+                                            <Button label="Next"
+                                                @click="() => { activeSteps[materi.id] = '4'; simpanProgress(materi.id); }" />
+                                        </div>
                                     </div>
                                 </div>
                             </StepPanel>
@@ -914,8 +1055,9 @@ onMounted(async () => {
                                     <div class="flex py-6 gap-2">
                                         <Button label="Back" severity="secondary"
                                             @click="() => activeSteps[materi.id] = '3'" />
-                                        <Button label="Finished" @click="() => kirimSemuaData(materi.id)"
+                                        <Button label="Submit" @click="kirimSemuaData(materi.id)"
                                             :disabled="isHistory(materi)" />
+
                                     </div>
                                 </div>
                             </StepPanel>
