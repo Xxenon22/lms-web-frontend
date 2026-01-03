@@ -148,7 +148,49 @@ const fetchSelectedInstructor = async (order = "asc") => {
     }
 }
 
+const validateForm = () => {
+    const errors = [];
+
+    if (!selectedKelas.value) errors.push("Class");
+    if (!tanggal.value) errors.push("Day / Date");
+    if (!studyTime.value.trim()) errors.push("Study Time");
+    if (!namaGuru.value) errors.push("Instructor");
+    if (!fase.value) errors.push("Phase");
+
+    if (!tujuanPemb.value.trim()) errors.push("Learning Objective");
+    if (
+        !memahami.value.trim() &&
+        !mengaplikasikan.value.trim() &&
+        !merefleksi.value.trim()
+    ) {
+        errors.push("At least one Learning Experience (Memahami / Mengaplikasikan / Merefleksi)");
+    }
+
+
+    if (
+        !asesmenMemahami.value.trim() &&
+        !asesmenMengaplikasikan.value.trim() &&
+        !asesmenMerefleksi.value.trim()
+    ) {
+        errors.push("At least one Assessment");
+    }
+
+    if (errors.length > 0) {
+        toast.add({
+            severity: "warn",
+            summary: "Incomplete Form",
+            detail: `Please fill: ${errors.join(", ")}`,
+            life: 4000,
+        });
+        return false;
+    }
+
+    return true;
+};
+
+
 const submitRPK = async () => {
+    if (!validateForm()) return;
     try {
         // --- 1. Insert ke rpk_memahami ---
         const { data: memahamiRes } = await api.post("/rpk-memahami", {

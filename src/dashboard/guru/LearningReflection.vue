@@ -61,7 +61,7 @@ const submitRPK = async () => {
 
         if (!selectedKelas.value) {
             toast.add({
-                severity: 'error',
+                severity: 'warn',
                 summary: 'Class Required',
                 detail: 'Please select a class.',
                 life: 3000
@@ -85,7 +85,7 @@ const submitRPK = async () => {
         for (const item of requiredFields) {
             if (!item.field || item.field.toString().trim() === '') {
                 toast.add({
-                    severity: 'error',
+                    severity: 'warn',
                     summary: 'Field Required',
                     detail: `${item.label} must be filled out.`,
                     life: 3000

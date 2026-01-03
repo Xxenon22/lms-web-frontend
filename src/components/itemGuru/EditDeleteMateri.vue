@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed, watch } from "vue";
+import { ref, onMounted, computed } from "vue";
 import api from "../../services/api";
 import { useToast } from "primevue";
 import Swal from "sweetalert2";
@@ -22,6 +22,9 @@ const selectedMateri = ref({
     deskripsi: "",
 });
 const isSaving = ref(false);
+const originalMateri = ref(null);
+const originalKelas = ref([]);
+
 
 // Ambil user ID
 const fetchUserId = async () => {
@@ -74,9 +77,9 @@ const materiUnique = computed(() => {
     return Array.from(map.values());
 });
 
-watch(materiUnique, (v) => {
-    console.log("MATERI UNIQUE:", v);
-}, { immediate: true });
+// watch(materiUnique, (v) => {
+//     console.log("MATERI UNIQUE:", v);
+// }, { immediate: true });
 
 const fetchKelas = async () => {
     const res = await api.get("/kelas");
@@ -101,7 +104,33 @@ const handleFileSelect = (event) => {
     }
 };
 
+const isEditFormValid = computed(() => {
+    const m = selectedMateri.value;
+
+    if (!m) return false;
+
+    // WAJIB (link_zoom OPTIONAL)
+    if (!m.judul?.trim()) return false;
+    if (!m.video_url?.trim()) return false;
+    if (!m.deskripsi?.trim()) return false;
+
+    // minimal 1 kelas harus dipilih
+    if (!selectedKelas.value || selectedKelas.value.length === 0) return false;
+
+    return true;
+});
+
+
 const updateMateri = async () => {
+    if (!isEditFormValid.value) {
+        toast.add({
+            severity: "warn",
+            summary: "Form Incomplete",
+            detail: "All fields are required except Zoom Link",
+            life: 3000,
+        });
+        return;
+    }
     try {
         isSaving.value = true;
         const materi = selectedMateri.value;
@@ -194,34 +223,77 @@ const openEditDialog = (materi) => {
     selectedMateri.value = { ...materi }; // copy data lama
     selectedKelas.value = [...materi.kelas_ids]; // isi kelas lama
 
+    // SIMPAN DATA AWAL
+    originalMateri.value = JSON.parse(JSON.stringify(materi));
+    originalKelas.value = [...materi.kelas_ids];
+
     selectedKelas.value = materi.kelas_ids
         .filter(id => kelasOptions.value.some(k => k.id === id));
     newFile.value = null;
     visible.value = true;
 };
 
+const isFormChanged = computed(() => {
+    if (!originalMateri.value) return false;
+
+    const m = selectedMateri.value;
+    const o = originalMateri.value;
+
+    const materiChanged =
+        m.judul !== o.judul ||
+        m.video_url !== o.video_url ||
+        m.deskripsi !== o.deskripsi ||
+        m.link_zoom !== o.link_zoom ||
+        m.pass_code !== o.pass_code;
+
+    const kelasChanged =
+        JSON.stringify(selectedKelas.value.sort()) !==
+        JSON.stringify(originalKelas.value.sort());
+
+    const fileChanged = !!newFile.value;
+
+    return materiChanged || kelasChanged || fileChanged;
+});
+
 // Hapus materi
-const deleteMateri = async (id) => {
+const deleteMateri = async (materiUuid) => {
     const confirm = await Swal.fire({
-        title: "Are you sure, you want to delete this Material?",
+        title: "Delete this material?",
+        text: "Material will be removed from all classes",
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes, delete it",
+        confirmButtonText: "Yes, delete all",
         cancelButtonText: "Cancel",
     });
 
     if (!confirm.isConfirmed) return;
 
     try {
-        await api.delete(`/module-pembelajaran/${id}`);
-        toast.add({ severity: "success", summary: "Berhasil Dihapus", detail: "Materi berhasil dihapus", life: 2000 });
-        await fetchModulePembelajaran();
+        await api.delete(`/module-pembelajaran/uuid/${materiUuid}`);
+
+        toast.add({
+            severity: "success",
+            summary: "Deleted",
+            detail: "Materi berhasil dihapus dari semua kelas",
+            life: 2000
+        });
+
+        // HAPUS LANGSUNG DI FRONTEND (tanpa fetch ulang)
+        materiPembelajaran.value = materiPembelajaran.value.filter(
+            m => m.materi_uuid !== materiUuid
+        );
+
     } catch (error) {
-        toast.add({ severity: "error", summary: "Gagal Hapus", detail: error.message, life: 3000 });
+        toast.add({
+            severity: "error",
+            summary: "Failed",
+            detail: "Gagal menghapus materi",
+            life: 3000
+        });
     }
 };
+
 
 // Embed YouTube
 const getEmbedUrl = (url) => {
@@ -298,7 +370,7 @@ onMounted(async () => {
                                             <div class="space-x-2">
                                                 <Button icon="pi pi-trash" severity="danger" outlined
                                                     class="flex-auto md:flex-initial whitespace-nowrap"
-                                                    @click="deleteMateri(materi.id)"></Button>
+                                                    @click="deleteMateri(materi.materi_uuid)"></Button>
 
                                                 <Button icon="pi pi-pencil" label="Edit Material"
                                                     @click="openEditDialog(materi)" />
@@ -319,86 +391,84 @@ onMounted(async () => {
                                     </div>
                                 </div> -->
 
-                                <div class="flex flex-col md:items-end gap-8">
-                                    <div class="flex flex-row-reverse md:flex-row gap-2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                                        <Dialog v-model:visible="visible" modal header="Edit Material"
-                                            :style="{ width: '50rem' }"
-                                            :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" v-if="selectedMateri">
-                                            <span class="text-surface-500 dark:text-surface-400 block mb-8">
-                                                Updating Material.
-                                            </span>
+                <div class="flex flex-col md:items-end gap-8">
+                    <div class="flex flex-row-reverse md:flex-row gap-2">
 
-                                            <div class="flex items-center gap-4 mb-4">
-                                                <label class="font-semibold w-50">Target Class</label>
-                                                <MultiSelect v-model="selectedKelas" :options="kelasOptions"
-                                                    optionLabel="label" optionValue="id" placeholder="Select Class"
-                                                    class="flex w-full overflow-auto break-all" display="chip" />
-                                            </div>
+                        <Dialog v-model:visible="visible" modal header="Edit Material" :style="{ width: '50rem' }"
+                            :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" v-if="selectedMateri">
+                            <span class="text-surface-500 dark:text-surface-400 block mb-8">
+                                Updating Material.
+                            </span>
+
+                            <div class="flex items-center gap-4 mb-4">
+                                <label class="font-semibold w-50">Target Class</label>
+                                <MultiSelect v-model="selectedKelas" :options="kelasOptions" optionLabel="label"
+                                    optionValue="id" placeholder="Select Class"
+                                    class="flex w-full overflow-auto break-all" display="chip" />
+                            </div>
 
 
-                                            <div class="flex items-center gap-4 mb-4">
-                                                <label class="font-semibold w-50">Material Title</label>
-                                                <InputText v-model="selectedMateri.judul" class="w-full"
-                                                    placeholder="Enter Material Title" />
-                                            </div>
+                            <div class="flex items-center gap-4 mb-4">
+                                <label class="font-semibold w-50">Material Title</label>
+                                <InputText v-model="selectedMateri.judul" class="w-full"
+                                    placeholder="Enter Material Title" />
+                            </div>
 
-                                            <div class="flex items-center gap-4 mb-4">
-                                                <label class="font-semibold w-50">Video URL</label>
-                                                <InputText v-model="selectedMateri.video_url"
-                                                    placeholder="Enter Youtube link" class="w-full" />
-                                            </div>
+                            <div class="flex items-center gap-4 mb-4">
+                                <label class="font-semibold w-50">Video URL</label>
+                                <InputText v-model="selectedMateri.video_url" placeholder="Enter Youtube link"
+                                    class="w-full" />
+                            </div>
 
-                                            <div class="flex items-center gap-4 mb-4">
-                                                <label class="font-semibold w-50">PDF File</label>
-                                                <div class="flex flex-col w-full">
-                                                    <FileUpload mode="basic" name="file" accept=".pdf"
-                                                        chooseLabel="Select File" :customUpload="true"
-                                                        class="w-full mb-2" @select="handleFileSelect" />
+                            <div class="flex items-center gap-4 mb-4">
+                                <label class="font-semibold w-50">PDF File</label>
+                                <div class="flex flex-col w-full">
+                                    <FileUpload mode="basic" name="file" accept=".pdf" chooseLabel="Select File"
+                                        :customUpload="true" class="w-full mb-2" @select="handleFileSelect" />
 
-                                                    <!-- File lama -->
-                                                    <div v-if="selectedMateri.file_url && !newFile"
-                                                        class="text-sm text-gray-500 mt-1">
-                                                        Current File:
-                                                        <a :href="selectedMateri.file_url" target="_blank"
-                                                            class="text-blue-500 underline">Open File</a>
-                                                    </div>
+                                    <!-- File lama -->
+                                    <div v-if="selectedMateri.file_url && !newFile" class="text-sm text-gray-500 mt-1">
+                                        Current File:
+                                        <a :href="selectedMateri.file_url" target="_blank"
+                                            class="text-blue-500 underline">Open File</a>
+                                    </div>
 
-                                                    <!-- File baru -->
-                                                    <div v-if="newFile" class="text-sm text-green-600 mt-1">
-                                                        New File Selected: {{ newFile?.name }}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="flex items-center gap-4 mb-8">
-                                                <label class="font-semibold w-50">Description</label>
-                                                <Textarea v-model="selectedMateri.deskripsi"
-                                                    placeholder="Enter Description" class="w-full" />
-                                            </div>
-
-                                            <div class="flex items-center gap-4 mb-8">
-                                                <label class="font-semibold w-50">Link Zoom</label>
-                                                <InputText v-model="selectedMateri.link_zoom" class="w-full" />
-                                            </div>
-
-                                            <div class="flex items-center gap-4 mb-8">
-                                                <label class="font-semibold w-50">Passcode Zoom</label>
-                                                <InputText v-model="selectedMateri.pass_code" class="w-full" />
-                                            </div>
-
-                                            <div class="flex justify-end gap-2">
-                                                <Button type="button" label="Cancel" severity="secondary"
-                                                    @click="visible = false"></Button>
-                                                <Button label="Save" :loading="isSaving" :disabled="isSaving"
-                                                    @click="updateMateri" />
-                                            </div>
-                                        </Dialog>
-
+                                    <!-- File baru -->
+                                    <div v-if="newFile" class="text-sm text-green-600 mt-1">
+                                        New File Selected: {{ newFile?.name }}
                                     </div>
                                 </div>
                             </div>
-                        </div>
+
+                            <div class="flex items-center gap-4 mb-8">
+                                <label class="font-semibold w-50">Description</label>
+                                <Textarea v-model="selectedMateri.deskripsi" placeholder="Enter Description"
+                                    class="w-full" />
+                            </div>
+
+                            <div class="flex items-center gap-4 mb-8">
+                                <label class="font-semibold w-50">Link Zoom (optional)</label>
+                                <InputText v-model="selectedMateri.link_zoom" class="w-full" />
+                            </div>
+
+                            <div class="flex items-center gap-4 mb-8">
+                                <label class="font-semibold w-50">Passcode Zoom (optional)</label>
+                                <InputText v-model="selectedMateri.pass_code" class="w-full" />
+                            </div>
+
+                            <div class="flex justify-end gap-2">
+                                <Button type="button" label="Cancel" severity="secondary"
+                                    @click="visible = false"></Button>
+                                <Button label="Save" :loading="isSaving"
+                                    :disabled="!isEditFormValid || isSaving || !isFormChanged" @click="updateMateri" />
+                            </div>
+                        </Dialog>
+
                     </div>
                 </div>
             </template>

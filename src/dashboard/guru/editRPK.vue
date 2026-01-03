@@ -107,6 +107,7 @@ const fetchExistingRPK = async () => {
 
         const res = await api.get(`/rpk/${id}`);
         const data = res.data;
+        console.log("Existing RPK data:", data);
         // === Parent table ===
         rombel.value = data.rombel_id;
         filteredInstructor.value = [...selectedInstructor.value];

@@ -1,6 +1,6 @@
 <script setup>
 import api from '../../services/api';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -9,7 +9,7 @@ const route = useRoute();
 const id = route.params.id
 const router = useRouter()
 
-
+const kelasId = ref(null);
 const rombel = ref("")
 const namaGuru = ref(null)
 const tanggal = ref("")
@@ -42,58 +42,69 @@ const fetchSelectedRombel = async () => {
 
 const fetchSelectedInstructor = async (order = "asc") => {
     try {
-        const res = await api.get("/teacher")
+        const res = await api.get("/teacher");
         selectedInstructor.value = res.data.map(i => ({
             id: Number(i.id),
             name: i.name
         }))
-            .sort((a, b) => {
-                if (order === "asc") {
-                    return a.name.localeCompare(b.name) // A-Z
-                } else {
-                    return b.name.localeCompare(a.name) // Z-A
-                }
-            })
+            .sort((a, b) => order === "asc" ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
+        console.log("Instructor list:", selectedInstructor.value);
     } catch (error) {
-        console.error("fetch instructor :", error)
+        console.error("fetch instructor :", error);
     }
-}
+};
 
 const fetchExistingLr = async () => {
     try {
         const res = await api.get(`/rpk-refleksi/${id}`);
         const data = res.data;
 
-        rombel.value = data.rombel_id
-        filteredInstructor.value = [...selectedInstructor.value];
-        namaGuru.value = selectedInstructor.value.find(
-            i => i.id === data.instructor
-        );
-        tanggal.value = data.hari_tanggal ? new Date(data.hari_tanggal) : null
-        studyTime.value = data.waktu
-        refleksiSiswa.value = data.refleksi_siswa
-        refleksiGuru.value = data.refleksi_guru
-        tngktPencapaian.value = data.tngkt_pencapaian
-        deskPencapaian.value = data.desk_pencapaian
-        followUp.value = data.follow_up
-        pendampinganSiswa.value = data.pendampingan_siswa
-        notes.value = data.keterangan
-    } catch (err) {
-        toast.add({ severity: 'error', summary: 'Failed', detail: 'Failed to load data.', life: 3000 })
-    }
+        kelasId.value = data.kelas_id;
+        rombel.value = data.rombel_id;
+        tanggal.value = data.hari_tanggal ? new Date(data.hari_tanggal) : null;
+        studyTime.value = data.waktu;
+        refleksiSiswa.value = data.refleksi_siswa;
+        refleksiGuru.value = data.refleksi_guru;
+        tngktPencapaian.value = data.tngkt_pencapaian;
+        deskPencapaian.value = data.desk_pencapaian;
+        followUp.value = data.follow_up;
+        pendampinganSiswa.value = data.pendampingan_siswa;
+        notes.value = data.keterangan;
 
-}
+        // 🔥 TUNGGU SAMPAI SUGGESTION SIAP
+        await nextTick();
+
+        if (data.instructor) {
+            const found = selectedInstructor.value.find(
+                i => i.id === Number(data.instructor)
+            );
+
+            console.log("Found instructor:", found);
+
+            namaGuru.value = found ?? null;
+        } else {
+            namaGuru.value = null;
+        }
+
+        filteredInstructor.value = [...selectedInstructor.value];
+
+    } catch (error) {
+        console.error("failed to fetch existing lr :", error);
+    }
+};
+
 
 const updateLr = async () => {
     try {
         await api.put(`/rpk-refleksi/${id}`, {
+            kelas_id: kelasId.value,
             rombel_id: rombel.value,
             hari_tanggal: tanggal.value
                 ? new Date(tanggal.value.getTime() - tanggal.value.getTimezoneOffset() * 60000)
                     .toISOString()
                     .split('T')[0]
                 : null,
-            instructor: namaGuru.value,
+            instructor: namaGuru.value?.id ?? null,
             waktu: studyTime.value,
             refleksi_siswa: refleksiSiswa.value,
             refleksi_guru: refleksiGuru.value,
@@ -134,10 +145,7 @@ onMounted(async () => {
 
 })
 
-const back = () => {
-    router.back()
-}
-
+const back = () => router.back();
 </script>
 
 <template>
@@ -180,6 +188,7 @@ const back = () => {
                                     <AutoComplete v-model="namaGuru" :suggestions="filteredInstructor"
                                         optionLabel="name" dataKey="id" @complete="searchInstructor" dropdown
                                         forceSelection placeholder="-- Select Instructor --" class="w-full" />
+
                                 </div>
                             </div>
                         </div>
