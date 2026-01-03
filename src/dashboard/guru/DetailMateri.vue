@@ -12,12 +12,12 @@ const modulePembelajaran = ref(null);
 const toast = useToast();
 
 const fetchModulePembelajaran = async () => {
-    console.log("Fetching module by ID:", materiId);
+    // console.log("Fetching module by ID:", materiId);
 
     try {
         const res = await api.get(`/module-pembelajaran/${materiId}`);
         modulePembelajaran.value = res.data;
-        console.log("Data ditemukan:", res.data);
+        // console.log("Data ditemukan:", res.data);
     } catch (error) {
         console.error("Gagal mengambil data:", error);
         toast.add({
@@ -41,22 +41,24 @@ const getEmbedUrl = (url) => {
 };
 
 const bukaPdf = () => {
-    if (modulePembelajaran.value?.file_url) {
-        const pdfUrl = `${import.meta.env.VITE_API_URL}${modulePembelajaran.value.file_url}`;
-        window.open(pdfUrl, "_blank");
-    } else {
+    if (!modulePembelajaran.value?.id) {
         toast.add({
             severity: "warn",
             summary: "File Not Found",
-            detail: "PDF file URL is not available.",
+            detail: "PDF tidak tersedia.",
             life: 3000,
         });
+        return;
     }
+
+    const pdfUrl = `${import.meta.env.VITE_API_URL}api/module-pembelajaran/${modulePembelajaran.value.id}/pdf`;
+
+    window.open(pdfUrl, "_blank");
 };
 
 const bukaLinkZoom = () => {
-    if (modulePembelajaran.link_zoom) {
-        window.open(modulePembelajaran.link_zoom, "_blank");
+    if (modulePembelajaran.value?.link_zoom) {
+        window.open(modulePembelajaran.value.link_zoom, "_blank");
     } else {
         toast.add({
             severity: "warn",

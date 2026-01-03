@@ -107,7 +107,7 @@ const fetchClassroom = async () => {
   try {
     const res = await api.get(`/kelas/${targetKelasId}`);
     classroom.value = res.data;
-    console.log("Classroom data:", classroom.value);
+    // console.log("Classroom data:", classroom.value);
     if (!res) {
       toast.add({ severity: "error", summary: "Classroom not found!", life: 3000 });
       return;

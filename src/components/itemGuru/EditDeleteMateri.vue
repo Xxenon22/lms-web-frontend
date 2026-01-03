@@ -1,9 +1,8 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import api from "../../services/api";
 import { useToast } from "primevue";
 import Swal from "sweetalert2";
-
 const toast = useToast();
 const materiPembelajaran = ref([]);
 const visible = ref(false);
@@ -23,6 +22,7 @@ const selectedMateri = ref({
     deskripsi: "",
 });
 const isSaving = ref(false);
+
 // Ambil user ID
 const fetchUserId = async () => {
     try {
@@ -58,8 +58,7 @@ const materiUnique = computed(() => {
 
     materiPembelajaran.value.forEach(m => {
         // ganti key kalau punya materi_parent_id / materi_uuid
-        const key = m.judul;
-
+        const key = m.materi_uuid || m.id;
         if (!map.has(key)) {
             map.set(key, {
                 ...m,
@@ -75,16 +74,20 @@ const materiUnique = computed(() => {
     return Array.from(map.values());
 });
 
+watch(materiUnique, (v) => {
+    console.log("MATERI UNIQUE:", v);
+}, { immediate: true });
+
 const fetchKelas = async () => {
     const res = await api.get("/kelas");
     daftarKelas.value = res.data;
-    console.log("Daftar Kelas:", daftarKelas.value);
+    // console.log("Daftar Kelas:", daftarKelas.value);
 };
 
 const kelasOptions = computed(() => {
     return daftarKelas.value.map(k => ({
         id: k.id,
-        label: `${k.grade_lvl} ${k.name_rombel} - ${k.nama_mapel}`
+        label: `${k.grade_lvl} ${k.major} ${k.name_rombel || ''} - ${k.nama_mapel}`
     }));
 });
 
@@ -186,10 +189,13 @@ const uploadPdf = async (materiId) => {
 
 // Buka dialog edit
 const openEditDialog = (materi) => {
-    console.log("KELAS IDS:", materi.kelas_ids);
-    console.log("OPTIONS:", kelasOptions.value);
+    // console.log("KELAS IDS:", materi.kelas_ids);
+    // console.log("OPTIONS:", kelasOptions.value);
     selectedMateri.value = { ...materi }; // copy data lama
     selectedKelas.value = [...materi.kelas_ids]; // isi kelas lama
+
+    selectedKelas.value = materi.kelas_ids
+        .filter(id => kelasOptions.value.some(k => k.id === id));
     newFile.value = null;
     visible.value = true;
 };
@@ -267,7 +273,7 @@ onMounted(async () => {
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
                                     <div class="grid gap-3">
                                         <span class="text-xl text-surface-500 dark:text-surface-400">{{ materi.judul
-                                        }}</span>
+                                            }}</span>
                                         <div class="flex space-x-3 text-lg max-h-40 overflow-auto break-words">
                                             <span v-tooltip.bottom="'Link Meeting'">{{ materi.link_zoom }}</span>
                                         </div>
@@ -279,13 +285,25 @@ onMounted(async () => {
 
                                         <div class="text-sm text-gray-500">
                                             Sent To Class:
-                                            <p v-for="(k, i) in materi.kelas_list" :key="i">
-                                                {{ k }}<span v-if="i < materi.kelas_list.length - 1">, </span>
-                                            </p>
+                                            <span v-for="(k, i) in materi.kelas_list || []"
+                                                :key="`${materi.materi_uuid}-${i}`">
+                                                {{ k || 'Kelas tidak terdefinisi' }}
+                                                <span v-if="i < materi.kelas_list.length - 1">, </span>
+                                            </span>
                                         </div>
 
-                                        <div class="footer">
+                                        <div class="footer flex justify-between items-center">
                                             <Button icon="pi pi-file-pdf" label="File PDF" @click="bukaPdf(materi)" />
+
+                                            <div class="space-x-2">
+                                                <Button icon="pi pi-trash" severity="danger" outlined
+                                                    class="flex-auto md:flex-initial whitespace-nowrap"
+                                                    @click="deleteMateri(materi.id)"></Button>
+
+                                                <Button icon="pi pi-pencil" label="Edit Material"
+                                                    @click="openEditDialog(materi)" />
+
+                                            </div>
                                         </div>
 
                                     </div>
@@ -303,9 +321,6 @@ onMounted(async () => {
 
                                 <div class="flex flex-col md:items-end gap-8">
                                     <div class="flex flex-row-reverse md:flex-row gap-2">
-                                        <Button icon="pi pi-trash" severity="danger" outlined
-                                            class="flex-auto md:flex-initial whitespace-nowrap"
-                                            @click="deleteMateri(materi.id)"></Button>
 
                                         <Dialog v-model:visible="visible" modal header="Edit Material"
                                             :style="{ width: '50rem' }"
@@ -317,8 +332,8 @@ onMounted(async () => {
                                             <div class="flex items-center gap-4 mb-4">
                                                 <label class="font-semibold w-50">Target Class</label>
                                                 <MultiSelect v-model="selectedKelas" :options="kelasOptions"
-                                                    optionLabel="nama_kelas" optionValue="id" placeholder="Select Class"
-                                                    class="w-full" display="chip" />
+                                                    optionLabel="label" optionValue="id" placeholder="Select Class"
+                                                    class="flex w-full overflow-auto break-all" display="chip" />
                                             </div>
 
 
@@ -380,8 +395,6 @@ onMounted(async () => {
                                             </div>
                                         </Dialog>
 
-                                        <Button icon="pi pi-pencil" label="Edit Material"
-                                            @click="openEditDialog(materi)" />
                                     </div>
                                 </div>
                             </div>
