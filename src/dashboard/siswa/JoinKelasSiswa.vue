@@ -517,38 +517,40 @@ const materiSelesai = computed(() => {
 
 const onAdvancedUpload = async (event, materiId) => {
     try {
-        ensureUploadedFiles(materiId);
-
         const formData = new FormData();
-        for (const file of event.files) {
-            formData.append("files", file);
-        }
 
+        event.files.forEach(file => {
+            formData.append("files", file);
+        });
+
+        formData.append("materi_id", materiId);
         formData.append(
             "bank_soal_id",
-            daftarMateri.value.find(m => Number(m.id) === Number(materiId))?.bank_soal_id || ""
+            daftarMateri.value.find(m => m.id === materiId)?.bank_soal_id || null
         );
-        formData.append("materi_id", materiId);
-        const { data } = await api.post(
+
+        const res = await api.post(
             "/jawaban-siswa/upload-multiple",
             formData,
-            { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "multipart/form-data"
+                }
+            }
         );
 
-        ensureUploadedFiles(materiId);
-
-        uploadedFiles.value[materiId].push(
-            ...data.map(f => ({
-                id: f.id,
-                nama_file: f.nama_file,
-                url: f.url
-            }))
-        );
+        // Backend HARUS return array file
+        uploadedFiles.value[materiId] = res.data.files.map(f => ({
+            id: f.id,
+            file_mime: f.mime,   // ⚠️ backend pakai "mime"
+            url: f.url           // ⚠️ backend sudah kasih URL stream
+        }));
 
 
         toast.add({
             severity: "success",
-            summary: "Upload successful!",
+            summary: "Upload Success",
             life: 3000
         });
 
@@ -556,19 +558,20 @@ const onAdvancedUpload = async (event, materiId) => {
         console.error("Upload error:", err);
         toast.add({
             severity: "error",
-            summary: "Upload failed!",
+            summary: "Upload Failed",
             detail: err.response?.data?.message || err.message,
             life: 3000
         });
     }
 };
 
+
 const ensureUploadedFiles = (materiId) => {
     if (!uploadedFiles.value[materiId]) {
         uploadedFiles.value[materiId] = [];
     }
-};
 
+};
 
 const fetchClassroom = async () => {
     try {
@@ -585,24 +588,19 @@ const fetchClassroom = async () => {
     }
 }
 
-const createPdfUrl = (materi) => {
-    if (!materi.file_pdf || !materi.file_mime) return null;
-
+const createFileUrl = (file) => {
     try {
-        // PostgreSQL bytea biasanya dikirim sebagai base64
-        const byteCharacters = atob(materi.file_pdf);
-        const byteNumbers = new Array(byteCharacters.length);
+        const binary = atob(file.file_data);
+        const bytes = new Uint8Array(binary.length);
 
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
         }
 
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: materi.file_mime });
-
+        const blob = new Blob([bytes], { type: file.file_mime });
         return URL.createObjectURL(blob);
     } catch (err) {
-        console.error("Failed create PDF URL", err);
+        console.error("Create file URL failed", err);
         return null;
     }
 };
@@ -740,28 +738,30 @@ onMounted(async () => {
                 </template>
 
                 <template #footer>
-                    <!-- UPLOAD GAMBAR/PDF DARI JAWABAN SISWA -->
-                    <FileUpload refkt="fileUpload" mode="advanced" name="files" customUpload
-                        @uploader="(e) => onAdvancedUpload(e, materi.id)" :multiple="true"
-                        accept="image/*, application/pdf" :maxFileSize="5000000" v-if="!isHistory(materi)">
+                    <!-- UPLOAD GAMBAR / PDF JAWABAN SISWA -->
+                    <FileUpload ref="fileUpload" mode="advanced" name="files" customUpload :multiple="true"
+                        accept="image/*,application/pdf" :maxFileSize="5000000"
+                        @uploader="(e) => onAdvancedUpload(e, materi.id)" v-if="!isHistory(materi)">
                         <template #empty>
-                            <span>Drag and drop files to here to upload.</span>
+                            <span>Drag & drop image or PDF here</span>
                         </template>
                     </FileUpload>
 
+                    <!-- PREVIEW FILE YANG SUDAH DIUPLOAD -->
                     <div v-for="file in uploadedFiles[materi.id]" :key="file.id" class="mb-4">
-
                         <!-- PDF -->
                         <iframe v-if="file.file_mime === 'application/pdf'" :src="file.url" width="100%" height="500"
                             style="border:none" />
 
                         <!-- IMAGE -->
-                        <img v-else :src="file.url" class="w-full max-w-md rounded shadow mx-auto" />
+                        <img v-else-if="file.file_mime?.startsWith('image/')" :src="file.url"
+                            class="w-full max-w-md rounded shadow mx-auto" />
 
+                        <!-- FALLBACK -->
+                        <p v-else class="text-center text-gray-500">
+                            File tidak dapat ditampilkan
+                        </p>
                     </div>
-
-
-
 
                     <div class="flex justify-end mt-3">
                         <span class="text-surface-500 dark:text-surface-400">

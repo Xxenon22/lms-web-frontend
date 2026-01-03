@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import api from "../../services/api";
 import { useToast } from "primevue";
 import Swal from "sweetalert2";
@@ -10,6 +10,8 @@ const visible = ref(false);
 const loading = ref(false);
 const newFile = ref(null);
 const userId = ref(null);
+const daftarKelas = ref([]);
+const selectedKelas = ref([]);
 const selectedMateri = ref({
     id: null,
     guru_id: null,
@@ -51,6 +53,42 @@ const fetchModulePembelajaran = async () => {
     }
 };
 
+const materiUnique = computed(() => {
+    const map = new Map();
+
+    materiPembelajaran.value.forEach(m => {
+        // ganti key kalau punya materi_parent_id / materi_uuid
+        const key = m.judul;
+
+        if (!map.has(key)) {
+            map.set(key, {
+                ...m,
+                kelas_ids: [m.kelas_id],
+                kelas_list: [m.kelas_nama]
+            });
+        } else {
+            map.get(key).kelas_ids.push(m.kelas_id);
+            map.get(key).kelas_list.push(m.kelas_nama);
+        }
+    });
+
+    return Array.from(map.values());
+});
+
+const fetchKelas = async () => {
+    const res = await api.get("/kelas");
+    daftarKelas.value = res.data;
+    console.log("Daftar Kelas:", daftarKelas.value);
+};
+
+const kelasOptions = computed(() => {
+    return daftarKelas.value.map(k => ({
+        id: k.id,
+        label: `${k.grade_lvl} ${k.name_rombel} - ${k.nama_mapel}`
+    }));
+});
+
+
 // Pilih file → simpan di frontend
 const handleFileSelect = (event) => {
     const file = event.files?.[0];
@@ -73,7 +111,11 @@ const updateMateri = async () => {
             pass_code: materi.pass_code,
         });
 
-        // 🔥 UPDATE DATA DI ARRAY TANPA FETCH ULANG
+        await api.put(`/module-pembelajaran/${materi.id}/kelas`, {
+            kelas_ids: selectedKelas.value
+        });
+
+        // UPDATE DATA DI ARRAY TANPA FETCH ULANG
         const index = materiPembelajaran.value.findIndex(
             m => m.id === materi.id
         );
@@ -142,11 +184,12 @@ const uploadPdf = async (materiId) => {
     }
 };
 
-
-
 // Buka dialog edit
 const openEditDialog = (materi) => {
+    console.log("KELAS IDS:", materi.kelas_ids);
+    console.log("OPTIONS:", kelasOptions.value);
     selectedMateri.value = { ...materi }; // copy data lama
+    selectedKelas.value = [...materi.kelas_ids]; // isi kelas lama
     newFile.value = null;
     visible.value = true;
 };
@@ -201,12 +244,13 @@ const bukaPdf = (materi) => {
 onMounted(async () => {
     await fetchUserId();
     await fetchModulePembelajaran();
+    await fetchKelas();
 });
 </script>
 
 <template>
     <div class="card">
-        <DataView :value="materiPembelajaran">
+        <DataView :value="materiUnique">
             <template #list="slotProps">
                 <div class="flex flex-col">
                     <div v-for="materi in slotProps.items" :key="materi.id">
@@ -223,7 +267,7 @@ onMounted(async () => {
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
                                     <div class="grid gap-3">
                                         <span class="text-xl text-surface-500 dark:text-surface-400">{{ materi.judul
-                                            }}</span>
+                                        }}</span>
                                         <div class="flex space-x-3 text-lg max-h-40 overflow-auto break-words">
                                             <span v-tooltip.bottom="'Link Meeting'">{{ materi.link_zoom }}</span>
                                         </div>
@@ -233,11 +277,29 @@ onMounted(async () => {
                                         <div class="text-sm max-h-40 overflow-auto break-words"
                                             v-html="materi.deskripsi"></div>
 
+                                        <div class="text-sm text-gray-500">
+                                            Sent To Class:
+                                            <p v-for="(k, i) in materi.kelas_list" :key="i">
+                                                {{ k }}<span v-if="i < materi.kelas_list.length - 1">, </span>
+                                            </p>
+                                        </div>
+
                                         <div class="footer">
                                             <Button icon="pi pi-file-pdf" label="File PDF" @click="bukaPdf(materi)" />
                                         </div>
+
                                     </div>
                                 </div>
+
+                                <!-- <div
+                                    class="flex flex-col max-w-fit md:flex-row justify-between md:items-center flex-1 gap-6">
+                                    <div class="text-sm text-gray-500">
+                                        Sent To Class:
+                                        <p v-for="(k, i) in materi.kelas_list" :key="i">
+                                            {{ k }}<span v-if="i < materi.kelas_list.length - 1">, </span>
+                                        </p>
+                                    </div>
+                                </div> -->
 
                                 <div class="flex flex-col md:items-end gap-8">
                                     <div class="flex flex-row-reverse md:flex-row gap-2">
@@ -251,6 +313,14 @@ onMounted(async () => {
                                             <span class="text-surface-500 dark:text-surface-400 block mb-8">
                                                 Updating Material.
                                             </span>
+
+                                            <div class="flex items-center gap-4 mb-4">
+                                                <label class="font-semibold w-50">Target Class</label>
+                                                <MultiSelect v-model="selectedKelas" :options="kelasOptions"
+                                                    optionLabel="nama_kelas" optionValue="id" placeholder="Select Class"
+                                                    class="w-full" display="chip" />
+                                            </div>
+
 
                                             <div class="flex items-center gap-4 mb-4">
                                                 <label class="font-semibold w-50">Material Title</label>

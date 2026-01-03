@@ -1,6 +1,6 @@
 <script setup>
 import api from "../../services/api";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useToast } from "primevue";
 
 const toast = useToast();
@@ -60,60 +60,43 @@ const handleFileSelect = (event) => {
   selectedFile.value = file;
 };
 
+const selectedSoal = computed(() =>
+  daftarBankSoal.value.find(b => b.id === judul_penugasan.value)
+);
+
 // ================= SUBMIT =================
 const submitMateri = async () => {
   try {
-    if (!judulMateri.value || !selectedKelas.value.length || !selectedFile.value) {
-      toast.add({
-        severity: "warn",
-        summary: "Incomplete",
-        detail: "Title, Class, dan PDF are required",
-      });
-      return;
-    }
-
     loading.value = true;
 
-    const selectedSoal = daftarBankSoal.value.find(
-      b => b.id === judul_penugasan.value
-    );
+    const formData = new FormData();
+    formData.append("judul", judulMateri.value);
+    formData.append("video_url", linkYtb.value);
+    formData.append("deskripsi", deskripsi.value);
+    formData.append("guru_id", guruId.value);
+    formData.append("bank_soal_id", judul_penugasan.value || "");
+    formData.append("judul_penugasan", selectedSoal?.name || "");
+    formData.append("link_zoom", linkZoom.value);
+    formData.append("pass_code", passcode.value);
+    formData.append("file", selectedFile.value);
 
-    const promises = selectedKelas.value.map((kelasId) => {
-      const formData = new FormData();
-      formData.append("judul", judulMateri.value);
-      formData.append("video_url", linkYtb.value);
-      formData.append("deskripsi", deskripsi.value);
-      formData.append("guru_id", guruId.value);
-      formData.append("bank_soal_id", judul_penugasan.value || "");
-      formData.append("judul_penugasan", selectedSoal?.name || "");
-      formData.append("link_zoom", linkZoom.value);
-      formData.append("kelas_id", kelasId);
-      formData.append("pass_code", passcode.value);
-      formData.append("file", selectedFile.value);
-
-      return api.post("/module-pembelajaran", formData);
-    })
-
-    await Promise.all(promises); // tunggu semua request selesai sekaligus
-
-    toast.add({
-      severity: "success",
-      summary: "Success",
-      detail: "Material successfully saved",
+    // ⬅️ kirim array kelas
+    selectedKelas.value.forEach(id => {
+      formData.append("kelas_ids[]", id);
     });
 
+    await api.post("/module-pembelajaran", formData);
+
+    toast.add({ severity: "success", summary: "Success" });
     resetForm();
   } catch (err) {
-    console.error("submitMateri:", err);
-    toast.add({
-      severity: "error",
-      summary: "Failed",
-      detail: "Failed to save material",
-    });
+    console.error(err);
+    toast.add({ severity: "error", summary: "Failed" });
   } finally {
     loading.value = false;
   }
 };
+
 
 const resetForm = () => {
   judulMateri.value = "";
@@ -156,15 +139,21 @@ onMounted(async () => {
             </FloatLabel>
           </div>
 
-          <div>
-            <FileUpload ref="fileUploadRef" mode="basic" accept=".pdf" chooseLabel="Choose PDF" :customUpload="true"
-              @select="handleFileSelect" />
+          <div class="flex flex-col space-y-5">
+            <div class="flex flex-col">
+              <FileUpload ref="fileUploadRef" mode="basic" accept=".pdf" chooseLabel="Choose PDF" :customUpload="true"
+                @select="handleFileSelect" />
 
-            <p v-if="selectedFile" class="text-sm text-green-600">
-              Selected file: {{ selectedFile.name }}
-            </p>
-
+              <!-- <p v-if="selectedFile" class="text-sm text-green-600">
+                Selected file: {{ selectedFile.name }}
+              </p> -->
+            </div>
+            <div class="">
+              <p class="text-red-500">*Maximum file size is 20MB.</p>
+            </div>
           </div>
+
+
 
           <div>
             <FloatLabel>
