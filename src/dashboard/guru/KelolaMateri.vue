@@ -209,8 +209,8 @@ onMounted(async () => {
 
         <!-- Preview Card -->
         <div class="flex w-1/2 justify-center">
-          <div class="preview border w-64 h-96 p-4 shadow-2xl flex flex-col justify-between">
-            <div class="text-center">
+          <div class="preview border w-80 p-4 shadow-2xl flex flex-col justify-between">
+            <div class="text-center mt-10">
               <h2 class="text-xl font-bold">{{ judulMateri || "Lesson Title" }}</h2>
             </div>
             <div class="text-center">
@@ -231,3 +231,14 @@ onMounted(async () => {
   </div>
   <Toast />
 </template>
+
+<style scoped>
+.preview {
+  width: 400px;
+  height: 560px;
+  background-image: url(/src/assets/cover.png);
+  background-size: cover;
+  background-position: center;
+  /* border-radius: 8px; */
+}
+</style>

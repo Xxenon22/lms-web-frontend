@@ -9,6 +9,8 @@ const studentList = ref([])
 const kelasId = route.params.kelasId
 const currentAssignmentId = route.params.assignmentId
 const photoKey = ref(Date.now());
+const src = ref(null);
+const profile = ref({})
 
 
 // daftar materi di kelas ini
@@ -52,13 +54,13 @@ const fetchStudentList = async () => {
                 status: hasProgress && hasJawaban ? "Completed" : "Not Completed",
                 assignmentId: jawabanSiswa?.bank_soal_id || null,
                 nilai: jawabanSiswa?.nilai || null,
-                photo_profile: student.id
-                    ? `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${student.id}`
-                    : null
+                user_photo: student.user_id
+                    ? `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${student.user_id}?t=${photoKey.value}` : null
             })
         }
 
         studentList.value = updatedList
+        console.log("Fetched student list:", studentList.value)
     } catch (err) {
         console.error("Error fetching student list:", err)
     }
@@ -85,8 +87,8 @@ onMounted(async () => {
                     <div class="flex items-center space-x-2">
                         <div
                             class="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center bg-gray-200">
-                            <Image v-if="student.photo_profiles_user" :src="student.photo_profiles_user" image=""
-                                shape="circle" />
+                            <img v-if="student.user_photo" :src="student.user_photo"
+                                class="w-full h-full object-cover" />
                             <i v-else class="pi pi-user text-gray-500 text-xl"></i>
                         </div>
                         <span>{{ student.name }}</span>

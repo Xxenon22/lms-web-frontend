@@ -21,7 +21,10 @@ const fetchRpk = async () => {
     if (!userId.value) return console.warn("userId kosong, tidak fetch data")
     try {
         const res = await api.get(`/rpk/all-rpk/${userId.value}`)
-        allRpk.value = res.data
+        allRpk.value = res.data.sort((a, b) => {
+            return new Date(b.hari_tanggal) - new Date(a.hari_tanggal)
+        })
+
     } catch (error) {
         console.error("Error fetch RPK :", error)
     }

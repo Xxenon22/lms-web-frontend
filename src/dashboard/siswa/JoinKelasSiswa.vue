@@ -187,7 +187,7 @@ const fetchSoalByBankSoalId = async (bankSoalId, materiId) => {
             }
         });
 
-        console.log(`soalList[${materiId}] loaded:`, soalList.value[materiId]);
+        // console.log(`soalList[${materiId}] loaded:`, soalList.value[materiId]);
     } catch (err) {
         console.error('fetchSoalByBankSoalId error', err);
         // fallback agar template tetap aman
@@ -202,7 +202,7 @@ const fetchMateriById = async () => {
         const res = await api.get(`/module-pembelajaran/siswa/${userId.value}/kelas/${kelasId}`);
         const materiRaw = res.data || [];
 
-        console.log("Materi Raw:", materiRaw);
+        // console.log("Materi Raw:", materiRaw);
         const materiData = materiRaw;
 
 
@@ -291,7 +291,7 @@ const fetchMateriById = async () => {
         }
 
         isLoading.value = false;
-        console.log("Daftar Materi:", daftarMateri.value);
+        // console.log("Daftar Materi:", daftarMateri.value);
     } catch (err) {
         isLoading.value = false;
         console.error('fetchMateriById', err);
@@ -606,22 +606,22 @@ const fetchClassroom = async () => {
     }
 }
 
-const createFileUrl = (file) => {
-    try {
-        const binary = atob(file.file_data);
-        const bytes = new Uint8Array(binary.length);
+// const createFileUrl = (file) => {
+//     try {
+//         const binary = atob(file.file_data);
+//         const bytes = new Uint8Array(binary.length);
 
-        for (let i = 0; i < binary.length; i++) {
-            bytes[i] = binary.charCodeAt(i);
-        }
+//         for (let i = 0; i < binary.length; i++) {
+//             bytes[i] = binary.charCodeAt(i);
+//         }
 
-        const blob = new Blob([bytes], { type: file.file_mime });
-        return URL.createObjectURL(blob);
-    } catch (err) {
-        console.error("Create file URL failed", err);
-        return null;
-    }
-};
+//         const blob = new Blob([bytes], { type: file.file_mime });
+//         return URL.createObjectURL(blob);
+//     } catch (err) {
+//         console.error("Create file URL failed", err);
+//         return null;
+//     }
+// };
 
 const fetchUploadedFiles = async (materi) => {
     try {
@@ -692,43 +692,43 @@ const deleteFile = async (fileId, materiId) => {
     }
 };
 
-const editFile = async (fileId, newFile, materiId) => {
-    try {
-        const formData = new FormData();
-        formData.append("file", newFile);
+// const editFile = async (fileId, newFile, materiId) => {
+//     try {
+//         const formData = new FormData();
+//         formData.append("file", newFile);
 
-        const res = await api.put(
-            `/jawaban-siswa/file/${fileId}`,
-            formData,
-            {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                    "Content-Type": "multipart/form-data"
-                }
-            }
-        );
+//         const res = await api.put(
+//             `/jawaban-siswa/file/${fileId}`,
+//             formData,
+//             {
+//                 headers: {
+//                     Authorization: `Bearer ${localStorage.getItem("token")}`,
+//                     "Content-Type": "multipart/form-data"
+//                 }
+//             }
+//         );
 
-        const updated = res.data.file;
+//         const updated = res.data.file;
 
-        uploadedFiles.value[materiId] =
-            uploadedFiles.value[materiId].map(f =>
-                f.id === fileId ? updated : f
-            );
+//         uploadedFiles.value[materiId] =
+//             uploadedFiles.value[materiId].map(f =>
+//                 f.id === fileId ? updated : f
+//             );
 
-        toast.add({
-            severity: "success",
-            summary: "File updated",
-            life: 2000
-        });
-    } catch (err) {
-        console.error(err);
-        toast.add({
-            severity: "error",
-            summary: "Failed to update file",
-            life: 3000
-        });
-    }
-};
+//         toast.add({
+//             severity: "success",
+//             summary: "File updated",
+//             life: 2000
+//         });
+//     } catch (err) {
+//         console.error(err);
+//         toast.add({
+//             severity: "error",
+//             summary: "Failed to update file",
+//             life: 3000
+//         });
+//     }
+// };
 
 
 onMounted(async () => {
@@ -946,7 +946,7 @@ onMounted(async () => {
                                             frameborder="0" allowfullscreen />
 
                                         <div v-else class="text-center text-gray-500 py-6">
-                                            PDF tidak tersedia
+                                            PDF not available.
                                         </div>
                                     </div>
 
@@ -978,7 +978,7 @@ onMounted(async () => {
                                                 <template #header>
                                                     <div class="flex items-center m-3">
                                                         <Tag severity="info" :value="`${index + 1}`" />
-                                                        <div class="ml-2 font-semibold overflow-auto break-all"
+                                                        <div class="ml-2 font-semibold overflow-auto break-words"
                                                             v-html="soal.pertanyaan"></div>
                                                     </div>
                                                 </template>
@@ -998,7 +998,7 @@ onMounted(async () => {
                                                                 :value="key" :name="`soal-${soal.id}`"
                                                                 :disabled="isHistory(materi)" />
                                                             <label :for="`${soal.id}-${key}`">{{ key }}. {{ opsi
-                                                            }}</label>
+                                                                }}</label>
                                                         </div>
                                                     </div>
 
@@ -1014,7 +1014,7 @@ onMounted(async () => {
                                                     <div class="flex flex-col">
                                                         <div class="flex items-center m-3">
                                                             <Tag severity="info" :value="`${index + 1}`" />
-                                                            <div class="ml-2 font-semibold flex overflow-auto break-all"
+                                                            <div class="ml-2 font-semibold overflow-auto break-words"
                                                                 v-html="soal.pertanyaan_essai">
                                                             </div>
                                                         </div>

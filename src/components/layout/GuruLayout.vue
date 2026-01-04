@@ -216,6 +216,7 @@ onMounted(async () => {
         <Icon class="icon" icon="famicons:book-sharp" />
         <h1 class="m-4 font-semibold">Let’s make learning awesome!</h1>
       </div>
+      <!-- <div class="flex flex-col justify-between flex-grow h-full"> -->
       <ul class="flex flex-col space-y-1 z-20">
         <RouterLink to="/home-teacher">
           <li>
@@ -272,6 +273,12 @@ onMounted(async () => {
           </li>
         </RouterLink>
       </ul>
+      <div class="wm mt-auto flex items-center justify-center mb-6 space-x-2">
+        <img src="/src/assets/Logo_ITEC.png" class="wm-logo" alt="Logo">
+        <span class="credit"> | Designed By ITEC Metschoo</span>
+      </div>
+
+      <!-- </div> -->
     </aside>
 
     <!-- Main content -->
@@ -307,7 +314,7 @@ onMounted(async () => {
   top: 135px;
   left: 20px;
   width: 60px;
-  height: calc(100vh - 96px);
+  height: calc(100vh - 155px);
   transition: width 0.3s ease;
   overflow-y: auto;
   scrollbar-width: none;
@@ -336,6 +343,39 @@ onMounted(async () => {
   visibility: hidden;
   transition: opacity 0.8s ease;
   color: #ffffff;
+}
+
+
+.credit {
+  font-size: 12px;
+  color: #ffffff;
+}
+
+.wm-logo {
+  width: 28px;
+  height: 28px;
+  transition: all 0.3s ease;
+}
+
+.sidebar .credit {
+  display: none;
+}
+
+.sidebar .wm {
+  flex-direction: column;
+}
+
+.sidebar:hover .credit {
+  display: inline;
+}
+
+.sidebar:hover .wm {
+  flex-direction: row;
+}
+
+.sidebar:hover .wm-logo {
+  width: 32px;
+  height: 32px;
 }
 
 .sidebar:hover .nav-item {

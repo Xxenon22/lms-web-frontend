@@ -15,7 +15,7 @@ const fetchModulePembelajaran = async () => {
     // console.log("Fetching module by ID:", materiId);
 
     try {
-        const res = await api.get(`/module-pembelajaran/${materiId}`);
+        const res = await api.get(`/module-pembelajaran/by-id/${materiId}`);
         modulePembelajaran.value = res.data;
         // console.log("Data ditemukan:", res.data);
     } catch (error) {

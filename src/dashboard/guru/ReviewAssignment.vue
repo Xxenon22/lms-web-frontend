@@ -131,7 +131,7 @@ function getFileUrl(filename) {
 
 const fetchFileJawabanSiswa = async () => {
     try {
-        const res = await api.get(`/jawaban-siswa/file/${assignmentId}`, {
+        const res = await api.get(`/jawaban-siswa/files-by-bank/${assignmentId}`, {
             params: { user_id: userId },
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         })
@@ -147,6 +147,27 @@ const fetchFileJawabanSiswa = async () => {
         console.error('Error fetch file jawaban siswa:', err)
     }
 }
+
+const downloadFile = async (url) => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+
+    const blobUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = blobUrl;
+    a.download = url.split("/").pop(); // nama file otomatis
+    document.body.appendChild(a);
+    a.click();
+
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(blobUrl);
+};
+
+const openFile = (url) => {
+    window.open(url, '_blank');
+};
+
 
 // Pisahkan file menjadi gambar dan pdf
 const imageFiles = computed(() => fileJawabanSiswa.value.filter(f => !f.isPdf))
@@ -258,55 +279,49 @@ const summaryPilgan = computed(() => {
             </template>
         </Card>
 
-        <!-- Gallery untuk gambar -->
-        <Card v-if="imageFiles.length">
-            <template #header>
-                <div class="m-5 flex justify-between items-center">
-                    <h1 class="font-bold text-lg">Student Image Submissions</h1>
-                </div>
-            </template>
 
-            <template #content>
-                <div class="card flex justify-center">
-                    <Galleria :value="galleriaItems" :responsiveOptions="responsiveOptions" :numVisible="4"
-                        containerStyle="max-width: 640px; margin: auto" showThumbnails showIndicators circular autoPlay
-                        transitionInterval="4000">
-                        <template #item="slotProps">
-                            <img :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt"
-                                style="width: 100%; height: 300px; object-fit: cover;" />
-                        </template>
-                        <template #thumbnail="slotProps">
-                            <img :src="slotProps.item.thumbnailImageSrc" :alt="slotProps.item.alt"
-                                style="width: 80px; height: 60px; object-fit: cover;" />
-                        </template>
-                    </Galleria>
-                </div>
-            </template>
-        </Card>
+        <div v-if="uploadedFiles[materi.id]?.length" class="space-y-3 mt-4">
+            <div v-for="file in uploadedFiles[materi.id]" :key="file.id"
+                class="flex items-center justify-between p-4 border rounded-lg bg-surface-50 hover:shadow transition">
 
-        <!-- PDF Files -->
-        <Card v-if="pdfFiles.length">
-            <template #header>
-                <div class="m-5 flex justify-between items-center">
-                    <h1 class="font-bold text-lg">Student PDF Submissions</h1>
-                </div>
-            </template>
+                <!-- LEFT -->
+                <div class="flex items-center gap-4">
+                    <!-- ICON -->
+                    <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-primary-100">
+                        <i v-if="file.file_mime === 'application/pdf'" class="pi pi-file-pdf text-red-500 text-xl"></i>
 
-            <template #content>
-                <!-- <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"> -->
-                <div v-for="file in pdfFiles" :key="file.id" class="p-3 border shadow-sm hover:shadow-md transition">
-                    <!-- <p class="font-semibold mb-2">{{ file.nama_file }}</p> -->
-                    <iframe :src="file.url" class="w-full h-[800px] rounded border mb-3" allow="fullscreen"
-                        allowfullscreen></iframe>
-                    <div class="flex justify-between items-center">
-                        <small class="text-gray-500">{{ new Date(file.created_at).toLocaleString() }}</small>
-                        <Button label="Download" icon="pi pi-download" class="p-button-sm p-button-info"
-                            @click="window.open(file.url, '_blank')" />
+                        <i v-else-if="file.file_mime?.startsWith('image/')"
+                            class="pi pi-image text-blue-500 text-xl"></i>
+
+                        <i v-else class="pi pi-file text-gray-500 text-xl"></i>
+                    </div>
+
+                    <!-- FILE INFO -->
+                    <div class="flex flex-col">
+                        <span class="font-semibold break-all">
+                            {{ file.file_name }}
+                        </span>
+
+                        <span class="text-sm text-gray-500">
+                            {{ formatDate(file.created_at) }}
+                        </span>
                     </div>
                 </div>
-                <!-- </div> -->
-            </template>
-        </Card>
+
+                <!-- ACTION -->
+                <div class="flex gap-2">
+                    <Button icon="pi pi-download" severity="secondary" size="small" @click="downloadFile(file.url)" />
+
+                    <Button icon="pi pi-external-link" size="small" @click="openFile(file.url)" />
+                    <Button icon="pi pi-trash" size="small" severity="danger" @click="deleteFile(file.id, materi.id)" />
+                </div>
+            </div>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div v-else class="text-gray-400 text-sm mt-4 italic">
+            No uploaded files yet.
+        </div>
 
         <!-- Summary dan nilai -->
         <div v-if="jawabanPilgan.length" class="mb-5 p-3 bg-blue-100 rounded text-center font-bold">
