@@ -976,10 +976,12 @@ onMounted(async () => {
                                             class="mb-6">
                                             <Card class="space-y-2">
                                                 <template #header>
-                                                    <div class="flex items-center m-3">
-                                                        <Tag severity="info" :value="`${index + 1}`" />
-                                                        <div class="ml-2 font-semibold overflow-auto break-words"
-                                                            v-html="soal.pertanyaan"></div>
+                                                    <div class="ml-2 font-semibold w-full max-w-full overflow-hidden">
+                                                        <div class="flex items-center m-3">
+                                                            <Tag severity="info" :value="`${index + 1}`" />
+                                                            <div class="ml-2 soal-html whitespace-normal font-semibold overflow-auto break-words"
+                                                                v-html="soal.pertanyaan"></div>
+                                                        </div>
                                                     </div>
                                                 </template>
                                                 <template #content>
@@ -1012,10 +1014,13 @@ onMounted(async () => {
                                             <Card class="space-y-2">
                                                 <template #header>
                                                     <div class="flex flex-col">
-                                                        <div class="flex items-center m-3">
-                                                            <Tag severity="info" :value="`${index + 1}`" />
-                                                            <div class="ml-2 font-semibold overflow-auto break-words"
-                                                                v-html="soal.pertanyaan_essai">
+                                                        <div
+                                                            class="ml-2 font-semibold w-full max-w-full overflow-hidden">
+                                                            <div class="flex items-center m-3">
+                                                                <Tag severity="info" :value="`${index + 1}`" />
+                                                                <div class="ml-2 soal-html whitespace-norma font-semibold overflow-auto break-words"
+                                                                    v-html="soal.pertanyaan_essai">
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div class="flex justify-center">
@@ -1075,5 +1080,41 @@ onMounted(async () => {
 .background {
     background: linear-gradient(90deg, rgba(20, 107, 107, 0.1)7%, rgba(244, 244, 244, 0.1)68%);
     backdrop-filter: blur(8px)
+}
+
+
+.soal-html {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* Semua elemen HTML di dalam soal */
+.soal-html * {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Gambar */
+.soal-html img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Table (penyebab utama tembus kanan) */
+.soal-html table {
+    width: 100%;
+    border-collapse: collapse;
+    display: block;
+    overflow-x: auto;
+}
+
+/* Paragraf & list */
+.soal-html p,
+.soal-html ol,
+.soal-html ul,
+.soal-html li {
+    white-space: normal;
 }
 </style>
