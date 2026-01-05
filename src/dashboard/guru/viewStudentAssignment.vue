@@ -11,6 +11,8 @@ const currentAssignmentId = route.params.assignmentId
 const photoKey = ref(Date.now());
 const src = ref(null);
 const profile = ref({})
+const loading = ref(false)
+
 
 
 // daftar materi di kelas ini
@@ -60,9 +62,11 @@ const fetchStudentList = async () => {
         }
 
         studentList.value = updatedList
-        console.log("Fetched student list:", studentList.value)
+        // console.log("Fetched student list:", studentList.value)
     } catch (err) {
         console.error("Error fetching student list:", err)
+    } finally {
+        loading.value = false
     }
 }
 
@@ -71,8 +75,10 @@ const back = () => {
 }
 
 onMounted(async () => {
+    loading.value = true
     await fetchMateriKelas()
     await fetchStudentList()
+    loading.value = false
 })
 </script>
 
@@ -81,6 +87,9 @@ onMounted(async () => {
         <Button icon="pi pi-arrow-left" label="Back" @click="back" />
     </div>
     <div class="space-y-3 m-10">
+        <div v-if="loading" class="flex justify-center items-center h-64">
+            <ProgressSpinner />
+        </div>
         <Card v-for="student in studentList" :key="student.id">
             <template #content>
                 <div class="flex items-center justify-between">

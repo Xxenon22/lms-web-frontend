@@ -15,27 +15,49 @@ const initialNilai = ref(null)
 const userId = route.params.userId
 const assignmentId = route.params.assignmentId
 
-// State data
+// ======================
+// STATE DATA
+// ======================
 const loading = ref(true)
 const errorMessage = ref(null)
+
 const jawabanPilgan = ref([])
 const jawabanEssai = ref([])
 const jawabanRefleksi = ref(null)
+
 const nilai = ref(null)
+
+// FILE JAWABAN
 const fileJawabanSiswa = ref([])
 
+// ======================
+// HELPER
+// ======================
 function getImageUrl(filename) {
     if (!filename) return null
     return `${import.meta.env.VITE_API_URL}/uploads/gambar-soal/${filename}`
 }
 
+// function getFileUrl(filename) {
+//     if (!filename) return null
+//     return `${import.meta.env.VITE_API_URL}/uploads/file-jawaban-siswa/${filename}`
+// }
+
+// ======================
+// FETCH JAWABAN (SOAL)
+// ======================
 const fetchJawabanSiswa = async () => {
     try {
         const res = await api.get('/jawaban-siswa/all-with-soal', {
             params: { bank_soal_id: assignmentId },
         })
 
+        // 🔍 DEBUG RAW RESPONSE
+        // console.log('RAW JAWABAN SISWA:', res.data)
+
         const data = res.data.filter(item => item.user_id === Number(userId))
+
+
         if (!data.length) {
             loading.value = false
             return
@@ -74,6 +96,7 @@ const fetchJawabanSiswa = async () => {
             }))
 
         jawabanRefleksi.value = data[0]?.refleksi_siswa || null
+
     } catch (err) {
         console.error('Error fetch jawaban siswa:', err)
         errorMessage.value = 'Gagal mengambil data jawaban.'
@@ -81,15 +104,21 @@ const fetchJawabanSiswa = async () => {
     loading.value = false
 }
 
+// ======================
+// FETCH NILAI
+// ======================
 const fetchNilai = async () => {
     try {
         const res = await api.get('/jawaban-siswa/all-with-soal', {
             params: { bank_soal_id: assignmentId },
         })
+
         const data = res.data.filter(item => item.user_id === Number(userId))
         const itemWithNilai = data.find(d => d.nilai !== null)
+
         nilai.value = itemWithNilai?.nilai ?? null
         initialNilai.value = itemWithNilai?.nilai ?? null
+
     } catch (err) {
         console.error('Fetch Nilai:', err)
     }
@@ -99,102 +128,111 @@ watch(nilai, () => {
     hasChanges.value = nilai.value !== initialNilai.value
 })
 
-const submitNilai = async () => {
-    if (isSubmitting.value || !hasChanges.value) return
-
-    if (!nilai.value) {
-        toast.add({ severity: 'warn', detail: 'Please fill out score', life: 3000 })
-        return
-    }
-
-    isSubmitting.value = true
-    try {
-        await api.put('/jawaban-siswa/nilai', {
-            user_id: userId,
-            bank_soal_id: assignmentId,
-            nilai: nilai.value,
-        })
-        toast.add({ severity: 'success', detail: 'Score submitted', life: 3000 })
-        initialNilai.value = nilai.value
-        hasChanges.value = false
-    } catch (err) {
-        console.error('Submit Nilai error:', err)
-        toast.add({ severity: 'error', detail: 'Failed to submit score', life: 3000 })
-    }
-    isSubmitting.value = false
-}
-
-function getFileUrl(filename) {
-    if (!filename) return null
-    return `${import.meta.env.VITE_API_URL}/uploads/file-jawaban-siswa/${filename}`
-}
-
+// ======================
+// FETCH FILE JAWABAN SISWA (INI PENTING)
+// ======================
 const fetchFileJawabanSiswa = async () => {
     try {
-        const res = await api.get(`/jawaban-siswa/files-by-bank/${assignmentId}`, {
-            params: { user_id: userId },
-            headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        })
+        const res = await api.get(
+            `/jawaban-siswa/files-by-bank-guru/${assignmentId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            }
+        );
+
+        // console.log("RAW FILE RESPONSE:", res.data);
 
         fileJawabanSiswa.value = res.data
-            .filter(file => file.nama_file)
+            .filter(f => f.user_id === Number(userId))
             .map(file => ({
-                ...file,
-                url: getFileUrl(file.nama_file),
-                isPdf: file.nama_file.endsWith('.pdf'),
-            }))
+                id: file.id,
+                nama_file: file.file_name,
+                file_mime: file.file_mime,
+                created_at: file.created_at,
+                url: file.url,
+                isPdf: file.file_mime === "application/pdf",
+            }));
+
+        // console.log("FILE JAWABAN SISWA (MAPPED):", fileJawabanSiswa.value);
+
     } catch (err) {
-        console.error('Error fetch file jawaban siswa:', err)
+        console.error("Error fetch file jawaban siswa:", err);
     }
-}
-
-const downloadFile = async (url) => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-
-    const blobUrl = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-
-    a.href = blobUrl;
-    a.download = url.split("/").pop(); // nama file otomatis
-    document.body.appendChild(a);
-    a.click();
-
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(blobUrl);
 };
 
+
+// ======================
+// DOWNLOAD
+// ======================
+const downloadFile = (url, filename) => {
+    const a = document.createElement("a");
+    a.href = `${url}?download=1`;
+    a.download = filename || "";
+    a.target = "_self";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+};
+
+
+// ======================
+// OPEN FILE
+// ======================   
 const openFile = (url) => {
     window.open(url, '_blank');
 };
 
+// ======================
+// COMPUTED FILE
+// ======================
+const imageFiles = computed(() => {
+    const result = fileJawabanSiswa.value.filter(f => !f.isPdf)
+    return result
+})
 
-// Pisahkan file menjadi gambar dan pdf
-const imageFiles = computed(() => fileJawabanSiswa.value.filter(f => !f.isPdf))
-const pdfFiles = computed(() => fileJawabanSiswa.value.filter(f => f.isPdf))
+const pdfFiles = computed(() => {
+    const result = fileJawabanSiswa.value.filter(f => f.isPdf)
+    // console.log('PDF FILES:', result) // 🔍 DEBUG
+    return result
+})
 
-// Buat data untuk Galleria
-const galleriaItems = computed(() =>
-    imageFiles.value.map(file => ({
+// ======================
+// GALLERIA
+// ======================
+const galleriaItems = computed(() => {
+    const items = imageFiles.value.map(file => ({
         itemImageSrc: file.url,
         thumbnailImageSrc: file.url,
         alt: file.nama_file,
     }))
-)
+    // console.log('GALLERIA ITEMS:', items) // 🔍 DEBUG
+    return items
+})
 
 const responsiveOptions = ref([
     { breakpoint: '1300px', numVisible: 4 },
     { breakpoint: '575px', numVisible: 1 },
 ])
 
+// ======================
+// NAVIGATION
+// ======================
 const back = () => router.back()
 
+// ======================
+// MOUNTED
+// ======================
 onMounted(async () => {
     await fetchJawabanSiswa()
     await fetchNilai()
     await fetchFileJawabanSiswa()
 })
 
+// ======================
+// HELPER UI
+// ======================
 function optionClass(item, option) {
     if (item.jawaban?.toUpperCase() === option) {
         return item.benar ? 'bg-green-200 p-1 rounded' : 'bg-red-200 p-1 rounded'
@@ -216,6 +254,7 @@ const summaryPilgan = computed(() => {
     return { benar, total }
 })
 </script>
+
 
 <template>
     <div class="m-5">
@@ -279,49 +318,73 @@ const summaryPilgan = computed(() => {
             </template>
         </Card>
 
+        <!-- image File -->
+        <Card v-if="imageFiles.length">
+            <template #header>
+                <div class="m-5">
+                    <h1 class="font-bold text-lg">Student Image Submissions</h1>
+                </div>
+            </template>
 
-        <div v-if="uploadedFiles[materi.id]?.length" class="space-y-3 mt-4">
-            <div v-for="file in uploadedFiles[materi.id]" :key="file.id"
-                class="flex items-center justify-between p-4 border rounded-lg bg-surface-50 hover:shadow transition">
+            <template #content>
+                <div class="space-y-3">
+                    <div v-for="file in imageFiles" :key="file.id"
+                        class="flex items-center justify-between p-3 border rounded hover:shadow transition">
+                        <div class="flex items-center gap-3">
+                            <i class="pi pi-image text-xl text-blue-500"></i>
+                            <div>
+                                <p class="font-semibold">{{ file.nama_file }}</p>
+                                <small class="text-gray-500">
+                                    {{ new Date(file.created_at).toLocaleString() }}
+                                </small>
+                            </div>
+                        </div>
 
-                <!-- LEFT -->
-                <div class="flex items-center gap-4">
-                    <!-- ICON -->
-                    <div class="w-12 h-12 flex items-center justify-center rounded-lg bg-primary-100">
-                        <i v-if="file.file_mime === 'application/pdf'" class="pi pi-file-pdf text-red-500 text-xl"></i>
-
-                        <i v-else-if="file.file_mime?.startsWith('image/')"
-                            class="pi pi-image text-blue-500 text-xl"></i>
-
-                        <i v-else class="pi pi-file text-gray-500 text-xl"></i>
-                    </div>
-
-                    <!-- FILE INFO -->
-                    <div class="flex flex-col">
-                        <span class="font-semibold break-all">
-                            {{ file.file_name }}
-                        </span>
-
-                        <span class="text-sm text-gray-500">
-                            {{ formatDate(file.created_at) }}
-                        </span>
+                        <div class="flex gap-2">
+                            <Button icon="pi pi-external-link" severity="secondary" size="small"
+                                @click="openFile(file.url)" />
+                            <Button icon="pi pi-download" severity="info" size="small"
+                                @click="downloadFile(file.url, file.nama_file)" />
+                        </div>
                     </div>
                 </div>
+            </template>
+        </Card>
 
-                <!-- ACTION -->
-                <div class="flex gap-2">
-                    <Button icon="pi pi-download" severity="secondary" size="small" @click="downloadFile(file.url)" />
 
-                    <Button icon="pi pi-external-link" size="small" @click="openFile(file.url)" />
-                    <Button icon="pi pi-trash" size="small" severity="danger" @click="deleteFile(file.id, materi.id)" />
+        <!-- PDF Files -->
+        <Card v-if="pdfFiles.length">
+            <template #header>
+                <div class="m-5">
+                    <h1 class="font-bold text-lg">Student PDF Submissions</h1>
                 </div>
-            </div>
-        </div>
+            </template>
 
-        <!-- EMPTY STATE -->
-        <div v-else class="text-gray-400 text-sm mt-4 italic">
-            No uploaded files yet.
-        </div>
+            <template #content>
+                <div class="space-y-3">
+                    <div v-for="file in pdfFiles" :key="file.id"
+                        class="flex items-center justify-between p-3 border rounded hover:shadow transition">
+                        <div class="flex items-center gap-3">
+                            <i class="pi pi-file-pdf text-xl text-red-500"></i>
+                            <div>
+                                <p class="font-semibold">{{ file.nama_file }}</p>
+                                <small class="text-gray-500">
+                                    {{ new Date(file.created_at).toLocaleString() }}
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <Button icon="pi pi-external-link" severity="secondary" size="small"
+                                @click="openFile(file.url)" />
+                            <Button icon="pi pi-download" severity="info" size="small"
+                                @click="downloadFile(file.url, file.nama_file)" />
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </Card>
+
 
         <!-- Summary dan nilai -->
         <div v-if="jawabanPilgan.length" class="mb-5 p-3 bg-blue-100 rounded text-center font-bold">

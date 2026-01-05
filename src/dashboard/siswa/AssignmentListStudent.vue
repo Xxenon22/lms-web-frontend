@@ -30,9 +30,14 @@ const fetchMateriByUserClass = async () => {
 
             m.nilai = jawabanMatch?.nilai ? Number(jawabanMatch.nilai) : 0;
 
-            if (m.guru_foto && !m.guru_foto.startsWith("http")) {
-                m.guru_foto = `${import.meta.env.VITE_API_URL}${m.guru_foto}`;
+            if (typeof m.guru_foto === "string" && m.guru_foto.length > 0) {
+                if (!m.guru_foto.startsWith("http")) {
+                    m.guru_foto = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${m.guru_foto}`;
+                }
+            } else {
+                m.guru_foto = null;
             }
+
 
             const key = `${m.kelas_id}-${m.judul_penugasan}`;
             if (!uniqueMateri.has(key)) {
@@ -73,7 +78,7 @@ onMounted(() => {
         You have not enrolled in any classes yet.
     </div>
     <div v-else>
-        <Card v-for="m in materiList" :key="m.id" class="m-15">
+        <Card v-for="m in materiList" :key="m.id" class="m-5">
             <template #content>
                 <div class="flex justify-between items-center">
                     <div class="flex items-center">

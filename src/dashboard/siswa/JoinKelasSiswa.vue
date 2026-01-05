@@ -630,7 +630,7 @@ const fetchUploadedFiles = async (materi) => {
         if (!materi.bank_soal_id) return;
 
         const { data } = await api.get(
-            `/jawaban-siswa/files-by-bank/${materi.bank_soal_id}`,
+            `/jawaban-siswa/files-by-bank-siswa/${materi.bank_soal_id}`,
             {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -645,20 +645,14 @@ const fetchUploadedFiles = async (materi) => {
     }
 };
 
-const downloadFile = async (url) => {
-    const response = await fetch(url);
-    const blob = await response.blob();
-
-    const blobUrl = window.URL.createObjectURL(blob);
+const downloadFile = (url, filename) => {
     const a = document.createElement("a");
-
-    a.href = blobUrl;
-    a.download = url.split("/").pop(); // nama file otomatis
+    a.href = `${url}?download=1`;
+    a.download = filename || "";
+    a.target = "_self";
     document.body.appendChild(a);
     a.click();
-
     document.body.removeChild(a);
-    window.URL.revokeObjectURL(blobUrl);
 };
 
 
@@ -1000,7 +994,7 @@ onMounted(async () => {
                                                                 :value="key" :name="`soal-${soal.id}`"
                                                                 :disabled="isHistory(materi)" />
                                                             <label :for="`${soal.id}-${key}`">{{ key }}. {{ opsi
-                                                                }}</label>
+                                                            }}</label>
                                                         </div>
                                                     </div>
 
