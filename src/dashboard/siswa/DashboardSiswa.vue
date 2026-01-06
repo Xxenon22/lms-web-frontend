@@ -18,38 +18,43 @@ const selectedView = ref("joined");
 
 // Lifecycle
 onMounted(async () => {
-    userId.value = localStorage.getItem("id");
+    try {
+        userId.value = localStorage.getItem("id");
 
-    const semuaKelas = await fetchSemuaKelas();
-    const idKelasIkut = await fetchKelasYangDiikuti();
+        const [semuaKelas, idKelasIkut] = await Promise.all([
+            fetchSemuaKelas(),
+            fetchKelasYangDiikuti(),
+        ]);
 
-    semuaKelas.forEach((k) => {
-        k.sudahDiikuti = idKelasIkut.includes(k.id);
-    });
+        semuaKelas.forEach(k => {
+            k.sudahDiikuti = idKelasIkut.includes(k.id);
+        });
 
-    kelasDiikuti.value = semuaKelas.filter((k) => k.sudahDiikuti);
-    kelasLainnya.value = semuaKelas.filter((k) => !k.sudahDiikuti);
-    isLoading.value = false;
+        kelasDiikuti.value = semuaKelas.filter(k => k.sudahDiikuti);
+        kelasLainnya.value = semuaKelas.filter(k => !k.sudahDiikuti);
+    } finally {
+        isLoading.value = false;
+    }
 });
 
+
+
 // Ambil semua kelas
+
 const fetchSemuaKelas = async () => {
     try {
         const res = await api.get("/kelas/all/list");
+
         return res.data.map((kelas) => ({
             ...kelas,
-            guru_photo: kelas.guru_id
-                ? `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${kelas.guru_id}?t=${Date.now()}`
+            sudahDiikuti: false,
+
+            guru_photo: kelas.teacher?.photo_profile
+                ? `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${kelas.teacher.photo_profile}`
                 : null,
-
-            // FIX NULL VALUE → EMPTY STRING
-            grade_lvl: kelas.grade_lvl || "",
-            rombel: kelas.rombel || "",
-            nama_mapel: kelas.nama_mapel || "",
-            guru_name: kelas.guru_name || "",
         }));
-
     } catch (err) {
+        console.error("fetchSemuaKelas error:", err);
         toast.add({
             severity: "error",
             summary: "Failed",
@@ -290,7 +295,7 @@ const fetchGuruById = async (guruId) => {
                         <div class="relative">
                             <img :src="kelas.link_wallpaper_kelas || 'https://primefaces.org/cdn/primevue/images/usercard.png'"
                                 class="w-full h-32 object-cover" />
-                            <div @click="fetchGuruById(kelas.guru_id)"
+                            <div @click="fetchGuruById(kelas.teacher?.id)"
                                 class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
                                 <img v-if="kelas.guru_photo" :src="kelas.guru_photo" alt="Photo Profile"
                                     class="w-full h-full object-cover" />
@@ -324,7 +329,7 @@ const fetchGuruById = async (guruId) => {
                         <div class="relative">
                             <img :src="kelas.link_wallpaper_kelas || 'https://primefaces.org/cdn/primevue/images/usercard.png'"
                                 class="w-full h-32 object-cover" />
-                            <div @click="fetchGuruById(kelas.guru_id)"
+                            <div @click="fetchGuruById(kelas.teacher?.id)"
                                 class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
                                 <img v-if="kelas.guru_photo" :src="kelas.guru_photo" alt="Photo Profile"
                                     class="w-full h-full object-cover" />

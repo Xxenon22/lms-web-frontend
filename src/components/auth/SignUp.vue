@@ -42,13 +42,6 @@ const handleRegister = async () => {
     localStorage.setItem("email", email.value); // untuk verifikasi
     localStorage.setItem("role", "student");
     localStorage.setItem("isLoginProcess", "false"); // <- penting
-
-
-    // localStorage.setItem("processType", "register");
-    // localStorage.setItem("email", email.value);
-    // localStorage.setItem("pendingVerification", "true"); // ✅ WAJIB
-    // localStorage.setItem("is_verified", "false");        // ✅ WAJIB
-    // localStorage.setItem("role", "student");
     router.push("/verify-code");
   } catch (err) {
     console.error("Register error:", err.response?.data || err);
