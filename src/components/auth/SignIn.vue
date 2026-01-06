@@ -37,7 +37,7 @@ const handleLogin = async () => {
 
   //     // SIMPAN EMAIL & MODE LOGIN
   //     localStorage.setItem("email", email.value);
-  //     localStorage.setItem("processType", "login");
+  //     localStorage.setItem("processType", "login"); // membedakan dengan register
 
   //     router.push("/verify-code");
   //     return;
@@ -62,7 +62,7 @@ const handleLogin = async () => {
 
     // Simpan token dan role langsung
     localStorage.setItem("token", res.data.token);
-    localStorage.setItem("role", res.data.users.role);
+    localStorage.setItem("role", res.data.user.role);
 
     toast.add({
       severity: "success",
