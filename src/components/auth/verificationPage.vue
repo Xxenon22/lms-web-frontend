@@ -62,10 +62,10 @@ const submitCode = async () => {
             localStorage.setItem("user", JSON.stringify(res.data.user));
 
             // 🔥 INI YANG PENTING
-            localStorage.setItem("is_verified", "true");
-            localStorage.removeItem("pendingVerification");
-            localStorage.removeItem("processType");
-            localStorage.removeItem("email");
+            // localStorage.setItem("is_verified", "true");
+            // localStorage.removeItem("pendingVerification");
+            // localStorage.removeItem("processType");
+            // localStorage.removeItem("email");
         }
         const role = res?.data?.user?.role || localStorage.getItem("role");
 

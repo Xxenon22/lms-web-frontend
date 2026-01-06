@@ -38,8 +38,8 @@ const handleLogin = async () => {
       // SIMPAN EMAIL & MODE LOGIN
       localStorage.setItem("email", email.value);
       localStorage.setItem("processType", "login");
-      localStorage.setItem("pendingVerification", "true");
-      localStorage.setItem("is_verified", "false");
+      // localStorage.setItem("pendingVerification", "true");
+      // localStorage.setItem("is_verified", "false");
 
       router.push("/verify-code");
       return;
