@@ -235,10 +235,8 @@ const fetchMateriById = async () => {
             refleksi.value[materi.id] = p?.refleksi ?? "";
             materi.pdf_url = `${import.meta.env.VITE_API_URL}api/module-pembelajaran/${materi.id}/pdf`;
 
-            if (typeof materi.guru_foto === "string" && materi.guru_foto.length > 0) {
-                if (!materi.guru_foto.startsWith("http")) {
-                    materi.guru_foto = `${import.meta.env.VITE_API_URL}${materi.guru_foto}`;
-                }
+            if (materi.guru_id) {
+                materi.guru_foto = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${materi.guru_id}`;
             } else {
                 materi.guru_foto = null;
             }
@@ -994,7 +992,7 @@ onMounted(async () => {
                                                                 :value="key" :name="`soal-${soal.id}`"
                                                                 :disabled="isHistory(materi)" />
                                                             <label :for="`${soal.id}-${key}`">{{ key }}. {{ opsi
-                                                            }}</label>
+                                                                }}</label>
                                                         </div>
                                                     </div>
 

@@ -19,62 +19,31 @@ const handleLogin = async () => {
     return;
   }
 
-  // try {
-  //   // STEP 1 LOGIN → request OTP
-  //   const res = await api.post("/auth/login", {
-  //     email: email.value,
-  //     password: password.value,
-  //   });
-
-  //   // === SUCCESS: OTP DIKIRIM ===
-  //   if (res.data.nextStep === "verify-login-code") {
-  //     toast.add({
-  //       severity: "info",
-  //       summary: "OTP Sent",
-  //       detail: "We have sent a login code to your email.",
-  //       life: 3000,
-  //     });
-
-  //     // SIMPAN EMAIL & MODE LOGIN
-  //     localStorage.setItem("email", email.value);
-  //     localStorage.setItem("processType", "login"); // membedakan dengan register
-
-  //     router.push("/verify-code");
-  //     return;
-  //   }
-
-  // } catch (err) {
-  //   console.error("error login:", err);
-
-  //   toast.add({
-  //     severity: "error",
-  //     summary: "Login Failed",
-  //     detail: err.response?.data?.message || "Something went wrong",
-  //     life: 3000,
-  //   });
-  // }
-
   try {
+    // STEP 1 LOGIN → request OTP
     const res = await api.post("/auth/login", {
       email: email.value,
       password: password.value,
     });
 
-    // Simpan token dan role langsung
-    localStorage.setItem("token", res.data.token);
-    localStorage.setItem("role", res.data.user.role);
+    // === SUCCESS: OTP DIKIRIM ===
+    if (res.data.nextStep === "verify-login-code") {
+      toast.add({
+        severity: "info",
+        summary: "OTP Sent",
+        detail: "We have sent a login code to your email.",
+        life: 3000,
+      });
 
-    toast.add({
-      severity: "success",
-      summary: "Login Success",
-      detail: `Welcome back, ${res.data.user.username}!`,
-      life: 3000,
-    });
+      // SIMPAN EMAIL & MODE LOGIN
+      localStorage.setItem("email", email.value);
+      localStorage.setItem("processType", "login");
+      localStorage.setItem("pendingVerification", "true");
+      localStorage.setItem("is_verified", "false");
 
-    // Redirect sesuai role
-    if (res.data.user.role === "student") router.push("/home-student");
-    if (res.data.user.role === "teacher") router.push("/home-teacher");
-    if (res.data.user.role === "admin") router.push("/home-admin");
+      router.push("/verify-code");
+      return;
+    }
 
   } catch (err) {
     console.error("error login:", err);
@@ -86,6 +55,39 @@ const handleLogin = async () => {
       life: 3000,
     });
   }
+
+  // try {
+  //   const res = await api.post("/auth/login", {
+  //     email: email.value,
+  //     password: password.value,
+  //   });
+
+  //   // Simpan token dan role langsung
+  //   localStorage.setItem("token", res.data.token);
+  //   localStorage.setItem("role", res.data.user.role);
+
+  //   toast.add({
+  //     severity: "success",
+  //     summary: "Login Success",
+  //     detail: `Welcome back, ${res.data.user.username}!`,
+  //     life: 3000,
+  //   });
+
+  //   // Redirect sesuai role
+  //   if (res.data.user.role === "student") router.push("/home-student");
+  //   if (res.data.user.role === "teacher") router.push("/home-teacher");
+  //   if (res.data.user.role === "admin") router.push("/home-admin");
+
+  // } catch (err) {
+  //   console.error("error login:", err);
+
+  //   toast.add({
+  //     severity: "error",
+  //     summary: "Login Failed",
+  //     detail: err.response?.data?.message || "Something went wrong",
+  //     life: 3000,
+  //   });
+  // }
 };
 </script>
 

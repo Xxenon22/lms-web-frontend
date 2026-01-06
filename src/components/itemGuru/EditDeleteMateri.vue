@@ -1,8 +1,9 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch, nextTick } from "vue";
 import api from "../../services/api";
 import { useToast } from "primevue";
 import Swal from "sweetalert2";
+
 const toast = useToast();
 const materiPembelajaran = ref([]);
 const visible = ref(false);
@@ -20,11 +21,20 @@ const selectedMateri = ref({
     link_zoom: "",
     pass_code: "",
     deskripsi: "",
+    bank_soal_id: null
 });
 const isSaving = ref(false);
 const originalMateri = ref(null);
 const originalKelas = ref([]);
+const daftarBankSoal = ref([]);
+const judul_penugasan = ref(null);
 
+// Watch untuk sync assignment
+watch(judul_penugasan, (newVal) => {
+    if (selectedMateri.value) {
+        selectedMateri.value.bank_soal_id = newVal;
+    }
+});
 
 // Ambil user ID
 const fetchUserId = async () => {
@@ -45,46 +55,17 @@ const fetchModulePembelajaran = async () => {
         });
         materiPembelajaran.value = res.data;
     } catch (error) {
-        if (error.code === "ECONNABORTED") {
-            toast.add({ severity: "error", summary: "Timeout", detail: "Server terlalu lambat merespon", life: 3000 });
-        } else {
-            toast.add({ severity: "error", summary: "Error", detail: error.message, life: 3000 });
-        }
+        toast.add({ severity: "error", summary: "Error", detail: error.message, life: 3000 });
         console.error("fetchModulePembelajaran:", error);
     } finally {
         loading.value = false;
     }
 };
 
-const materiUnique = computed(() => {
-    const map = new Map();
-
-    materiPembelajaran.value.forEach(m => {
-        // ganti key kalau punya materi_parent_id / materi_uuid
-        const key = m.materi_uuid || m.id;
-        if (!map.has(key)) {
-            map.set(key, {
-                ...m,
-                kelas_ids: [m.kelas_id],
-                kelas_list: [m.kelas_nama]
-            });
-        } else {
-            map.get(key).kelas_ids.push(m.kelas_id);
-            map.get(key).kelas_list.push(m.kelas_nama);
-        }
-    });
-
-    return Array.from(map.values());
-});
-
-// watch(materiUnique, (v) => {
-//     console.log("MATERI UNIQUE:", v);
-// }, { immediate: true });
-
+// Ambil daftar kelas
 const fetchKelas = async () => {
     const res = await api.get("/kelas");
     daftarKelas.value = res.data;
-    // console.log("Daftar Kelas:", daftarKelas.value);
 };
 
 const kelasOptions = computed(() => {
@@ -94,8 +75,36 @@ const kelasOptions = computed(() => {
     }));
 });
 
+// Ambil daftar penugasan
+const fetchPenugasan = async () => {
+    try {
+        const res = await api.get("/bank-soal");
+        daftarBankSoal.value = res.data.map(bs => ({
+            id: bs.id,
+            name: bs.judul_penugasan
+        }));
+    } catch (err) {
+        toast.add({ severity: "error", summary: "Error", detail: "Failed to fetch assignments", life: 3000 });
+        console.error(err);
+    }
+};
 
-// Pilih file → simpan di frontend
+// Compute materi unik
+const materiUnique = computed(() => {
+    const map = new Map();
+    materiPembelajaran.value.forEach(m => {
+        const key = m.materi_uuid || m.id;
+        if (!map.has(key)) {
+            map.set(key, { ...m, kelas_ids: [m.kelas_id], kelas_list: [m.kelas_nama] });
+        } else {
+            map.get(key).kelas_ids.push(m.kelas_id);
+            map.get(key).kelas_list.push(m.kelas_nama);
+        }
+    });
+    return Array.from(map.values());
+});
+
+// Pilih file
 const handleFileSelect = (event) => {
     const file = event.files?.[0];
     if (file) {
@@ -104,147 +113,27 @@ const handleFileSelect = (event) => {
     }
 };
 
+// Validasi form
 const isEditFormValid = computed(() => {
     const m = selectedMateri.value;
-
     if (!m) return false;
-
-    // WAJIB (link_zoom OPTIONAL)
-    if (!m.judul?.trim()) return false;
-    if (!m.video_url?.trim()) return false;
-    if (!m.deskripsi?.trim()) return false;
-
-    // minimal 1 kelas harus dipilih
+    if (!m.judul?.trim() || !m.video_url?.trim() || !m.deskripsi?.trim()) return false;
     if (!selectedKelas.value || selectedKelas.value.length === 0) return false;
-
     return true;
 });
 
-
-const updateMateri = async () => {
-    if (!isEditFormValid.value) {
-        toast.add({
-            severity: "warn",
-            summary: "Form Incomplete",
-            detail: "All fields are required except Zoom Link",
-            life: 3000,
-        });
-        return;
-    }
-    try {
-        isSaving.value = true;
-        const materi = selectedMateri.value;
-
-        const res = await api.put(`/module-pembelajaran/${materi.id}`, {
-            judul: materi.judul,
-            video_url: materi.video_url,
-            deskripsi: materi.deskripsi,
-            link_zoom: materi.link_zoom,
-            pass_code: materi.pass_code,
-        });
-
-        await api.put(`/module-pembelajaran/${materi.id}/kelas`, {
-            kelas_ids: selectedKelas.value
-        });
-
-        // UPDATE DATA DI ARRAY TANPA FETCH ULANG
-        const index = materiPembelajaran.value.findIndex(
-            m => m.id === materi.id
-        );
-
-        if (index !== -1) {
-            materiPembelajaran.value[index] = {
-                ...materiPembelajaran.value[index],
-                ...res.data
-            };
-        }
-
-        // upload PDF di background
-        if (newFile.value) {
-            uploadPdf(materi.id);
-        }
-
-        toast.add({
-            severity: "success",
-            summary: "Updated",
-            detail: "Material successfully updated",
-            life: 1500,
-        });
-
-        visible.value = false;
-        newFile.value = null;
-
-    } catch (error) {
-        if (error.code === "ECONNABORTED") return;
-
-        toast.add({
-            severity: "error",
-            summary: "Error",
-            detail: "Failed to update material",
-            life: 3000,
-        });
-    } finally {
-        isSaving.value = false;
-    }
-};
-
-const uploadPdf = async (materiId) => {
-    try {
-        const fd = new FormData();
-        fd.append("file", newFile.value);
-
-        await api.put(
-            `/module-pembelajaran/${materiId}/pdf`,
-            fd,
-            { headers: { "Content-Type": "multipart/form-data" } }
-        );
-
-        toast.add({
-            severity: "info",
-            summary: "PDF Updated",
-            detail: "PDF file uploaded successfully",
-            life: 2000,
-        });
-
-    } catch (err) {
-        toast.add({
-            severity: "warn",
-            summary: "PDF Error",
-            detail: "Failed to upload PDF",
-            life: 3000,
-        });
-    }
-};
-
-// Buka dialog edit
-const openEditDialog = (materi) => {
-    // console.log("KELAS IDS:", materi.kelas_ids);
-    // console.log("OPTIONS:", kelasOptions.value);
-    selectedMateri.value = { ...materi }; // copy data lama
-    selectedKelas.value = [...materi.kelas_ids]; // isi kelas lama
-
-    // SIMPAN DATA AWAL
-    originalMateri.value = JSON.parse(JSON.stringify(materi));
-    originalKelas.value = [...materi.kelas_ids];
-
-    selectedKelas.value = materi.kelas_ids
-        .filter(id => kelasOptions.value.some(k => k.id === id));
-    newFile.value = null;
-    visible.value = true;
-};
-
+// Cek perubahan form
 const isFormChanged = computed(() => {
     if (!originalMateri.value) return false;
-
     const m = selectedMateri.value;
     const o = originalMateri.value;
-
     const materiChanged =
         m.judul !== o.judul ||
         m.video_url !== o.video_url ||
         m.deskripsi !== o.deskripsi ||
         m.link_zoom !== o.link_zoom ||
-        m.pass_code !== o.pass_code;
+        m.pass_code !== o.pass_code ||
+        m.bank_soal_id !== o.bank_soal_id;
 
     const kelasChanged =
         JSON.stringify(selectedKelas.value.sort()) !==
@@ -255,7 +144,64 @@ const isFormChanged = computed(() => {
     return materiChanged || kelasChanged || fileChanged;
 });
 
-// Hapus materi
+// Update materi
+const updateMateri = async () => {
+    if (!isEditFormValid.value) {
+        toast.add({ severity: "warn", summary: "Form Incomplete", detail: "All fields are required except Zoom Link", life: 3000 });
+        return;
+    }
+
+    try {
+        isSaving.value = true;
+        const materi = selectedMateri.value;
+
+        // Update materi & kelas sekaligus
+        const [materiRes] = await Promise.all([
+            api.put(`/module-pembelajaran/${materi.id}`, {
+                judul: materi.judul,
+                video_url: materi.video_url,
+                deskripsi: materi.deskripsi,
+                link_zoom: materi.link_zoom,
+                pass_code: materi.pass_code,
+                bank_soal_id: materi.bank_soal_id || null
+            }),
+            api.put(`/module-pembelajaran/${materi.id}/kelas`, { kelas_ids: selectedKelas.value })
+        ]);
+
+        // Update array lokal
+        const index = materiPembelajaran.value.findIndex(m => m.id === materi.id);
+        if (index !== -1) materiPembelajaran.value[index] = { ...materiPembelajaran.value[index], ...materiRes.data };
+
+        // Upload PDF hanya jika ada file baru
+        if (newFile.value) await uploadPdf(materi.id);
+
+        toast.add({ severity: "success", summary: "Updated", detail: "Material successfully updated", life: 1500 });
+
+        visible.value = false;
+        newFile.value = null;
+
+    } catch (error) {
+        toast.add({ severity: "error", summary: "Error", detail: "Failed to update material", life: 3000 });
+        console.error(error);
+    } finally {
+        isSaving.value = false;
+    }
+};
+
+// Upload PDF
+const uploadPdf = async (materiId) => {
+    try {
+        const fd = new FormData();
+        fd.append("file", newFile.value);
+        await api.put(`/module-pembelajaran/${materiId}/pdf`, fd, { headers: { "Content-Type": "multipart/form-data" } });
+        toast.add({ severity: "info", summary: "PDF Updated", detail: "PDF file uploaded successfully", life: 2000 });
+    } catch (err) {
+        toast.add({ severity: "warn", summary: "PDF Error", detail: "Failed to upload PDF", life: 3000 });
+        console.error(err);
+    }
+};
+
+// Delete materi
 const deleteMateri = async (materiUuid) => {
     const confirm = await Swal.fire({
         title: "Delete this material?",
@@ -266,36 +212,30 @@ const deleteMateri = async (materiUuid) => {
         confirmButtonText: "Yes, delete all",
         cancelButtonText: "Cancel",
     });
-
     if (!confirm.isConfirmed) return;
-
     try {
         await api.delete(`/module-pembelajaran/uuid/${materiUuid}`);
-
-        toast.add({
-            severity: "success",
-            summary: "Deleted",
-            detail: "Material successfully removed from all classes",
-            life: 2000
-        });
-
-        // HAPUS LANGSUNG DI FRONTEND (tanpa fetch ulang)
-        materiPembelajaran.value = materiPembelajaran.value.filter(
-            m => m.materi_uuid !== materiUuid
-        );
-
+        toast.add({ severity: "success", summary: "Deleted", detail: "Material successfully removed from all classes", life: 2000 });
+        materiPembelajaran.value = materiPembelajaran.value.filter(m => m.materi_uuid !== materiUuid);
     } catch (error) {
-        toast.add({
-            severity: "error",
-            summary: "Failed",
-            detail: "failed to delete material",
-            life: 3000
-        });
+        toast.add({ severity: "error", summary: "Failed", detail: "Failed to delete material", life: 3000 });
+        console.error(error);
     }
 };
 
+// Dialog edit materi
+const openEditDialog = (materi) => {
+    selectedMateri.value = { ...materi };
+    selectedKelas.value = [...materi.kelas_ids];
+    judul_penugasan.value = materi.bank_soal_id || null;
+    originalMateri.value = JSON.parse(JSON.stringify(materi));
+    originalKelas.value = [...materi.kelas_ids];
+    selectedKelas.value = materi.kelas_ids.filter(id => kelasOptions.value.some(k => k.id === id));
+    newFile.value = null;
+    visible.value = true;
+};
 
-// Embed YouTube
+// YouTube embed
 const getEmbedUrl = (url) => {
     if (!url) return "";
     const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([\w\-]{11})/);
@@ -306,15 +246,9 @@ const getEmbedUrl = (url) => {
 // Buka PDF
 const bukaPdf = (materi) => {
     if (!materi.id) {
-        toast.add({
-            severity: "warn",
-            summary: "File Not Found",
-            detail: "PDF tidak tersedia",
-            life: 3000,
-        });
+        toast.add({ severity: "warn", summary: "File Not Found", detail: "PDF tidak tersedia", life: 3000 });
         return;
     }
-
     const pdfUrl = `${import.meta.env.VITE_API_URL}api/module-pembelajaran/${materi.id}/pdf`;
     window.open(pdfUrl, "_blank");
 };
@@ -323,6 +257,7 @@ onMounted(async () => {
     await fetchUserId();
     await fetchModulePembelajaran();
     await fetchKelas();
+    await fetchPenugasan();
 });
 </script>
 
@@ -345,7 +280,7 @@ onMounted(async () => {
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
                                     <div class="grid gap-3">
                                         <span class="text-xl text-surface-500 dark:text-surface-400">{{ materi.judul
-                                        }}</span>
+                                            }}</span>
                                         <div class="flex space-x-3 text-lg max-h-40 overflow-auto break-words">
                                             <span v-tooltip.bottom="'Link Meeting'">{{ materi.link_zoom }}</span>
                                         </div>
@@ -443,6 +378,12 @@ onMounted(async () => {
                                         New File Selected: {{ newFile?.name }}
                                     </div>
                                 </div>
+                            </div>
+
+                            <div class="flex items-center gap-4 mb-4">
+                                <label class="font-semibold w-50">Assignment</label>
+                                <Select v-model="judul_penugasan" :options="daftarBankSoal" filter option-label="name"
+                                    option-value="id" placeholder="Select Assignment" class="w-full md:w-full" />
                             </div>
 
                             <div class="flex items-center gap-4 mb-8">

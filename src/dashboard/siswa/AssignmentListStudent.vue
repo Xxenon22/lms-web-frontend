@@ -29,11 +29,8 @@ const fetchMateriByUserClass = async () => {
 
 
             m.nilai = jawabanMatch?.nilai ? Number(jawabanMatch.nilai) : 0;
-
-            if (typeof m.guru_foto === "string" && m.guru_foto.length > 0) {
-                if (!m.guru_foto.startsWith("http")) {
-                    m.guru_foto = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${m.guru_foto}`;
-                }
+            if (m.guru_id) {
+                m.guru_foto = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${m.guru_id}`;
             } else {
                 m.guru_foto = null;
             }
@@ -82,7 +79,7 @@ onMounted(() => {
             <template #content>
                 <div class="flex justify-between items-center">
                     <div class="flex items-center">
-                        <Avatar v-if="m.guru_foto" :image="m.guru_foto" class="mr-2"
+                        <Avatar v-if="m.guru_foto" :image="m.guru_foto" class="mr-2 object-cover"
                             style="background-color: #ece9fc; color: #2a1261" shape="circle" size="large" />
                         <Avatar v-else icon="pi pi-user" class="mr-2" style="background-color: #ece9fc; color: #2a1261"
                             shape="circle" size="large" />

@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch, computed } from 'vue';
 import api from '../../services/api';
 import { useToast } from 'primevue';
 import Swal from 'sweetalert2';
@@ -7,6 +7,9 @@ import Swal from 'sweetalert2';
 const toast = useToast()
 const allRpk = ref([])
 const userId = ref(null)
+const selectedRpk = ref([])
+const filteredClass = ref([])
+const kelasHasilPencarian = ref(null)
 
 const fetchUserId = async () => {
     try {
@@ -24,6 +27,7 @@ const fetchRpk = async () => {
         allRpk.value = res.data.sort((a, b) => {
             return new Date(b.hari_tanggal) - new Date(a.hari_tanggal)
         })
+        // console.log("Fetched RPK:", allRpk.value)
 
     } catch (error) {
         console.error("Error fetch RPK :", error)
@@ -62,6 +66,50 @@ const formatDate = (hari_tanggal) => {
     }).format(new Date(hari_tanggal));
 };
 
+// search engine
+const search = (event) => {
+    const query = event.query ? event.query.toLowerCase() : "";
+
+    filteredClass.value = allRpk.value
+        .filter((rpk) => {
+            const grade = String(rpk.name_grade || "").toLowerCase();
+            const major = String(rpk.major || "").toLowerCase();
+            const rombel = String(rpk.name_rombel || "").toLowerCase();
+            const tanggal = formatDate(rpk.hari_tanggal).toLowerCase();
+
+            return (
+                // mapel.includes(query) 
+                grade.includes(query) ||
+                major.includes(query) ||
+                rombel.includes(query) ||
+                tanggal.includes(query)
+                // guru.includes(query)
+            );
+        })
+        .map((rpk) => ({
+            name: `${rpk.name_grade} ${rpk.major} ${rpk.name_rombel} • ${formatDate(rpk.hari_tanggal)}`,
+            id: rpk.id,
+        }));
+};
+
+watch(selectedRpk, (newVal) => {
+    if (Array.isArray(newVal) && newVal.length > 0) {
+        const selectedId = newVal[0].id;
+        kelasHasilPencarian.value =
+            allRpk.value.find((rpk) => rpk.id === selectedId) || null;
+    } else {
+        kelasHasilPencarian.value = null;
+    }
+});
+
+
+const displayedRpk = computed(() => {
+    if (kelasHasilPencarian.value) {
+        return [kelasHasilPencarian.value];
+    }
+    return allRpk.value;
+});
+
 
 onMounted(async () => {
     await fetchUserId()
@@ -74,9 +122,14 @@ onMounted(async () => {
 </script>
 
 <template>
-    <DataView :value="allRpk">
+    <DataView :value="displayedRpk">
         <template #list="slotProps">
             <div class="flex flex-col">
+
+                <label for="multiple-ac-1" class="font-bold mb-2 block">Learning Plan</label>
+                <AutoComplete v-model="selectedRpk" optionLabel="name" :suggestions="filteredClass" @complete="search"
+                    inputId="multiple-ac-1" multiple fluid />
+
                 <div v-for="rpk in slotProps.items" :key="rpk.id">
                     <div class="border-b border-surface-200 dark:border-surface-700">
                         <div class="flex flex-col sm:flex-row sm:items-center p-6 gap-4">

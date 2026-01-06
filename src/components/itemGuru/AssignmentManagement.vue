@@ -78,6 +78,16 @@ onMounted(async () => {
                                         </span>
                                         <div class="text-lg font-medium mt-2">{{ materi.judul_penugasan }}
                                         </div>
+                                        <div class="text-sm text-gray-500 mt-2">
+                                            Sent to Class:
+                                            <span v-if="materi.kelas_list?.length">
+                                                <span v-for="(k, i) in materi.kelas_list" :key="i">
+                                                    {{ k }}<span v-if="i < materi.kelas_list.length - 1">, </span>
+                                                </span>
+                                            </span>
+                                            <span v-else>-</span>
+                                        </div>
+
                                     </div>
                                 </div>
                                 <div class="flex flex-col md:items-end gap-8">
