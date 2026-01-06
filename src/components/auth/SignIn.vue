@@ -62,7 +62,7 @@ const handleLogin = async () => {
 
     // Simpan token dan role langsung
     localStorage.setItem("token", res.data.token);
-    localStorage.setItem("role", res.data.user.role);
+    localStorage.setItem("role", res.data.users.role);
 
     toast.add({
       severity: "success",
