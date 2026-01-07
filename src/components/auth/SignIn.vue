@@ -94,7 +94,7 @@ const handleLogin = async () => {
   <div class="logo flex absolute top-4 left-4 m-4 items-center space-x-2">
     <img src="../../assets/LOGO_SMK_METLAND.png" class="w-15 h-15" alt="school's_logo">
     <div class="flex flex-col">
-      <h1 class="text-2xl font-semibold">MILS</h1>
+      <h1 class="text-2xl font-semibold">MILES</h1>
       <p>
         Metschoo Integrated Learning System</p>
     </div>
@@ -109,7 +109,7 @@ const handleLogin = async () => {
       <div class=" w-1/2 flex flex-row justify-center">
         <form class="space-y-15 w-full min-h-80 p-15 rounded-2xl" @submit.prevent="handleLogin">
           <div class="header flex flex-col items-center space-y-2">
-            <h1 class="text-3xl font-bold">Welcome To MILS</h1>
+            <h1 class="text-3xl font-bold">Welcome To MILES</h1>
             <p>Please sign in to your account!</p>
           </div>
           <div class="space-y-10">

@@ -43,7 +43,7 @@ onMounted(async () => {
             <div class="flex items-center space-x-5">
                 <img src="../../assets/LOGO_SMK_METLAND.png" alt="Logo" width="65" />
                 <div class="flex flex-col">
-                    <h1 class="text-2xl font-semibold">MILS</h1>
+                    <h1 class="text-2xl font-semibold">MILES</h1>
                     <p>
                         Metschoo Integrated Learning System</p>
                 </div>
