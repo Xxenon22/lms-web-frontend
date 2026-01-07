@@ -141,16 +141,7 @@ const uploadGambar = async (file) => {
         const res = await api.post("/gambar-soal", formData, {
             headers: { "Content-Type": "multipart/form-data" }
         });
-
-        console.log("✅ Image uploaded, backend response:", {
-            mimetype: res.data.mimetype,
-            bufferLength: res.data.buffer?.length,
-        });
-
-        return {
-            data: res.data.buffer,
-            mimetype: res.data.mimetype
-        };
+        return res.data.path;
     } catch (error) {
         console.error("❌ Upload image failed:", error);
         throw error;
@@ -162,90 +153,17 @@ const uploadGambar = async (file) => {
 // Submit semua soal
 const submitSemuaSoal = async () => {
     if (!judulBaru.value.trim()) {
-        toast.add({ severity: "warn", summary: "Title cannot be empty", life: 2000 });
+        toast.add({ severity: "warn", summary: "Title required" });
         return;
-    }
-
-    // if (!guruId.value) {
-    //     toast.add({ severity: "error", summary: "Failed", detail: "Teacher ID not found" });
-    //     return;
-    // }
-
-    // 🔹 Cek apakah ada minimal 1 soal valid (PG atau Essai)
-    let adaPGValid = false;
-    let adaEssaiValid = false;
-
-    // Cek PG valid
-    for (let i = 0; i < listSoal.value.length; i++) {
-        const soal = listSoal.value[i];
-        if (
-            soal.pertanyaan.trim() &&
-            soal.jawaban.a.trim() &&
-            soal.jawaban.b.trim() &&
-            soal.jawaban.c.trim() &&
-            soal.jawaban.d.trim() &&
-            soal.jawaban.e.trim() &&
-            soal.kunci
-        ) {
-            adaPGValid = true;
-            break;
-        }
-    }
-
-    // Cek Essai valid
-    for (let i = 0; i < listSoalEssai.value.length; i++) {
-        const soal = listSoalEssai.value[i];
-        if (soal.pertanyaan_essai.trim()) {
-            adaEssaiValid = true;
-            break;
-        }
-    }
-
-    if (!adaPGValid && !adaEssaiValid) {
-        toast.add({
-            severity: "warn",
-            summary: "No questions available",
-            detail: "Please fill in at least one: Multiple Choice Question or Essay Question.",
-            life: 3000,
-        });
-        return;
-    }
-
-    // 🔹 Validasi detail PG (hanya kalau ada PG yang diisi)
-    if (adaPGValid) {
-        for (let i = 0; i < listSoal.value.length; i++) {
-            const soal = listSoal.value[i];
-            if (!soal.pertanyaan.trim()) {
-                toast.add({ severity: "warn", summary: `Multiple Choice Question Number ${i + 1}`, detail: "Question is required", life: 2500 });
-                return;
-            }
-            if (!soal.jawaban.a.trim() || !soal.jawaban.b.trim() || !soal.jawaban.c.trim() || !soal.jawaban.d.trim() || !soal.jawaban.e.trim()) {
-                toast.add({ severity: "warn", summary: `Multiple Choice Question Number ${i + 1}`, detail: "All options A–E are required", life: 2500 });
-                return;
-            }
-            if (!soal.kunci) {
-                toast.add({ severity: "warn", summary: `Multiple Choice Question Number ${i + 1}`, detail: "Answer key is required", life: 2500 });
-                return;
-            }
-        }
-    }
-
-    //  Validasi detail Essai (hanya kalau ada Essai yang diisi)
-    if (adaEssaiValid) {
-        for (let i = 0; i < listSoalEssai.value.length; i++) {
-            const soal = listSoalEssai.value[i];
-            if (!soal.pertanyaan_essai.trim()) {
-                toast.add({ severity: "warn", summary: `Essay Question Number ${i + 1}`, detail: "Question is required", life: 2500 });
-                return;
-            }
-        }
     }
 
     loading.value = true;
 
     try {
-        // Buat bank soal
-        const res = await api.post("/bank-soal", { judul_penugasan: judulBaru.value },
+        // CREATE BANK SOAL
+        const bank = await api.post(
+            "/bank-soal",
+            { judul_penugasan: judulBaru.value },
             {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`
@@ -253,22 +171,16 @@ const submitSemuaSoal = async () => {
             }
         );
 
+        const bankSoalId = bank.data.id;
 
-        const bankSoalId = res.data.id;
-
-        // Gabungkan PG & Essai
         const allData = [];
-        const maxLength = Math.max(listSoal.value.length, listSoalEssai.value.length);
+        const max = Math.max(listSoal.value.length, listSoalEssai.value.length);
 
-        for (let i = 0; i < maxLength; i++) {
+        for (let i = 0; i < max; i++) {
             const pg = listSoal.value[i] || {};
             const es = listSoalEssai.value[i] || {};
 
-            const pgImage = pg.gambar ? await uploadGambar(pg.gambar) : null;
-            const essaiImage = es.gambar_soal_essai ? await uploadGambar(es.gambar_soal_essai) : null;
-
             allData.push({
-                bank_soal_id: bankSoalId,
                 pertanyaan: pg.pertanyaan || null,
                 pg_a: pg.jawaban?.a || null,
                 pg_b: pg.jawaban?.b || null,
@@ -277,52 +189,67 @@ const submitSemuaSoal = async () => {
                 pg_e: pg.jawaban?.e || null,
                 kunci_jawaban: pg.kunci || null,
                 pertanyaan_essai: es.pertanyaan_essai || null,
-                gambar: pgImage?.data || null,
-                gambar_mimetype: pgImage?.mimetype || null,
-                gambar_soal_essai: essaiImage?.data || null,
-                gambar_essai_mimetype: essaiImage?.mimetype || null,
             });
         }
 
-        // Submit soal ke API
-        await api.post("/soal",
-            {
+        // 🔥 FORM DATA
+        const formData = new FormData();
+        formData.append(
+            "data",
+            JSON.stringify({
                 bank_soal_id: bankSoalId,
                 soal_list: allData
-            },
-            {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`
-                }
-            }
+            })
         );
+
+        // APPEND FILE
+        listSoal.value.forEach((s, i) => {
+            if (s.gambar) {
+                formData.append(`pg_image_${i}`, s.gambar);
+            }
+        });
+
+        listSoalEssai.value.forEach((s, i) => {
+            if (s.gambar_soal_essai) {
+                formData.append(`essai_image_${i}`, s.gambar_soal_essai);
+            }
+        });
+
+        await api.post("/soal", formData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+                "Content-Type": "multipart/form-data"
+            }
+        });
 
         toast.add({
             severity: "success",
-            summary: "Success!",
-            detail: "All questions saved successfully.",
-            life: 3000,
+            summary: "Success",
+            detail: "Soal berhasil disimpan"
         });
 
-        // Reset form
+        // RESET
         judulBaru.value = "";
-        listSoal.value = [
-            {
-                pertanyaan: "",
-                jawaban: { a: "", b: "", c: "", d: "", e: "" },
-                kunci: "",
-                gambar: null,
-                previewUrl: null,
-            },
-        ];
-        listSoalEssai.value = [
-            { pertanyaan_essai: "", gambar_soal_essai: null, previewUrlEssai: null },
-        ];
-    } catch (error) {
+        listSoal.value = [{
+            pertanyaan: "",
+            jawaban: { a: "", b: "", c: "", d: "", e: "" },
+            kunci: "",
+            gambar: null,
+            previewUrl: null
+        }];
+
+        listSoalEssai.value = [{
+            pertanyaan_essai: "",
+            gambar_soal_essai: null,
+            previewUrlEssai: null
+        }];
+
+    } catch (err) {
+        console.error(err);
         toast.add({
             severity: "error",
             summary: "Failed",
-            detail: error.response?.data?.message || error.message,
+            detail: err.response?.data?.message || err.message
         });
     }
 

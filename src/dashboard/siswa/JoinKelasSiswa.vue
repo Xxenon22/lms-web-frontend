@@ -641,19 +641,40 @@ const fetchUploadedFiles = async (materi) => {
     }
 };
 
-const downloadFile = (url, filename) => {
-    const a = document.createElement("a");
-    a.href = `${url}?download=1`;
-    a.download = filename || "";
-    a.target = "_self";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+const downloadFile = async (downloadUrl, fileName = "file") => {
+    try {
+        const response = await fetch(downloadUrl, {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error("Download failed");
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName; // nama file
+        document.body.appendChild(a);
+        a.click();
+
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    } catch (err) {
+        console.error(err);
+        alert("Gagal mengunduh file");
+    }
 };
 
 
+
 const openFile = (url) => {
-    window.open(url, '_blank');
+    window.open(url, "_blank");
 };
 
 const deleteFile = async (fileId, materiId) => {
@@ -835,7 +856,8 @@ onMounted(async () => {
                 <template #footer>
                     <!-- UPLOAD GAMBAR / PDF JAWABAN SISWA -->
                     <FileUpload mode="advanced" customUpload multiple accept="image/*,application/pdf"
-                        :maxFileSize="5000000" @uploader="e => onAdvancedUpload(e, materi.id)">
+                        :maxFileSize="5000000" :showCancelButton="false" :showFileList="false"
+                        @uploader="e => onAdvancedUpload(e, materi.id)">
                         <template #empty>
                             <span>Drag & drop image or PDF here</span>
                         </template>
@@ -876,7 +898,7 @@ onMounted(async () => {
                             <!-- ACTION -->
                             <div class="flex gap-2">
                                 <Button icon="pi pi-download" severity="secondary" size="small"
-                                    @click="downloadFile(file.url)" />
+                                    @click="downloadFile(file.download_url, file.file_name)" />
 
                                 <Button icon="pi pi-external-link" size="small" @click="openFile(file.url)" />
                                 <Button icon="pi pi-trash" size="small" severity="danger"
@@ -991,7 +1013,7 @@ onMounted(async () => {
                                                                 :value="key" :name="`soal-${soal.id}`"
                                                                 :disabled="isHistory(materi)" />
                                                             <label :for="`${soal.id}-${key}`">{{ key }}. {{ opsi
-                                                                }}</label>
+                                                            }}</label>
                                                         </div>
                                                     </div>
 

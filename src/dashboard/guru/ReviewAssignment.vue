@@ -50,6 +50,7 @@ const fetchJawabanSiswa = async () => {
     try {
         const res = await api.get('/jawaban-siswa/all-with-soal', {
             params: { bank_soal_id: assignmentId },
+
         })
 
         // 🔍 DEBUG RAW RESPONSE

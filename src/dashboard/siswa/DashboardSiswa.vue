@@ -126,7 +126,9 @@ const fetchGuruById = async (id) => {
         const res = await api.get(`/auth/teacher/${id}`);
         guruCache.value[id] = {
             ...res.data,
-            photo_profile: `${import.meta.env.VITE_API_URL}api/upload-profile/${id}`,
+            photo_profile: res.data.photo_url
+                ? `${API_URL}${res.data.photo_url}`
+                : null
         };
         profile.value = guruCache.value[id];
         src.value = guruCache.value[id].photo_profile;
@@ -173,8 +175,8 @@ const fetchGuruById = async (id) => {
                             <div @click="fetchGuruById(kelasHasilPencarian.guru_id)"
                                 class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
                                 <img v-if="kelasHasilPencarian.guru_photo"
-                                    :src="`${API_URL}api/upload-profile/${kelasHasilPencarian.guru_id}`"
-                                    alt="Photo Profile" class="w-full h-full object-cover" loading="lazy" />
+                                    :src="`${API_URL}${kelasHasilPencarian.guru_photo}`" alt="Photo Profile"
+                                    class="w-full h-full object-cover" loading="lazy" />
                                 <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
                             </div>
                         </div>
@@ -238,10 +240,10 @@ const fetchGuruById = async (id) => {
                         <div class="relative">
                             <img :src="kelas.link_wallpaper_kelas || 'https://primefaces.org/cdn/primevue/images/usercard.png'"
                                 class="w-full h-32 object-cover" loading="lazy" />
-                            <div @click="fetchGuruById(kelas.teacher?.id)"
+                            <div @click="fetchGuruById(kelas.guru_id)"
                                 class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
-                                <img v-if="kelas.guru_photo" :src="`${API_URL}api/upload-profile/${kelas.guru_id}`"
-                                    alt="Photo Profile" class="w-full h-full object-cover" loading="lazy" />
+                                <img v-if="kelas.guru_photo" :src="`${API_URL}${kelas.guru_photo}`"
+                                    class="w-full h-full object-cover" />
                                 <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
                             </div>
                         </div>
@@ -272,10 +274,10 @@ const fetchGuruById = async (id) => {
                         <div class="relative">
                             <img :src="kelas.link_wallpaper_kelas || 'https://primefaces.org/cdn/primevue/images/usercard.png'"
                                 class="w-full h-32 object-cover" loading="lazy" />
-                            <div @click="fetchGuruById(kelas.teacher?.id)"
+                            <div @click="fetchGuruById(kelas.guru_id)"
                                 class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
-                                <img v-if="kelas.guru_photo" :src="`${API_URL}api/upload-profile/${kelas.guru_id}`"
-                                    alt="Photo Profile" class="w-full h-full object-cover" loading="lazy" />
+                                <img v-if="kelas.guru_photo" :src="`${API_URL}${kelas.guru_photo}`" alt="Photo Profile"
+                                    class="w-full h-full object-cover" loading="lazy" />
                                 <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
                             </div>
                         </div>

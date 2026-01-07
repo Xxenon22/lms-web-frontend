@@ -12,6 +12,7 @@ const soalId = route.params.id;
 const judulBaru = ref("");
 const listSoal = ref([]);
 const listEssai = ref([]);
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 /* ================= FETCH DATA ================= */
 
@@ -35,13 +36,8 @@ const fetchSoalDariAssignment = async () => {
             },
             kunci: d.kunci_jawaban,
 
-            // BASE64 EXISTING
-            gambar: d.gambar,
-            gambar_mimetype: d.gambar_mimetype,
-
-            previewUrl: d.gambar
-                ? `data:${d.gambar_mimetype};base64,${d.gambar}`
-                : null
+            gambar: d.gambar, // SIMPAN PATH
+            previewUrl: d.gambar ? `${BASE_URL}${d.gambar}` : null
         }));
 
     listEssai.value = data
@@ -50,41 +46,91 @@ const fetchSoalDariAssignment = async () => {
             id: d.id,
             pertanyaan_essai: d.pertanyaan_essai,
             gambar_soal_essai: d.gambar_soal_essai,
-            gambar_essai_mimetype: d.gambar_essai_mimetype,
             previewUrlEssai: d.gambar_soal_essai
-                ? `data:${d.gambar_essai_mimetype};base64,${d.gambar_soal_essai}`
+                ? `${BASE_URL}${d.gambar_soal_essai}`
                 : null
         }));
 };
 
+const tambahSoal = () => {
+    listSoal.value.push({
+        id: null,
+        pertanyaan: "",
+        jawaban: {
+            a: "",
+            b: "",
+            c: "",
+            d: "",
+            e: ""
+        },
+        kunci: "",
+        gambar: null,
+        gambar_mimetype: null,
+        previewUrl: null
+    });
+};
+
+const tambahSoalEssai = () => {
+    listEssai.value.push({
+        id: null,
+        pertanyaan_essai: "",
+        gambar_soal_essai: null,
+        gambar_essai_mimetype: null,
+        previewUrlEssai: null
+    });
+};
+
+
 /* ================= FILE HANDLER ================= */
 
-const readBase64 = (file, cb) => {
-    const reader = new FileReader();
-    reader.onload = e => cb(e.target.result.split(",")[1]);
-    reader.readAsDataURL(file);
-};
-
-const onFileSelect = (e, index) => {
+const onFileSelect = async (e, index) => {
     const file = e.files?.[0];
     if (!file) return;
 
-    readBase64(file, base64 => {
-        listSoal.value[index].gambar = base64;
-        listSoal.value[index].gambar_mimetype = file.type;
-        listSoal.value[index].previewUrl = `data:${file.type};base64,${base64}`;
-    });
-};
+    const formData = new FormData();
+    formData.append("gambar", file);
 
-const onFileSelectEssai = (e, index) => {
+    try {
+        const res = await api.post(
+            `/gambar-soal/pg/${listSoal.value[index].id}`,
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        listSoal.value[index].gambar = res.data.path;
+        listSoal.value[index].previewUrl = `${BASE_URL}${res.data.path}`;
+    } catch (err) {
+        toast.add({
+            severity: "error",
+            summary: "Upload gagal",
+            detail: "Gambar PG gagal diupload"
+        });
+    }
+};
+const onFileSelectEssai = async (e, index) => {
     const file = e.files?.[0];
     if (!file) return;
 
-    readBase64(file, base64 => {
-        listEssai.value[index].gambar_soal_essai = base64;
-        listEssai.value[index].gambar_essai_mimetype = file.type;
-        listEssai.value[index].previewUrlEssai = `data:${file.type};base64,${base64}`;
-    });
+    const formData = new FormData();
+    formData.append("gambar", file);
+
+    try {
+        const res = await api.post(
+            `/gambar-soal/essai/${listEssai.value[index].id}`,
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        listEssai.value[index].gambar_soal_essai = res.data.path;
+        listEssai.value[index].previewUrlEssai =
+            `${BASE_URL}${res.data.path}`;
+    } catch (err) {
+        toast.add({
+            severity: "error",
+            summary: "Upload gagal",
+            detail: "Gambar essai gagal diupload"
+        });
+    }
 };
 
 /* ================= SUBMIT ================= */
@@ -123,6 +169,7 @@ const submitSemuaSoal = async () => {
 
     toast.add({ severity: "success", summary: "Success", detail: "Soal tersimpan" });
 };
+const back = () => router.back();
 
 onMounted(fetchSoalDariAssignment);
 </script>
@@ -131,7 +178,7 @@ onMounted(fetchSoalDariAssignment);
     <div class="space-y-8">
         <!-- Dropdown pilih penugasan -->
         <div class="m-5">
-            <Button icon="pi pi-arrow-left" class="mb-3" label="Back" @click="kembali"></Button>
+            <Button icon="pi pi-arrow-left" class="mb-3" label="Back" @click="back"></Button>
         </div>
 
         <!-- Judul penugasan (bisa diedit) -->
