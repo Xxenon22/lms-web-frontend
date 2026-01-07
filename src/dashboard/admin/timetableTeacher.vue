@@ -94,7 +94,7 @@ onMounted(() => {
                         class="w-full mb-2" @select="handleFileSelect" />
                     <p v-if="fileUrl" class="text-sm text-green-500">File Uploaded Successfully</p>
                 </div>
-                <div class="flex justify-end">
+                <div class="flex justify-end m-5">
                     <Button label="Submit" :loading="loading" :disabled="!selectedFile || uploaded"
                         @click="uploadFile" />
                 </div>
