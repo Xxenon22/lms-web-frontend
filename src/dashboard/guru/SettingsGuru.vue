@@ -172,7 +172,7 @@ onMounted(fetchProfile);
 
                     <div>
                         <h2 class="mb-2 font-semibold">Teacher's Subject</h2>
-                        <InputText v-model="subject" class="w-full" placeholder="Enter your name" />
+                        <InputText v-model="subject" class="w-full" placeholder="Enter your Subject" />
                     </div>
 
                     <div>

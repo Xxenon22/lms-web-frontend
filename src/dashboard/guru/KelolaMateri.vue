@@ -126,10 +126,12 @@ onMounted(async () => {
     <template #content>
       <div class="flex space-x-5">
         <!-- Form Input -->
-        <div class="space-y-7 w-1/2">
+        <div class="space-y-10 w-1/2">
           <div>
             <MultiSelect v-model="selectedKelas" :options="daftarKelas" option-label="name" filter option-value="id"
               display="chip" placeholder="Select one or more classes" class="flex w-full overflow-auto break-all" />
+
+            <p class="text-xs ml-3 mt-2 text-red-500">*Must Be Filled</p>
           </div>
 
           <div>
@@ -137,19 +139,17 @@ onMounted(async () => {
               <InputText id="judul_materi" v-model="judulMateri" class="w-full" />
               <label for="judul_materi">Lesson Title</label>
             </FloatLabel>
+            <p class="text-xs ml-3 mt-2 text-red-500">*Must Be Filled</p>
           </div>
 
           <div class="flex flex-col space-y-5">
             <div class="flex flex-col">
               <FileUpload ref="fileUploadRef" mode="basic" accept=".pdf" chooseLabel="Choose PDF" :customUpload="true"
                 @select="handleFileSelect" />
-
-              <!-- <p v-if="selectedFile" class="text-sm text-green-600">
-                Selected file: {{ selectedFile.name }}
-              </p> -->
+              <p class="text-xs ml-3 mt-2 text-red-500">*Must Be Filled</p>
+              <p class="text-red-500 ml-3 mt-2">*Maximum file size is 20MB.</p>
             </div>
             <div class="">
-              <p class="text-red-500">*Maximum file size is 20MB.</p>
             </div>
           </div>
 
@@ -160,6 +160,7 @@ onMounted(async () => {
               <InputText id="link_ytb" v-model="linkYtb" class="w-full" />
               <label for="link_ytb">Enter Youtube link</label>
             </FloatLabel>
+            <p class="text-xs ml-3 mt-2 text-red-500">*Must Be Filled</p>
           </div>
 
           <div>
@@ -176,6 +177,8 @@ onMounted(async () => {
                 </div>
               </template>
             </Select>
+            <p class="text-xs ml-3 mt-2 text-red-500">*Must Be Filled</p>
+
           </div>
 
           <div class="">
@@ -183,6 +186,8 @@ onMounted(async () => {
               <Textarea id="deskripsi" v-model="deskripsi" class="w-full" rows="3" />
               <label for="deskripsi">Description</label>
             </FloatLabel>
+            <p class="text-xs ml-3 mt-2 text-red-500">*Must Be Filled</p>
+
           </div>
 
           <Card>

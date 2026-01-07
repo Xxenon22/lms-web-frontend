@@ -236,14 +236,14 @@ onMounted(async () => {
         </RouterLink>
         <RouterLink to="/develope-course-content">
           <li>
-            <Icon class="icon" icon="material-symbols:bookmark-manager-rounded" /><span class="nav-item">Develop
-              Course
-              Content</span>
+            <Icon class="icon" icon="tdesign:task-filled" /><span class="nav-item">Assignments</span>
           </li>
         </RouterLink>
         <RouterLink to="/assignments">
           <li>
-            <Icon class="icon" icon="tdesign:task-filled" /><span class="nav-item">Assignments</span>
+            <Icon class="icon" icon="material-symbols:bookmark-manager-rounded" /><span class="nav-item">Develop
+              Course
+              Content</span>
           </li>
         </RouterLink>
         <RouterLink to="/timetables">
