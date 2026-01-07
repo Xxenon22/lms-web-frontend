@@ -21,7 +21,7 @@ const pdfSelesai = ref({});
 const activeSteps = ref({});
 // const tugasSelesai = ref({})
 const pdfContainerRefs = ref({});
-const selesaiMateri = ref([]);
+// const selesaiMateri = ref([]);
 const videoDurations = ref({});
 const videoWatchTime = ref({});
 const watchIntervalIds = ref({});
@@ -32,10 +32,8 @@ const isLoading = ref(true)
 // const selectedFile = ref(null);
 // const fileUrl = ref(null);
 // const uploaded = ref(false);
-const isHistory = (materi) => {
-    const p = progressMateriMap[materi.id];
-    return materi?.status_selesai === true || p?.langkah_aktif === "4";
-};
+
+const isHistory = (materi) => materi?.status_selesai === true;
 
 const uploadedFiles = ref({})
 
@@ -64,17 +62,9 @@ const fetchProgressMateri = async () => {
         const { data } = await api.get(`/progress-materi/${userId.value}`, {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
+
         data?.forEach(item => {
             progressMateriMap[item.materi_id] = item;
-
-            if (item.langkah_aktif === "4") {
-                const materiId = Number(item.materi_id);
-
-                if (!selesaiMateri.value.includes(materiId)) {
-                    selesaiMateri.value.push(materiId);
-                }
-            }
-
         });
     } catch (err) {
         console.error("fetchProgressMateri error:", err);
@@ -129,11 +119,15 @@ const kirimSemuaData = async (materiId) => {
         await simpanProgress(materiId);
 
         const numericId = Number(materiId);
-        if (!selesaiMateri.value.includes(numericId)) {
-            selesaiMateri.value.push(numericId);
-        }
+        // if (!selesaiMateri.value.includes(numericId)) {
+        //     selesaiMateri.value.push(numericId);
+        // }
 
-        materi.status_selesai = true;
+        await simpanProgress(materiId);
+        await fetchMateriById();
+
+        // refresh ulang dari backend (optional tapi paling aman)
+        await fetchMateriById();
 
         toast.add({ severity: 'success', summary: 'The answer has been successfully saved!', life: 3000 });
         // console.log("selesaiMateri setelah kirimSemuaData:", selesaiMateri.value);
@@ -223,16 +217,19 @@ const fetchMateriById = async () => {
         });
 
         const newDaftar = [];
-        selesaiMateri.value = [];
+        // selesaiMateri.value = [];
 
         for (const materi of materiData) {
-            // inisialisasi progress-related state
             const p = progressMateriMap[materi.id];
-            materi.status_selesai = p?.langkah_aktif === "4";
+
+            // 🔥 FIX UTAMA
+            materi.status_selesai = Boolean(materi.status_selesai);
+
             videoSelesai.value[materi.id] = p?.video_selesai ?? false;
             pdfSelesai.value[materi.id] = p?.pdf_selesai ?? false;
             activeSteps.value[materi.id] = p?.langkah_aktif ?? "1";
             refleksi.value[materi.id] = p?.refleksi ?? "";
+
             materi.pdf_url = `${import.meta.env.VITE_API_URL}api/module-pembelajaran/${materi.id}/pdf`;
 
             if (materi.guru_id) {
@@ -240,6 +237,7 @@ const fetchMateriById = async () => {
             } else {
                 materi.guru_foto = null;
             }
+
 
 
             // jika backend module tidak include soal, tapi punya bank_soal_id -> fetch dari /soal/:id
@@ -527,9 +525,9 @@ const bukaLinkZoom = (materi) => {
 // });
 
 // Materi yang sudah selesai -> kalau mau dipisahkan juga
-const materiSelesai = computed(() => {
-    return daftarMateri.value.filter(m => selesaiMateri.value.includes(Number(m.id)));
-});
+// const materiSelesai = computed(() => {
+//     return daftarMateri.value.filter(m => selesaiMateri.value.includes(Number(m.id)));
+// });
 
 const onAdvancedUpload = async (event, materiId) => {
     try {
@@ -825,8 +823,9 @@ onMounted(async () => {
                                 <i v-if="!materi.guru_foto" class="pi pi-user"></i>
                             </Avatar>
                             <span class="font-bold">Educational Objectives: {{ materi.judul }}</span>
-                            <Tag v-if="selesaiMateri.includes(Number(materi.id))
-                            " severity="success" value="Finished" class="ml-2" />
+                            <Tag v-if="materi.status_selesai === true" severity="success" value="Finished"
+                                class="ml-2" />
+
                         </div>
 
                         <Button label="Join Meeting" @click="bukaLinkZoom(materi)" />
@@ -902,7 +901,7 @@ onMounted(async () => {
 
                 <div class="card">
                     <Stepper v-if="daftarMateri.length > 0" :value="activeSteps[materi.id]" linear
-                        :readonly="selesaiMateri.includes(materi.id)">
+                        :readonly="materi.status_selesai === true">
                         <StepItem value="1">
                             <Step class="flex justify-between">
                                 <span>Learning Unit 1</span>
@@ -984,8 +983,8 @@ onMounted(async () => {
                                                         </div>
                                                         <div v-for="(opsi, key) in { A: soal.pg_a, B: soal.pg_b, C: soal.pg_c, D: soal.pg_d, E: soal.pg_e }"
                                                             :key="key" class="flex items-center gap-2" :class="{
-                                                                'bg-green-100': isHistory && key === soal.kunci_jawaban,
-                                                                'bg-red-100': isHistory && key === soal.jawaban_siswa && key !== soal.kunci_jawaban
+                                                                'bg-green-100': isHistory(materi) && key === soal.kunci_jawaban,
+                                                                'bg-red-100': isHistory(materi) && key === selectedAnswers[materi.id][soal.id] && key !== soal.kunci_jawaban
                                                             }">
                                                             <RadioButton :inputId="`${soal.id}-${key}`"
                                                                 v-model="selectedAnswers[materi.id][soal.id]"
@@ -1025,7 +1024,7 @@ onMounted(async () => {
                                                     <div class="flex flex-col gap-4">
                                                         <Textarea v-model="jawabanEssaiSiswa[materi.id][soal.id]"
                                                             placeholder="Submit your Answer"
-                                                            :disabled="selesaiMateri.includes(materi.id)"
+                                                            :disabled="isHistory(materi)"
                                                             :readonly="isHistory(materi)" />
                                                     </div>
                                                 </template>
@@ -1048,7 +1047,7 @@ onMounted(async () => {
                                 <div class="flex flex-col h-full">
                                     <Textarea v-model="refleksi[materi.id]" rows="5" class="w-full"
                                         placeholder="Submit Your Reflection..." @blur="() => simpanProgress(materi.id)"
-                                        :readonly="selesaiMateri.includes(materi.id)" />
+                                        :readonly="materi.status_selesai === true" />
                                     <div class="flex py-6 gap-2">
                                         <Button label="Back" severity="secondary"
                                             @click="() => activeSteps[materi.id] = '3'" />

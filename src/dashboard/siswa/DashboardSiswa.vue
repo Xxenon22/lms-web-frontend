@@ -1,196 +1,138 @@
 <script setup>
+import { ref, onMounted, watch } from "vue";
 import api from "../../services/api";
-import { onMounted, ref, watch } from "vue";
 import { useToast } from "primevue/usetoast";
 
 const toast = useToast();
+
+/* ================= STATE ================= */
 const kelasDiikuti = ref([]);
 const kelasLainnya = ref([]);
-const userId = ref(null);
-const selectedClass = ref("");
+const selectedView = ref("joined");
+const loading = ref(true);
+
+const selectedClass = ref(null);
 const filteredClass = ref([]);
 const kelasHasilPencarian = ref(null);
-const isLoading = ref(true);
+
+/* dialog guru */
 const visible = ref(false);
+const profile = ref({});
 const src = ref(null);
-const profile = ref([]);
-const selectedView = ref("joined");
+const guruCache = ref({});
 
-// Lifecycle
-onMounted(async () => {
+const API_URL = import.meta.env.VITE_API_URL;
+
+
+/* ================= FETCH DASHBOARD ================= */
+const loadDashboard = async () => {
+    loading.value = true;
     try {
-        userId.value = localStorage.getItem("id");
+        const res = await api.get("/kelas/student/dashboard");
+        // console.log(res.data);
 
-        const [semuaKelas, idKelasIkut] = await Promise.all([
-            fetchSemuaKelas(),
-            fetchKelasYangDiikuti(),
-        ]);
+        kelasDiikuti.value = Array.isArray(res.data.joined)
+            ? res.data.joined
+            : [];
 
-        semuaKelas.forEach(k => {
-            k.sudahDiikuti = idKelasIkut.includes(k.id);
+        kelasLainnya.value = Array.isArray(res.data.other)
+            ? res.data.other
+            : [];
+    } catch (err) {
+        console.error(err);
+        toast.add({
+            severity: "error",
+            summary: "Failed",
+            detail: "Failed to load class data",
+            life: 3000,
         });
-
-        kelasDiikuti.value = semuaKelas.filter(k => k.sudahDiikuti);
-        kelasLainnya.value = semuaKelas.filter(k => !k.sudahDiikuti);
     } finally {
-        isLoading.value = false;
-    }
-});
-
-
-
-// Ambil semua kelas
-
-const fetchSemuaKelas = async () => {
-    try {
-        const res = await api.get("/kelas/all/list");
-
-        return res.data.map((kelas) => ({
-            ...kelas,
-            sudahDiikuti: false,
-
-            guru_photo: kelas.teacher?.photo_profile
-                ? `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${kelas.teacher.photo_profile}`
-                : null,
-        }));
-    } catch (err) {
-        console.error("fetchSemuaKelas error:", err);
-        toast.add({
-            severity: "error",
-            summary: "Failed",
-            detail: "Unable to retrieve classroom",
-            life: 3000,
-        });
-        return [];
+        loading.value = false;
     }
 };
 
-// Ambil kelas yang diikuti user
-const fetchKelasYangDiikuti = async () => {
-    try {
-        const res = await api.get("/kelas/followed/me");
-        return res.data.map((k) => k.kelas_id);
-    } catch (err) {
-        return [];
-    }
-};
+onMounted(loadDashboard);
 
-// Ikuti kelas
-const ikutiKelas = async (kelasId) => {
-    try {
-        await api.post(`/kelas/follow/${kelasId}`, {
-            user_id: userId.value,
-            kelas_id: kelasId,
-        });
-
-        toast.add({
-            severity: "success",
-            summary: "Success",
-            detail: "You have started joining the Classroom.",
-            life: 2000,
-        });
-
-        const index = kelasLainnya.value.findIndex((k) => k.id === kelasId);
-        if (index !== -1) {
-            const kelas = kelasLainnya.value[index];
-            kelas.sudahDiikuti = true;
-            kelasDiikuti.value.push(kelas);
-            kelasLainnya.value.splice(index, 1);
-        }
-    } catch (err) {
-        toast.add({
-            severity: "warn",
-            summary: "Failed",
-            detail: "You have already joined this class.",
-            life: 3000,
-        });
-    }
-};
-
-// Batal ikuti kelas
-const batalIkutiKelas = async (kelasId) => {
-    try {
-        await api.delete(`/kelas/unfollow/${kelasId}`, {
-            data: { user_id: userId.value, kelas_id: kelasId },
-        });
-
-        toast.add({
-            severity: "info",
-            summary: "Success",
-            detail: "Class has been unfollowed.",
-            life: 2000,
-        });
-
-        const index = kelasDiikuti.value.findIndex((k) => k.id === kelasId);
-        if (index !== -1) {
-            const kelas = kelasDiikuti.value[index];
-            kelas.sudahDiikuti = false;
-            kelasLainnya.value.push(kelas);
-            kelasDiikuti.value.splice(index, 1);
-        }
-    } catch (err) {
-        toast.add({
-            severity: "error",
-            summary: "Failed",
-            detail: "Failed to unfollow the class",
-            life: 3000,
-        });
-    }
-};
-
-// search engine
+/* ================= SEARCH ================= */
 const search = (event) => {
-    const query = event.query ? event.query.toLowerCase() : "";
-    const semuaKelas = [...kelasDiikuti.value, ...kelasLainnya.value];
+    const q = event.query?.toLowerCase() || "";
+    const source = [...kelasDiikuti.value, ...kelasLainnya.value];
 
-    // Filter berdasarkan nama mapel atau nama rombel
-    filteredClass.value = semuaKelas
-        .filter((kelas) => {
-            const mapel = kelas.nama_mapel?.toLowerCase() || "";
-            const grade = kelas.rombel?.grade_lvl?.toLowerCase() || "";
-            const rombel = kelas.rombel?.name_rombel?.toLowerCase() || "";
-            const guru = kelas.teacher?.username?.toLowerCase() || "";
-            return (
-                mapel.includes(query) ||
-                grade.includes(query) ||
-                rombel.includes(query) ||
-                guru.includes(query)
-            );
-        })
-        .map((kelas) => ({
-            name: `${kelas.nama_mapel} - ${kelas.rombel?.grade_lvl || ""} ${kelas.rombel?.major} ${kelas.rombel?.name_rombel || ""}`,
-            id: kelas.id,
+    filteredClass.value = source
+        .filter(k =>
+            k.nama_mapel?.toLowerCase().includes(q) ||
+            k.teacher?.username?.toLowerCase().includes(q) ||
+            k.rombel?.name_rombel?.toLowerCase().includes(q)
+        )
+        .slice(0, 10)
+        .map(k => ({
+            id: k.id,
+            name: `${k.nama_mapel} - ${k.rombel?.grade_lvl || ""} ${k.rombel?.major || ""} ${k.rombel?.name_rombel || ""} | ${k.guru_name || "No Teacher"}`,
         }));
 };
 
-//update hasil pencarian
-watch(selectedClass, (newVal) => {
-    if (newVal && newVal.id) {
-        const semuaKelas = [...kelasDiikuti.value, ...kelasLainnya.value];
-        const hasil = semuaKelas.find((k) => k.id === newVal.id);
-        kelasHasilPencarian.value = hasil || null;
-    } else {
+watch(selectedClass, (val) => {
+    if (!val) {
         kelasHasilPencarian.value = null;
+        return;
     }
+    const source = [...kelasDiikuti.value, ...kelasLainnya.value];
+    kelasHasilPencarian.value = source.find(k => k.id === val.id) || null;
 });
 
-// Ambil detail guru (untuk dialog)
-const fetchGuruById = async (guruId) => {
+/* ================= FOLLOW ================= */
+const ikutiKelas = async (id) => {
     try {
-        const res = await api.get(`/auth/teacher/${guruId}`);
-        profile.value = res.data;
-        src.value = profile.value.id
-            ? `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${profile.value.id}?t=${Date.now()}`
-            : null;
+        await api.post(`/kelas/follow/${id}`);
+        const kelas = kelasLainnya.value.find(k => k.id === id);
+        if (!kelas) return;
+
+        kelas.sudahDiikuti = true;
+        kelasDiikuti.value.unshift(kelas);
+        kelasLainnya.value = kelasLainnya.value.filter(k => k.id !== id);
+
+        toast.add({ severity: "success", summary: "Joined", life: 2000 });
+    } catch {
+        toast.add({ severity: "warn", summary: "Already joined", life: 2000 });
+    }
+};
+
+const batalIkutiKelas = async (id) => {
+    try {
+        await api.delete(`/kelas/unfollow/${id}`);
+        const kelas = kelasDiikuti.value.find(k => k.id === id);
+        if (!kelas) return;
+
+        kelas.sudahDiikuti = false;
+        kelasLainnya.value.unshift(kelas);
+        kelasDiikuti.value = kelasDiikuti.value.filter(k => k.id !== id);
+
+        toast.add({ severity: "info", summary: "Unfollowed", life: 2000 });
+    } catch {
+        toast.add({ severity: "error", summary: "Failed", life: 2000 });
+    }
+};
+
+/* ================= TEACHER PROFILE ================= */
+const fetchGuruById = async (id) => {
+    if (guruCache.value[id]) {
+        profile.value = guruCache.value[id];
+        src.value = guruCache.value[id].photo_profile;
         visible.value = true;
-    } catch (error) {
-        console.error("Error fetch teacher profile by ID:", error);
-        toast.add({
-            severity: "error",
-            summary: "Failed",
-            detail: "Unable to retrieve teacher profile",
-            life: 3000,
-        });
+        return;
+    }
+
+    try {
+        const res = await api.get(`/auth/teacher/${id}`);
+        guruCache.value[id] = {
+            ...res.data,
+            photo_profile: `${import.meta.env.VITE_API_URL}api/upload-profile/${id}`,
+        };
+        profile.value = guruCache.value[id];
+        src.value = guruCache.value[id].photo_profile;
+        visible.value = true;
+    } catch {
+        toast.add({ severity: "error", summary: "Failed to load profile" });
     }
 };
 </script>
@@ -227,11 +169,12 @@ const fetchGuruById = async (guruId) => {
                     <template #header>
                         <div class="relative">
                             <img :src="kelasHasilPencarian.link_wallpaper_kelas || '/wallpapers/w1.jpg'"
-                                class="w-full h-32 object-cover" />
+                                class="w-full h-32 object-cover" loading="lazy" />
                             <div @click="fetchGuruById(kelasHasilPencarian.guru_id)"
                                 class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
-                                <img v-if="kelasHasilPencarian.guru_photo" :src="kelasHasilPencarian.guru_photo"
-                                    alt="Photo Profile" class="w-full h-full object-cover" />
+                                <img v-if="kelasHasilPencarian.guru_photo"
+                                    :src="`${API_URL}api/upload-profile/${kelasHasilPencarian.guru_id}`"
+                                    alt="Photo Profile" class="w-full h-full object-cover" loading="lazy" />
                                 <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
                             </div>
                         </div>
@@ -281,8 +224,8 @@ const fetchGuruById = async (guruId) => {
         <!-- Joined Classes -->
 
         <div class="" v-if="selectedView === 'joined'">
-            <div v-if="isLoading" class="flex justify-center py-10">
-                <ProgressSpinner />
+            <div v-if="loading" class="grid grid-cols-3 gap-8">
+                <Skeleton height="200px" v-for="i in 6" :key="i" />
             </div>
 
             <div v-else-if="kelasDiikuti.length === 0" class="text-center text-gray-400 mb-8">
@@ -294,11 +237,11 @@ const fetchGuruById = async (guruId) => {
                     <template #header>
                         <div class="relative">
                             <img :src="kelas.link_wallpaper_kelas || 'https://primefaces.org/cdn/primevue/images/usercard.png'"
-                                class="w-full h-32 object-cover" />
+                                class="w-full h-32 object-cover" loading="lazy" />
                             <div @click="fetchGuruById(kelas.teacher?.id)"
                                 class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
-                                <img v-if="kelas.guru_photo" :src="kelas.guru_photo" alt="Photo Profile"
-                                    class="w-full h-full object-cover" />
+                                <img v-if="kelas.guru_photo" :src="`${API_URL}api/upload-profile/${kelas.guru_id}`"
+                                    alt="Photo Profile" class="w-full h-full object-cover" loading="lazy" />
                                 <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
                             </div>
                         </div>
@@ -328,11 +271,11 @@ const fetchGuruById = async (guruId) => {
                     <template #header>
                         <div class="relative">
                             <img :src="kelas.link_wallpaper_kelas || 'https://primefaces.org/cdn/primevue/images/usercard.png'"
-                                class="w-full h-32 object-cover" />
+                                class="w-full h-32 object-cover" loading="lazy" />
                             <div @click="fetchGuruById(kelas.teacher?.id)"
                                 class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
-                                <img v-if="kelas.guru_photo" :src="kelas.guru_photo" alt="Photo Profile"
-                                    class="w-full h-full object-cover" />
+                                <img v-if="kelas.guru_photo" :src="`${API_URL}api/upload-profile/${kelas.guru_id}`"
+                                    alt="Photo Profile" class="w-full h-full object-cover" loading="lazy" />
                                 <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
                             </div>
                         </div>
@@ -363,7 +306,7 @@ const fetchGuruById = async (guruId) => {
         <div v-if="profile" class="flex flex-col items-center gap-4">
             <div
                 class="w-32 h-32 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow">
-                <img v-if="src" :src="src" alt="Photo Profile" class="w-full h-full object-cover" />
+                <img v-if="src" :src="src" alt="Photo Profile" class="w-full h-full object-cover" loading="lazy" />
                 <i v-else class="pi pi-user text-gray-500" style="font-size: 3.5rem"></i>
             </div>
             <h2 class="text-xl font-semibold">
