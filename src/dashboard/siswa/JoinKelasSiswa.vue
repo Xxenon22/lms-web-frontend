@@ -634,7 +634,14 @@ const fetchUploadedFiles = async (materi) => {
             }
         );
 
-        uploadedFiles.value[materi.id] = data || [];
+        uploadedFiles.value[materi.id] = (data || []).map(f => ({
+            id: f.id,
+            nama_file: f.nama_file,
+            mime: f.mime,
+            url: f.url,
+            download_url: f.download_url,
+            created_at: f.created_at
+        }));
     } catch (err) {
         console.error("fetchUploadedFiles error:", err);
         uploadedFiles.value[materi.id] = [];
@@ -760,7 +767,17 @@ onMounted(async () => {
 
         await fetchProgressMateri();
         await fetchClassroom();
-        await fetchMateriById();
+        // await fetchMateriById();
+        uploadedFiles.value[materiId].unshift(
+            ...res.data.files.map(f => ({
+                id: f.id,
+                nama_file: f.nama_file,
+                mime: f.mime,
+                url: f.url,
+                download_url: f.download_url,
+                created_at: f.created_at
+            }))
+        );
         // for (const materi of daftarMateri.value) {
         //     await fetchUploadedFiles(materi);
         // }
