@@ -19,14 +19,14 @@ const routes = [
             title: 'Sign up - Metschoo Integrated Learning System'
         }
     },
-    {
-        path: '/verify-code',
-        component: () => import("./components/auth/verificationPage.vue"),
-        name: "verify",
-        meta: {
-            title: 'Verify code - Metschoo Integrated Learning System'
-        }
-    },
+    // {
+    //     path: '/verify-code',
+    //     component: () => import("./components/auth/verificationPage.vue"),
+    //     name: "verify",
+    //     meta: {
+    //         title: 'Verify code - Metschoo Integrated Learning System'
+    //     }
+    // },
     {
         path: "/home-admin",
         component: () => import("./dashboard/admin/DashboardAdmin.vue"),
