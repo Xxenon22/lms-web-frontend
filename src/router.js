@@ -19,14 +19,14 @@ const routes = [
             title: 'Sign up - Metschoo Integrated Learning System'
         }
     },
-    // {
-    //     path: '/verify-code',
-    //     component: () => import("./components/auth/verificationPage.vue"),
-    //     name: "verify",
-    //     meta: {
-    //         title: 'Verify code - Metschoo Integrated Learning System'
-    //     }
-    // },
+    {
+        path: '/verify-code',
+        component: () => import("./components/auth/verificationPage.vue"),
+        name: "verify",
+        meta: {
+            title: 'Verify code - Metschoo Integrated Learning System'
+        }
+    },
     {
         path: "/home-admin",
         component: () => import("./dashboard/admin/DashboardAdmin.vue"),
@@ -431,19 +431,19 @@ router.beforeEach((to, from, next) => {
     const pending = localStorage.getItem("pendingVerification");
     const isVerified = localStorage.getItem("is_verified");
 
-    if (pending === "true" || isVerified === "false") {
-        if (to.path !== "/verify-code") {
-            return next("/verify-code")
-        }
-        return next();
-    }
+    // if (pending === "true" || isVerified === "false") {
+    //     if (to.path !== "/verify-code") {
+    //         return next("/verify-code")
+    //     }
+    //     return next();
+    // }
 
-    if (to.path === "/verify-code" && isVerified === "true") {
-        if (role === "student") return next("/home-student");
-        if (role === "teacher") return next("/home-teacher");
-        if (role === "admin") return next("/home-admin");
-        return next("/");
-    }
+    // if (to.path === "/verify-code" && isVerified === "true") {
+    //     if (role === "student") return next("/home-student");
+    //     if (role === "teacher") return next("/home-teacher");
+    //     if (role === "admin") return next("/home-admin");
+    //     return next("/");
+    // }
 
     if (to.meta.requiresAuth) {
         if (!token) {
