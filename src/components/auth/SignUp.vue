@@ -32,17 +32,32 @@ const handleRegister = async () => {
       confirmPassword: confirmPassword.value,
     });
 
+    // toast.add({
+    //   severity: "success",
+    //   summary: "Success",
+    //   detail: res.data.message,
+    //   life: 5000,
+    // });
+    // localStorage.setItem("processType", "register");
+    // localStorage.setItem("email", email.value); // untuk verifikasi
+    // localStorage.setItem("role", "student");
+    // localStorage.setItem("isLoginProcess", "false"); // <- penting
+    // router.push("/verify-code");
+
     toast.add({
       severity: "success",
       summary: "Success",
       detail: res.data.message,
       life: 5000,
     });
-    localStorage.setItem("processType", "register");
-    localStorage.setItem("email", email.value); // untuk verifikasi
-    localStorage.setItem("role", "student");
-    localStorage.setItem("isLoginProcess", "false"); // <- penting
-    router.push("/verify-code");
+
+    // bersihkan data otp
+    localStorage.removeItem("processType");
+    localStorage.removeItem("email");
+    localStorage.removeItem("isLoginProcess");
+
+    router.push("/home-student"); // atau /login
+
   } catch (err) {
     console.error("Register error:", err.response?.data || err);
     toast.add({
