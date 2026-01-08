@@ -5,12 +5,14 @@ import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
 import { Password } from "primevue";
 
-const router = useRouter()
+const router = useRouter();
 const toast = useToast();
+
 const username = ref("");
 const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
+const loading = ref(false);
 
 // const handleRegister = async () => {
 
