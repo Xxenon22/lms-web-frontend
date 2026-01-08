@@ -12,7 +12,73 @@ const email = ref("");
 const password = ref("");
 const confirmPassword = ref("");
 
+// const handleRegister = async () => {
+
+//   if (password.value !== confirmPassword.value) {
+//     toast.add({
+//       severity: "warn",
+//       summary: "Password Mismatch",
+//       detail: "Password and confirmation do not match",
+//       life: 4000,
+//     })
+//     return;
+//   }
+
+//   try {
+//     const res = await api.post("/auth/register", {
+//       username: username.value,
+//       email: email.value,
+//       password: password.value,
+//       confirmPassword: confirmPassword.value,
+//     });
+
+//     // toast.add({
+//     //   severity: "success",
+//     //   summary: "Success",
+//     //   detail: res.data.message,
+//     //   life: 5000,
+//     // });
+//     // localStorage.setItem("processType", "register");
+//     // localStorage.setItem("email", email.value); // untuk verifikasi
+//     // localStorage.setItem("role", "student");
+//     // localStorage.setItem("isLoginProcess", "false"); // <- penting
+//     // router.push("/verify-code");
+
+//     toast.add({
+//       severity: "success",
+//       summary: "Success",
+//       detail: res.data.message,
+//       life: 5000,
+//     });
+
+//     // bersihkan data otp
+//     localStorage.removeItem("processType");
+//     localStorage.removeItem("email");
+//     localStorage.removeItem("isLoginProcess");
+
+//     router.push("/home-student"); // atau /login
+
+//   } catch (err) {
+//     console.error("Register error:", err.response?.data || err);
+//     toast.add({
+//       severity: "error",
+//       summary: "Failed",
+//       detail: err.response?.data?.message,
+//       life: 5000,
+//     });
+//   }
+// };
+
 const handleRegister = async () => {
+  if (!username.value || !email.value || !password.value || !confirmPassword.value) {
+    toast.add({
+      severity: "warn",
+      summary: "Incomplete Data",
+      detail: "Please fill in all fields",
+      life: 4000,
+    });
+    return;
+  }
 
   if (password.value !== confirmPassword.value) {
     toast.add({
@@ -20,9 +86,11 @@ const handleRegister = async () => {
       summary: "Password Mismatch",
       detail: "Password and confirmation do not match",
       life: 4000,
-    })
+    });
     return;
   }
+
+  loading.value = true;
 
   try {
     const res = await api.post("/auth/register", {
@@ -32,44 +100,38 @@ const handleRegister = async () => {
       confirmPassword: confirmPassword.value,
     });
 
-    // toast.add({
-    //   severity: "success",
-    //   summary: "Success",
-    //   detail: res.data.message,
-    //   life: 5000,
-    // });
-    // localStorage.setItem("processType", "register");
-    // localStorage.setItem("email", email.value); // untuk verifikasi
-    // localStorage.setItem("role", "student");
-    // localStorage.setItem("isLoginProcess", "false"); // <- penting
-    // router.push("/verify-code");
-
     toast.add({
       severity: "success",
       summary: "Success",
       detail: res.data.message,
-      life: 5000,
+      life: 4000,
     });
 
-    // bersihkan data otp
-    localStorage.removeItem("processType");
-    localStorage.removeItem("email");
-    localStorage.removeItem("isLoginProcess");
+    // reset form
+    username.value = "";
+    email.value = "";
+    password.value = "";
+    confirmPassword.value = "";
 
-    router.push("/home-student"); // atau /login
+    // redirect (pilih salah satu)
+    // router.push("/login");
+    // atau langsung masuk:
+    router.push("/home-student");
 
   } catch (err) {
-    console.error("Register error:", err.response?.data || err);
+    console.error("Register error:", err);
+
     toast.add({
       severity: "error",
-      summary: "Failed",
-      detail: err.response?.data?.message,
+      summary: "Registration Failed",
+      detail: err.response?.data?.message || "Something went wrong",
       life: 5000,
     });
+  } finally {
+    loading.value = false;
   }
 };
 </script>
-
 <template>
   <div class="logo flex absolute top-4 left-4 m-4 items-center space-x-2">
     <img src="../../assets/LOGO_SMK_METLAND.png" class="w-15 h-15" alt="school's_logo" />
