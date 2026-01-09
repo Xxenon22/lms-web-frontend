@@ -442,7 +442,7 @@ router.beforeEach(async (to, from, next) => {
 
     if (to.name !== "maintenance") {
         try {
-            const res = await api.get("/maintenance");
+            const res = await api.get("/api");
 
             if (res.data?.is_active) {
                 return next({
