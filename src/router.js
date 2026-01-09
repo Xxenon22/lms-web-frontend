@@ -452,10 +452,10 @@ router.beforeEach(async (to, from, next) => {
                 }
             }
 
-            if (res.data?.status && token) {
-                // Sudah login → tapi bukan whitelist
-                return next({ name: "maintenance" });
-            }
+            // if (res.data?.status && token) {
+            //     // Sudah login → tapi bukan whitelist
+            //     return next({ name: "maintenance" });
+            // }
         } catch (err) {
             console.warn("Maintenance check failed");
         }
