@@ -12,24 +12,36 @@ api.interceptors.request.use((config) => {
 
 });
 
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
 api.interceptors.response.use(
     res => res,
     err => {
-        if (err.response?.status === 403) {
-            localStorage.clear();
+        const status = err.response?.status;
 
-            // optional flag utk notif
-            localStorage.setItem("token_expired", "true");
+        // 🔥 TOKEN EXPIRED / INVALID
+        if (status === 401 || status === 403) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("users");
+
+            // optional: flag notif
+            localStorage.setItem("session_expired", "1");
 
             window.location.href = "/";
         }
 
-        if (err.response?.status === 503 && err.response.data?.maintenance) {
+        // Maintenance
+        if (status === 503 && err.response.data?.maintenance) {
             window.location.href = "/maintenance";
         }
 
         return Promise.reject(err);
     }
 );
-
 export default api;
