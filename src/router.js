@@ -460,6 +460,10 @@ router.beforeEach(async (to, from, next) => {
             console.warn("Maintenance check failed");
         }
     }
+    // Auth guard biasa
+    if (to.meta.requiresAuth && !token) {
+        return next("/");
+    }
 
     const tempToken = localStorage.getItem("tempToken");
     const pending = localStorage.getItem("pendingVerification");
