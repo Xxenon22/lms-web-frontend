@@ -446,11 +446,7 @@ router.beforeEach(async (to, from, next) => {
 
             if (res.data?.is_active) {
                 return next({
-                    name: "maintenance",
-                    query: {
-                        title: res.data.title,
-                        message: res.data.message
-                    }
+                    name: "maintenance"
                 });
             }
         } catch (err) {
