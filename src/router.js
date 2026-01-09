@@ -440,18 +440,24 @@ router.beforeEach(async (to, from, next) => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
+    // Cek maintenance
     if (to.name !== "maintenance") {
         try {
             const res = await api.get("/maintenance");
 
-            if (res.data?.status) {
-                return next({
-                    name: "maintenance"
-                });
+            if (res.data?.status && !token) {
+                // Belum login → tetap boleh di sign-in
+                if (to.name !== "SignIn") {
+                    return next("/");
+                }
+            }
+
+            if (res.data?.status && token) {
+                // Sudah login → tapi bukan whitelist
+                return next({ name: "maintenance" });
             }
         } catch (err) {
-            // kalau API maintenance error → jangan block user
-            console.error("Maintenance check failed");
+            console.warn("Maintenance check failed");
         }
     }
 
