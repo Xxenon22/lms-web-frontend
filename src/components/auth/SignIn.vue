@@ -86,6 +86,20 @@ const handleLogin = async () => {
       life: 3000,
     });
   }
+
+  onMounted(() => {
+    if (localStorage.getItem("session_expired") === "true") {
+      toast.add({
+        severity: "warn",
+        summary: "Session Expired",
+        detail: "Silakan login kembali.",
+        life: 4000
+      });
+
+      localStorage.removeItem("session_expired");
+    }
+  });
+
 };
 </script>
 

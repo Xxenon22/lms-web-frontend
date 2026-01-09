@@ -465,9 +465,9 @@ router.beforeEach(async (to, from, next) => {
         return next("/");
     }
 
-    const tempToken = localStorage.getItem("tempToken");
-    const pending = localStorage.getItem("pendingVerification");
-    const isVerified = localStorage.getItem("is_verified");
+    // const tempToken = localStorage.getItem("tempToken");
+    // const pending = localStorage.getItem("pendingVerification");
+    // const isVerified = localStorage.getItem("is_verified");
 
     // if (pending === "true" || isVerified === "false") {
     //     if (to.path !== "/verify-code") {
