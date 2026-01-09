@@ -21,6 +21,7 @@ onMounted(() => {
     router.replace("/mobile-unavailable");
   }
 });
+
 </script>
 <template>
   <component :is="layoutMap[route.meta.layout] || 'div'">

@@ -97,7 +97,7 @@ const fetchProfiles = async () => {
       rombel_id: p.rombel_id,
       number: p.number
     }))
-    console.log("Profile", allProfiles.value)
+    // console.log("Profile", allProfiles.value)
 
     jurusanList.value = jurusan.map(j => ({
       id: j.id,
@@ -243,7 +243,7 @@ const updateStudent = async () => {
     await api.put(`/auth/profile/${editStudentData.value.id}`, {
       username: editStudentData.value.username,
       phone_number: editStudentData.value.phone_number,
-      username: editStudentData.value.username,
+      // username: editStudentData.value.username,
       grade_id: editStudentData.value.grade_id,
       jurusan_id: editStudentData.value.jurusan_id,
       rombel_id: editStudentData.value.rombel_id

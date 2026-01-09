@@ -20,7 +20,7 @@ const fetchUserId = async () => {
         const res = await api.get("/auth/profile")
         userId.value = res.data.id
     } catch (err) {
-        console.error("Gagal decode JWT:", err);
+        console.error("JWT decode Failed:", err);
     }
 };
 
@@ -30,7 +30,7 @@ const fetchDaftarKelas = async () => {
         const res = await api.get("/kelas");
         daftarKelas.value = res.data.map(k => ({
             id: k.id,
-            name: `${k.grade_lvl || ''} ${k.name_rombel || ''} - ${k.nama_mapel || ''}`
+            name: `${k.grade_lvl || ''} ${k.major || ''} ${k.name_rombel || ''} - ${k.nama_mapel || ''}`
         }));
     } catch (error) {
         console.error("Fetch Kelas:", error);
@@ -44,7 +44,7 @@ const fetchForumList = async () => {
         // console.log("forum data :", res.data)
         forumList.value = res.data;
     } catch (error) {
-        console.error("Fetch Forum diskusi :", error);
+        console.error("Fetch discuss forum :", error);
     }
 };
 
@@ -84,35 +84,50 @@ const deleteForum = async (id) => {
     try {
         // console.log("Deleting forum with ID:", id); // Debug
         await api.delete(`/forum-discuss/${id}`);
-        toast.add({ severity: "success", summary: "Deleted", detail: "Forum berhasil dihapus" });
+        toast.add({ severity: "success", summary: "Deleted", detail: "Forum deleted sucessfully" });
         await fetchForumList()
     } catch (error) {
         console.error("error delete interactive forum:", error)
     }
 };
 
+const normalizedForumList = computed(() =>
+    forumList.value.map(f => ({
+        ...f,
+        searchableText: `
+      ${f.nama_grup}
+      ${f.grade_lvl}
+      ${f.major}
+      ${f.name_rombel}
+    `.toLowerCase()
+    }))
+);
 
-// Fungsi pencarian
+
+/* AutoComplete suggestion */
 const search = (event) => {
     const query = event.query.toLowerCase();
 
     if (!query) {
-        items.value = forumList.value.map(f => f.nama_grup);
+        items.value = [];
         return;
     }
 
-    items.value = forumList.value
-        .filter(f => f.nama_grup.toLowerCase().includes(query))
-        .map(f => f.nama_grup);
+    items.value = normalizedForumList.value
+        .filter(f => f.searchableText.includes(query))
+        .map(f => ({
+            label: `${f.nama_grup} – ${f.grade_lvl} ${f.major} ${f.name_rombel}`,
+            value: f.nama_grup
+        }));
 };
 
 // Filtered list berdasarkan search
 const filteredForumList = computed(() => {
-    if (!value.value) {
-        return forumList.value;
-    }
-    return forumList.value.filter((forum) =>
-        forum.nama_grup.toLowerCase().includes(value.value.toLowerCase())
+    if (!value.value) return forumList.value;
+
+    const q = value.value.toLowerCase();
+    return normalizedForumList.value.filter(f =>
+        f.searchableText.includes(q)
     );
 });
 
@@ -131,7 +146,8 @@ onMounted(async () => {
                 @click="visible = true" />
         </div>
         <div>
-            <AutoComplete v-model="value" placeholder="Search here..." :suggestions="items" @complete="search" />
+            <AutoComplete v-model="value" :suggestions="items" optionLabel="label" optionValue="value"
+                placeholder="Search group or class..." @complete="search" />
         </div>
     </div>
 
@@ -155,8 +171,7 @@ onMounted(async () => {
                             <h2 class="font-semibold">{{ forum.nama_grup }}</h2>
                         </div>
                         <div class="ml-13">
-                            <p> {{ forum.grade_lvl }} {{
-                                forum.name_rombel }}
+                            <p> {{ forum.grade_lvl }} {{ forum.major }} {{ forum.name_rombel }}
                             </p>
                         </div>
                     </div>
@@ -187,7 +202,7 @@ onMounted(async () => {
         </div>
         <div class="flex items-center gap-4 mb-8">
             <span for="linkGrup" class="font-semibold w-32">Select Class</span>
-            <MultiSelect v-model="selectedKelas" display="chip" :options="daftarKelas" option-label="name" filter
+            <MultiSelect v-model="selectedKelas" display="chip" :options="daftarKelas" optionLabel="name" filter
                 option-value="id" class="flex w-full overflow-auto break-all" autocomplete="off" />
         </div>
         <div class="flex justify-end gap-2">

@@ -1,5 +1,6 @@
 import { createWebHistory, createRouter } from 'vue-router'
 import Signin from "./components/auth/SignIn.vue"
+import api from "./services/api.js"
 
 const routes = [
 
@@ -69,8 +70,8 @@ const routes = [
         }
     },
     {
-        path: "/assignments",
-        name: "Assignments",
+        path: "/develope-course-content",
+        name: "Develope-Course-Content",
         component: () => import("./dashboard/guru/KelolaMateri.vue"),
         meta: {
             requiresAuth: true,
@@ -80,8 +81,8 @@ const routes = [
         }
     },
     {
-        path: "/develope-course-content",
-        name: "Develope-Course-Content",
+        path: "/assignments",
+        name: "Assignments",
         component: () => import("./dashboard/guru/KelolaTugas.vue"),
         meta: {
             requiresAuth: true,
@@ -414,7 +415,19 @@ const routes = [
             layout: "admin",
             title: 'Add Teacher Account - Metschoo Integrated Learning System'
         }
-    }
+    },
+    {
+        path: "/maintenance",
+        name: "maintenance",
+        component: Maintenance,
+        props: route => ({
+            title: route.query.title,
+            message: route.query.message
+        }),
+        meta: {
+            layout: "none"
+        }
+    },
 ]
 
 const router = createRouter({
@@ -423,9 +436,28 @@ const router = createRouter({
 });
 
 // navigation guard
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
+
+    if (to.name !== "maintenance") {
+        try {
+            const res = await api.get("/maintenance");
+
+            if (res.data?.is_active) {
+                return next({
+                    name: "maintenance",
+                    query: {
+                        title: res.data.title,
+                        message: res.data.message
+                    }
+                });
+            }
+        } catch (err) {
+            // kalau API maintenance error → jangan block user
+            console.error("Maintenance check failed");
+        }
+    }
 
     const tempToken = localStorage.getItem("tempToken");
     const pending = localStorage.getItem("pendingVerification");

@@ -975,7 +975,6 @@ onMounted(async () => {
 
                                 </div>
                             </StepPanel>
-
                         </StepItem>
 
                         <StepItem value="3">
@@ -1013,7 +1012,7 @@ onMounted(async () => {
                                                                 :value="key" :name="`soal-${soal.id}`"
                                                                 :disabled="isHistory(materi)" />
                                                             <label :for="`${soal.id}-${key}`">{{ key }}. {{ opsi
-                                                            }}</label>
+                                                                }}</label>
                                                         </div>
                                                     </div>
 

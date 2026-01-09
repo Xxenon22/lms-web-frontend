@@ -49,7 +49,7 @@ const fetchRombel = async () => {
         const res = await api.get("/rombel")
         rombel.value = res.data.map(b => ({
             id: b.id,
-            name: `${b.grade_name || ''} ${b.major} ${b.name_rombel || ''} `, // tampilkan gabungan
+            name: `${b.grade_name || ''} ${b.major || ''} ${b.rombel_number || ''} `, // tampilkan gabungan
         }));
     } catch (error) {
         console.error("error fetching rombel :", error)

@@ -9,6 +9,17 @@ api.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
     if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
+
 });
+
+api.interceptors.response.use(
+    res => res,
+    err => {
+        if (err.response?.status === 503 && err.response.data?.maintenance) {
+            window.location.href = "/maintenance";
+        }
+        return Promise.reject(err);
+    }
+);
 
 export default api;

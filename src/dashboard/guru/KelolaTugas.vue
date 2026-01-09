@@ -6,8 +6,6 @@ import { useToast } from "primevue/usetoast";
 const toast = useToast();
 const loading = ref(false);
 
-// ambil guruId dari localStorage (hasil login)
-// const guruId = ref(localStorage.getItem("id"));
 const judulBaru = ref("");
 
 // Soal pilihan ganda
@@ -225,7 +223,7 @@ const submitSemuaSoal = async () => {
         toast.add({
             severity: "success",
             summary: "Success",
-            detail: "Soal berhasil disimpan"
+            detail: "Question saved successfully"
         });
 
         // RESET
@@ -306,11 +304,26 @@ const submitSemuaSoal = async () => {
                 <template #content>
                     <div class="grid gap-4">
                         <div class="pilgan flex flex-col space-y-4">
-                            <InputText v-model="soal.jawaban.a" placeholder="Option A" />
-                            <InputText v-model="soal.jawaban.b" placeholder="Option B" />
-                            <InputText v-model="soal.jawaban.c" placeholder="Option C" />
-                            <InputText v-model="soal.jawaban.d" placeholder="Option D" />
-                            <InputText v-model="soal.jawaban.e" placeholder="Option E" />
+                            <div class="flex items-center space-x-3">
+                                <h1>A.</h1>
+                                <InputText v-model="soal.jawaban.a" placeholder="Option A" class="w-full" />
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <h1>B.</h1>
+                                <InputText v-model="soal.jawaban.b" placeholder="Option B" class="w-full" />
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <h1>C.</h1>
+                                <InputText v-model="soal.jawaban.c" placeholder="Option C" class="w-full" />
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <h1>D.</h1>
+                                <InputText v-model="soal.jawaban.d" placeholder="Option D" class="w-full" />
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <h1>E.</h1>
+                                <InputText v-model="soal.jawaban.e" placeholder="Option E" class="w-full" />
+                            </div>
                             <Select v-model="soal.kunci" :options="['A', 'B', 'C', 'D', 'E']"
                                 placeholder="Answer Key" />
                         </div>

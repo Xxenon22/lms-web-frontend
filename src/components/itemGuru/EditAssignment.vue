@@ -128,7 +128,7 @@ const onFileSelectEssai = async (e, index) => {
         toast.add({
             severity: "error",
             summary: "Upload gagal",
-            detail: "Gambar essai gagal diupload"
+            detail: "Failed to upload essai image"
         });
     }
 };
@@ -167,7 +167,7 @@ const submitSemuaSoal = async () => {
         soal_list
     });
 
-    toast.add({ severity: "success", summary: "Success", detail: "Soal tersimpan" });
+    toast.add({ severity: "success", summary: "Success", detail: "saved assignment" });
 };
 const back = () => router.back();
 

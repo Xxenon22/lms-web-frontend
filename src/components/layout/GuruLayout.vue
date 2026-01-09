@@ -12,6 +12,7 @@ const isiMapel = ref(null);
 const toast = useToast();
 const rombel = ref([]);
 const mapel = ref([]);
+const rombelNum = ref([])
 const src = ref(null)
 const router = useRouter()
 const images = ref([]);
@@ -44,12 +45,21 @@ const requireConfirmation = (event) => {
   });
 };
 
+const fetchRombelNum = async () => {
+  try {
+    const res = await api.get("/number-rombel");
+    rombelNum.value = res.data;
+  } catch (err) {
+    console.error("Fetch Rombel Number:", err);
+  }
+};
+
 const fetchDataKelas = async () => {
   try {
     const res = await api.get("/rombel")
     rombel.value = res.data.map(b => ({
       id: b.id,
-      name: `${b.grade_name || ''} ${b.major} ${b.name_rombel || ''} `, // tampilkan gabungan
+      name: `${b.grade_name || ''} ${b.major || ''} ${b.rombel_number || ''} `.trim() // tampilkan gabungan
     }));
   } catch (error) {
     console.error("Fetch data kelas: ", error)
@@ -125,7 +135,7 @@ onMounted(async () => {
   await fetchDataMapel();
   await fetchPhotoProfile();
   await fetchDataKelas();
-
+  await fetchRombelNum();
 });
 
 </script>
@@ -234,12 +244,12 @@ onMounted(async () => {
               Reflection</span>
           </li>
         </RouterLink>
-        <RouterLink to="/develope-course-content">
+        <RouterLink to="/assignments">
           <li>
             <Icon class="icon" icon="tdesign:task-filled" /><span class="nav-item">Assignments</span>
           </li>
         </RouterLink>
-        <RouterLink to="/assignments">
+        <RouterLink to="/develope-course-content">
           <li>
             <Icon class="icon" icon="material-symbols:bookmark-manager-rounded" /><span class="nav-item">Develop
               Course

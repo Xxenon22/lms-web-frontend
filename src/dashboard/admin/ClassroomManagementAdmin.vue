@@ -5,6 +5,7 @@ import api from "../../services/api";
 
 const mapel = ref("");
 const guru = ref("");
+const collabClass = ref("");
 const gradeLvl = ref([]);
 const major = ref([]);
 const rombelNum = ref([]);
@@ -79,6 +80,32 @@ const submitNewRombel = async () => {
         });
     }
 };
+
+// Add New Collab Class
+const submitNewCollab = async () => {
+    if (!collabClass.value) {
+        toast.add({
+            severity: "warn",
+            summary: "Warning",
+            detail: "Please fill all fields before submitting",
+            life: 3000
+        })
+    }
+    try {
+        await api.post("/rombel/collab", {
+            colab_class: collabClass.value
+        })
+        toast.add({
+            severity: "success",
+            summary: "success",
+            detail: "Collab Class has been saved",
+            life: 3000
+        })
+        collabClass.value = ""
+    } catch (error) {
+        console.log("Collab class:", error)
+    }
+}
 
 // Add new Subject
 const submitNewMapel = async () => {
@@ -168,13 +195,34 @@ onMounted(() => {
                         <Select v-model="selectRombel" :options="rombelNum" option-value="id" option-label="number"
                             placeholder="Select a Class" class="w-full"></Select>
                     </div>
-
                 </div>
+
             </template>
 
             <template #footer>
                 <div class="m-5 flex justify-end">
                     <Button label="Submit" @click="submitNewRombel" />
+                </div>
+            </template>
+        </Card>
+
+        <Card>
+            <template #header>
+                <div class="m-5">
+                    <h1>Create New Collab Class</h1>
+                </div>
+            </template>
+
+            <template #content>
+                <div class="flex space-x-3 w-full overflow-hidden">
+                    <InputText placeholder="Create New Collab Class" class="w-full" v-model="collabClass" />
+                </div>
+
+            </template>
+
+            <template #footer>
+                <div class="m-5 flex justify-end">
+                    <Button label="Submit" @click="submitNewCollab" />
                 </div>
             </template>
         </Card>
