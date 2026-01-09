@@ -419,7 +419,7 @@ const routes = [
     {
         path: "/maintenance",
         name: "maintenance",
-        component: Maintenance,
+        component: () => import("./views/maintanance.vue"),
         props: route => ({
             title: route.query.title,
             message: route.query.message
