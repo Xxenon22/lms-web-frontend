@@ -15,21 +15,19 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
     res => res,
     err => {
-        const status = err.response?.status;
+        if (err.response?.status === 403) {
+            localStorage.clear();
 
-        // 🔐 TOKEN EXPIRED / INVALID
-        if (status === 401 || status === 403) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
+            // optional flag utk notif
+            localStorage.setItem("token_expired", "true");
 
-            // flag untuk notif di sign-in
-            sessionStorage.setItem("session_expired", "true");
-
-            // redirect ke sign-in
-            if (router.currentRoute.value.name !== "SignIn") {
-                router.replace("/");
-            }
+            window.location.href = "/";
         }
+
+        if (err.response?.status === 503 && err.response.data?.maintenance) {
+            window.location.href = "/maintenance";
+        }
+
         return Promise.reject(err);
     }
 );

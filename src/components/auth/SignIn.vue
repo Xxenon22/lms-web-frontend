@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import api from "../../services/api";
 import { useRouter } from "vue-router";
 import { useToast } from "primevue/usetoast";
@@ -88,18 +88,17 @@ const handleLogin = async () => {
   }
 
   onMounted(() => {
-    if (localStorage.getItem("session_expired") === "true") {
+    if (localStorage.getItem("token_expired")) {
       toast.add({
         severity: "warn",
         summary: "Session Expired",
-        detail: "Silakan login kembali.",
-        life: 4000
+        detail: "Silakan login ulang, sesi kamu telah berakhir.",
+        life: 4000,
       });
 
-      localStorage.removeItem("session_expired");
+      localStorage.removeItem("token_expired");
     }
   });
-
 };
 </script>
 
