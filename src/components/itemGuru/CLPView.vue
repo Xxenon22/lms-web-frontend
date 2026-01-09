@@ -64,7 +64,7 @@ const back = () => {
 // === EXPORT PDF ===
 const exportPDF = () => {
     if (!rpk.value || Object.keys(rpk.value).length === 0) {
-        console.warn("⚠️ Tidak ada data untuk diexport ke PDF");
+        console.warn("There is no data to export to PDF");
         return;
     }
 
@@ -88,11 +88,10 @@ const exportPDF = () => {
 
     // === Bagian Identitas ===
     doc.setFontSize(12);
-    doc.text("Identity", 14, 30);
     autoTable(doc, {
         startY: 35,
         theme: "grid",
-        head: [["Field", "Value"]],
+        head: [["IDENTITY", ""]],
         body: [
             ["Class & Subject", `${data.grade_lvl} ${data.major} ${data.name_rombel || ""} - ${data.subject || ""}`],
             ["Phase", data.phase || ""],
@@ -106,11 +105,10 @@ const exportPDF = () => {
     });
 
     // === Instructional Design ===
-    doc.text("Instructional Design", 14, doc.lastAutoTable.finalY + 10);
     autoTable(doc, {
-        startY: doc.lastAutoTable.finalY + 15,
+        startY: doc.lastAutoTable.finalY + 35,
         theme: "grid",
-        head: [["Field", "Value"]],
+        head: [["INSTRUCTIONAL DESIGN", ""]],
         body: [
             ["Learning Objective", data.tujuan_pembelajaran || ""],
             ["Interdisciplinery", data.lintas_disiplin_ilmu || ""],
@@ -127,11 +125,10 @@ const exportPDF = () => {
         }
     }
 
-    doc.text("Dimensi Profil Lulusan", 14, doc.lastAutoTable.finalY + 10);
     autoTable(doc, {
         startY: doc.lastAutoTable.finalY + 15,
         theme: "grid",
-        head: [["DPL"]],
+        head: [["DPL (Dimensi Profil Lulusan)"]],
         body: dplList.length ? dplList : [["No DPL Selected"]],
     });
 
@@ -172,7 +169,7 @@ const exportPDF = () => {
         ],
     });
 
-    doc.save("RPK.pdf");
+    doc.save("Learning_Plan.pdf");
 };
 
 // === Helper: Prinsip Pembelajaran ===

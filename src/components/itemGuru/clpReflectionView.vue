@@ -61,7 +61,7 @@ const exportPDF = () => {
     autoTable(doc, {
         startY: 30,
         theme: "grid",
-        head: [["Field", "Value"]],
+        // head: [["Field", "Value"]],
         body: [
             ["Subject", data.subject || ""],
             ["Teacher", data.teacher_name || ""],

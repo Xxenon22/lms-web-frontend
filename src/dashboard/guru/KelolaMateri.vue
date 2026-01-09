@@ -215,8 +215,8 @@ onMounted(async () => {
         <!-- Preview Card -->
         <div class="flex w-1/2 justify-center">
           <div class="preview border w-80 p-4 shadow-2xl flex flex-col justify-between">
-            <div class="text-center mt-10">
-              <h2 class="text-xl font-bold">{{ judulMateri || "Lesson Title" }}</h2>
+            <div class="text-center mt-20">
+              <h2 class="text-xl font-bold ">{{ judulMateri || "Lesson Title" }}</h2>
             </div>
             <div class="text-center">
               <h2 class="text-sm text-gray-600">
