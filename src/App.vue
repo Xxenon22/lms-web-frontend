@@ -39,8 +39,8 @@ watch(
       toast.add({
         severity: "warn",
         summary: "Session Expired",
-        detail: "Silakan login ulang, sesi kamu telah berakhir.",
-        life: 4000,
+        detail: "Your session has ended. For security purposes, please sign in again.",
+        life: 5000,
       });
 
       router.replace({ query: {} });
