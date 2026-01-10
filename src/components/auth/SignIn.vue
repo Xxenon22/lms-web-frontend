@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 import { ref, onMounted } from "vue";
 import api from "../../services/api";
 import { useRouter } from "vue-router";
@@ -61,8 +61,12 @@ const handleLogin = async () => {
     });
 
     // Simpan token dan role langsung
+    // localStorage.setItem("token", res.data.token);
+    // localStorage.setItem("role", res.data.user.role);
     localStorage.setItem("token", res.data.token);
     localStorage.setItem("role", res.data.user.role);
+    localStorage.setItem("user_id", res.data.user.id);
+
 
     toast.add({
       severity: "success",
@@ -87,18 +91,91 @@ const handleLogin = async () => {
     });
   }
 
-  onMounted(() => {
-    if (localStorage.getItem("token_expired")) {
-      toast.add({
-        severity: "warn",
-        summary: "Session Expired",
-        detail: "Silakan login ulang, sesi kamu telah berakhir.",
-        life: 4000,
-      });
+};
+onMounted(() => {
+  if (localStorage.getItem("token_expired")) {
+    toast.add({
+      severity: "warn",
+      summary: "Session Expired",
+      detail: "Silakan login ulang, sesi kamu telah berakhir.",
+      life: 4000,
+    });
 
-      localStorage.removeItem("token_expired");
-    }
-  });
+    localStorage.removeItem("token_expired");
+  }
+});
+</script> -->
+<script setup>
+import { ref, onMounted } from "vue";
+import api from "../../services/api";
+import { useRouter, useRoute } from "vue-router";
+import { useToast } from "primevue/usetoast";
+
+const email = ref("");
+const password = ref("");
+const router = useRouter();
+const route = useRoute();
+const toast = useToast();
+
+
+onMounted(async () => {
+  if (localStorage.getItem("session_expired")) {
+
+    // ⏳ tunggu DOM & Toast siap
+    await nextTick();
+
+    toast.add({
+      severity: "warn",
+      summary: "Session Expired",
+      detail: "Silakan login ulang, sesi kamu telah berakhir.",
+      life: 4000,
+    });
+
+    localStorage.removeItem("session_expired");
+  }
+})
+
+const handleLogin = async () => {
+  if (!email.value || !password.value) {
+    toast.add({
+      severity: "warn",
+      summary: "Warning",
+      detail: "Email and Password are required.",
+    });
+    return;
+  }
+
+  try {
+    const res = await api.post("/auth/login", {
+      email: email.value,
+      password: password.value,
+    });
+
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("role", res.data.user.role);
+
+    toast.add({
+      severity: "success",
+      summary: "Login Success",
+      detail: `Welcome back, ${res.data.user.username}!`,
+      life: 2000,
+    });
+
+    const role = res.data.user.role;
+
+    // 🔥 WAJIB replace
+    if (role === "student") router.replace("/home-student");
+    else if (role === "teacher") router.replace("/home-teacher");
+    else if (role === "admin") router.replace("/home-admin");
+
+  } catch (err) {
+    toast.add({
+      severity: "error",
+      summary: "Login Failed",
+      detail: err.response?.data?.message || err.message,
+      life: 3000,
+    });
+  }
 };
 </script>
 

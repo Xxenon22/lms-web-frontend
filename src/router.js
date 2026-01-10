@@ -440,13 +440,24 @@ router.beforeEach(async (to, from, next) => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
+    if (localStorage.getItem("token_expired")) {
+        localStorage.removeItem("token_expired");
+        localStorage.removeItem("token");
+        localStorage.removeItem("role");
+
+        return next({
+            path: "/",
+            query: { expired: "1" }
+        });
+    }
+
+
     // Cek maintenance
     if (to.name !== "maintenance") {
         try {
             const res = await api.get("/maintenance");
 
             if (res.data?.status && !token) {
-                // Belum login → tetap boleh di sign-in
                 if (to.name !== "SignIn") {
                     return next("/");
                 }
@@ -459,10 +470,6 @@ router.beforeEach(async (to, from, next) => {
         } catch (err) {
             console.warn("Maintenance check failed");
         }
-    }
-    // Auth guard biasa
-    if (to.meta.requiresAuth && !token) {
-        return next("/");
     }
 
     // const tempToken = localStorage.getItem("tempToken");
@@ -483,12 +490,9 @@ router.beforeEach(async (to, from, next) => {
     //     return next("/");
     // }
 
-    if (to.meta.requiresAuth) {
-        if (!token) {
-            return next("/");
-        }
+    if (to.meta.requiresAuth && !token) {
+        return next("/");
     }
-
     // kalau route ada rule role, tapi role user beda → lempar ke dashboard sesuai role dia
     if (to.meta.role && role !== to.meta.role) {
         if (role === "student") return next("/home-student");

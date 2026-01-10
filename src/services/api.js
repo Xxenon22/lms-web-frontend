@@ -20,28 +20,20 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+
+// RESPONSE → tangkap token expired
 api.interceptors.response.use(
-    res => res,
-    err => {
-        const status = err.response?.status;
-
-        // 🔥 TOKEN EXPIRED / INVALID
-        if (status === 401 || status === 403) {
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
             localStorage.removeItem("token");
-            localStorage.removeItem("users");
-
-            // optional: flag notif
-            localStorage.setItem("session_expired", "1");
+            localStorage.removeItem("role");
+            localStorage.setItem("token_expired", "true");
 
             window.location.href = "/";
         }
-
-        // Maintenance
-        if (status === 503 && err.response.data?.maintenance) {
-            window.location.href = "/maintenance";
-        }
-
-        return Promise.reject(err);
+        return Promise.reject(error);
     }
 );
+
 export default api;

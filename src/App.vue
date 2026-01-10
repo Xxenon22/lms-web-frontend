@@ -4,6 +4,7 @@ import { onMounted } from "vue";
 import AdminLayout from "./components/layout/AdminLayout.vue";
 import GuruLayout from "./components/layout/GuruLayout.vue";
 import SiswaLayout from "./components/layout/SiswaLayout.vue";
+import { Toast } from "primevue";
 
 const route = useRoute();
 const router = useRouter();
@@ -25,6 +26,7 @@ onMounted(() => {
 </script>
 <template>
   <component :is="layoutMap[route.meta.layout] || 'div'">
+    <Toast />
     <router-view />
   </component>
 </template>
