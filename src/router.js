@@ -439,16 +439,17 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
-
-    if (localStorage.getItem("token_expired")) {
+    if (!token && localStorage.getItem("token_expired")) {
         localStorage.removeItem("token_expired");
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
 
         return next({
             path: "/",
             query: { expired: "1" }
         });
+    }
+
+    if (to.meta.requiresAuth && !token) {
+        return next("/");
     }
 
 

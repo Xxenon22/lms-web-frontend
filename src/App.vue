@@ -1,13 +1,16 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
-import { onMounted } from "vue";
+import { onMounted, watch } from "vue";
+import { useToast } from "primevue/usetoast";
+
 import AdminLayout from "./components/layout/AdminLayout.vue";
 import GuruLayout from "./components/layout/GuruLayout.vue";
 import SiswaLayout from "./components/layout/SiswaLayout.vue";
-import { Toast } from "primevue";
+import Toast from "primevue/toast";
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 
 const layoutMap = {
   admin: AdminLayout,
@@ -15,6 +18,9 @@ const layoutMap = {
   student: SiswaLayout,
 };
 
+/* =========================
+   MOBILE BLOCK
+========================= */
 onMounted(() => {
   const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -23,7 +29,27 @@ onMounted(() => {
   }
 });
 
+/* =========================
+   TOKEN EXPIRED TOAST
+========================= */
+watch(
+  () => route.fullPath,
+  () => {
+    if (route.query.expired === "1") {
+      toast.add({
+        severity: "warn",
+        summary: "Session Expired",
+        detail: "Silakan login ulang, sesi kamu telah berakhir.",
+        life: 4000,
+      });
+
+      router.replace({ query: {} });
+    }
+  },
+  { immediate: true }
+);
 </script>
+
 <template>
   <component :is="layoutMap[route.meta.layout] || 'div'">
     <Toast />

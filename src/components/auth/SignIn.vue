@@ -106,7 +106,7 @@ onMounted(() => {
 });
 </script> -->
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, nextTick } from "vue";
 import api from "../../services/api";
 import { useRouter, useRoute } from "vue-router";
 import { useToast } from "primevue/usetoast";
@@ -119,11 +119,10 @@ const toast = useToast();
 
 
 onMounted(async () => {
-  if (localStorage.getItem("session_expired")) {
+  // ⛔ PENTING: tunggu DOM & Toast siap
+  await nextTick();
 
-    // ⏳ tunggu DOM & Toast siap
-    await nextTick();
-
+  if (route.query.expired === "1") {
     toast.add({
       severity: "warn",
       summary: "Session Expired",
@@ -131,9 +130,10 @@ onMounted(async () => {
       life: 4000,
     });
 
-    localStorage.removeItem("session_expired");
+    // bersihkan URL
+    router.replace({ query: {} });
   }
-})
+});
 
 const handleLogin = async () => {
   if (!email.value || !password.value) {
