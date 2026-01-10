@@ -1,20 +1,22 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "https://metschoo-ils.my.id/api",
-    // timeout: 10000, // 30 detik
+    baseURL: "https://metschoo-ils.my.id/api"
 });
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
 
+/* =========================
+   REQUEST INTERCEPTOR
+========================= */
+api.interceptors.request.use(config => {
+    const token = localStorage.getItem("token");
+
+    // ⛔ JANGAN kirim token ke /maintenance
+    if (token && !config.url.includes("/maintenance")) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    return config;
+});
 
 /* =========================
    RESPONSE INTERCEPTOR
@@ -29,10 +31,12 @@ api.interceptors.response.use(
 
             localStorage.removeItem("token");
             localStorage.removeItem("role");
-            localStorage.setItem("token_expired", "1");
 
-            // ⛔ WAJIB hard redirect
-            window.location.href = "/?expired=1";
+            // flag hanya 1x
+            if (!localStorage.getItem("token_expired")) {
+                localStorage.setItem("token_expired", "1");
+                window.location.href = "/?expired=1";
+            }
         }
 
         return Promise.reject(error);

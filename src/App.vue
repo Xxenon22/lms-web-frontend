@@ -39,8 +39,7 @@ watch(
       toast.add({
         severity: "warn",
         summary: "Session Expired",
-        detail: "Your session has ended. For security purposes, please sign in again.",
-        life: 5000,
+        detail: "Your session has ended. For security purposes, please sign in again."
       });
 
       router.replace({ query: {} });

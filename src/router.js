@@ -458,18 +458,11 @@ router.beforeEach(async (to, from, next) => {
         try {
             const res = await api.get("/maintenance");
 
-            if (res.data?.status && !token) {
-                if (to.name !== "SignIn") {
-                    return next("/");
-                }
+            if (res.data?.status) {
+                return next({ name: "maintenance" });
             }
-
-            // if (res.data?.status && token) {
-            //     // Sudah login → tapi bukan whitelist
-            //     return next({ name: "maintenance" });
-            // }
         } catch (err) {
-            console.warn("Maintenance check failed");
+            // kalau 503 → backend sudah handle
         }
     }
 
