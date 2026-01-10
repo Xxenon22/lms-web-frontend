@@ -4,39 +4,34 @@ const api = axios.create({
     baseURL: "https://metschoo-ils.my.id/api"
 });
 
-/* =========================
-   REQUEST INTERCEPTOR
-========================= */
+/* REQUEST */
 api.interceptors.request.use(config => {
     const token = localStorage.getItem("token");
-
-    // ⛔ JANGAN kirim token ke /maintenance
-    if (token && !config.url.includes("/maintenance")) {
+    if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
 });
 
-/* =========================
-   RESPONSE INTERCEPTOR
-========================= */
+/* RESPONSE */
 api.interceptors.response.use(
-    response => response,
+    res => res,
     error => {
         const status = error.response?.status;
 
+        // 🔐 TOKEN EXPIRED
         if (status === 401) {
-            console.warn("TOKEN EXPIRED → FORCE LOGOUT");
-
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
-
-            // flag hanya 1x
             if (!localStorage.getItem("token_expired")) {
                 localStorage.setItem("token_expired", "1");
+                localStorage.removeItem("token");
+                localStorage.removeItem("role");
                 window.location.href = "/?expired=1";
             }
+        }
+
+        // 🛠️ MAINTENANCE
+        if (status === 503 && error.response?.data?.maintenance) {
+            window.location.href = "/maintenance";
         }
 
         return Promise.reject(error);

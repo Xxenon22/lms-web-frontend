@@ -454,17 +454,17 @@ router.beforeEach(async (to, from, next) => {
 
 
     // Cek maintenance
-    if (to.name !== "maintenance") {
-        try {
-            const res = await api.get("/maintenance");
+    // if (to.name !== "maintenance") {
+    //     try {
+    //         const res = await api.get("/maintenance");
 
-            if (res.data?.status) {
-                return next({ name: "maintenance" });
-            }
-        } catch (err) {
-            // kalau 503 → backend sudah handle
-        }
-    }
+    //         if (res.data?.status) {
+    //             return next({ name: "maintenance" });
+    //         }
+    //     } catch (err) {
+    //         // kalau 503 → backend sudah handle
+    //     }
+    // }
 
     // const tempToken = localStorage.getItem("tempToken");
     // const pending = localStorage.getItem("pendingVerification");
