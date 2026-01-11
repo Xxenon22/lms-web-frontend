@@ -90,10 +90,6 @@ onMounted(() => {
                     <template v-else-if="classroom.rombel?.type === 'collab'">
                         {{ classroom.rombel.colab_class }}
                     </template>
-
-                    <template v-else>
-                        -
-                    </template>
                 </h2>
             </div>
             <p>{{ classroom.guru_name }}</p>
