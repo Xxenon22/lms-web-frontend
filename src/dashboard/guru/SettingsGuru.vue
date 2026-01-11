@@ -26,10 +26,12 @@ const fetchProfile = async () => {
         nama.value = data.username;
         subject.value = data.teacher_subject;
         noTelp.value = data.phone_number;
-
         userId.value = data.id;
 
-        src.value = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${data.id}?t=${photoKey.value}`;
+        src.value = data.photo_url
+            ? `${import.meta.env.VITE_API_URL}${data.photo_url}?t=${photoKey.value}`
+            : null;
+
         initialData.value = {
             username: data.username,
             teacher_subject: data.teacher_subject,
@@ -39,6 +41,7 @@ const fetchProfile = async () => {
         console.error("fetchProfile error:", err);
     }
 };
+
 
 // Detect perubahan
 watch([nama, subject, noTelp, imageFile], () => {

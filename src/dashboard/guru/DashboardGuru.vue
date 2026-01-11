@@ -36,6 +36,8 @@ const fetchDataGradeLevel = async () => {
   }
 }
 
+
+
 onMounted(async () => {
   // await fetchUserId(); // ambil user ID dulu
   await fetchDataSubject();
@@ -70,7 +72,17 @@ onMounted(async () => {
           </div>
         </template>
         <template #title>{{ kls.nama_mapel }}</template>
-        <template #subtitle>{{ kls.grade_lvl }} {{ kls.major }} {{ kls.name_rombel }}</template>
+        <template #subtitle>
+          <!-- COLLAB CLASS -->
+          <span v-if="kls.colab_class">
+            Collab Class • {{ kls.colab_class }}
+          </span>
+
+          <!-- REGULAR CLASS -->
+          <span v-else>
+            {{ kls.grade_lvl }} {{ kls.major }} {{ kls.name_rombel }}
+          </span>
+        </template>
         <template #footer>
           <div class="flex gap-4 mt-1">
             <router-link :to="{ name: 'Assignment-List', params: { kelasId: kls.id } }" class="w-full">

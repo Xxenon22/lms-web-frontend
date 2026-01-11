@@ -10,6 +10,7 @@ const id = route.params.id;
 const router = useRouter();
 
 // Form fields
+const kelasId = ref(null);
 const rombel = ref("");
 const namaGuru = ref(null);
 const tutor = ref("");
@@ -80,8 +81,9 @@ const fetchSelectedRombel = async () => {
             headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
         });
         selectedRombel.value = res.data.map(b => ({
-            id: b.rombel_id,
-            name: `${b.grade_lvl || ''} ${b.major} ${b.name_rombel || ''} - ${b.nama_mapel}`
+            id: b.id,
+            rombel_id: b.rombel_id,
+            name: `${b.grade_lvl || ''} ${b.major || ''} ${b.name_rombel || ''} ${b.colab_class || ''} - ${b.nama_mapel}`
         }));
     } catch (error) {
         console.error("fetch rombel :", error);
@@ -109,6 +111,7 @@ const fetchExistingRPK = async () => {
         const data = res.data;
         console.log("Existing RPK data:", data);
         // === Parent table ===
+        kelasId.value = data.kelas_id;
         rombel.value = data.rombel_id;
         filteredInstructor.value = [...selectedInstructor.value];
         namaGuru.value = selectedInstructor.value.find(
@@ -163,6 +166,10 @@ const fetchExistingRPK = async () => {
 // =======================================================
 
 const updateRPK = async () => {
+    const selected = selectedRombel.value.find(
+        r => r.id === kelasId.value
+    );
+
     try {
         const postOrPut = async (path, id, payload) => {
             if (id) {
@@ -205,7 +212,8 @@ const updateRPK = async () => {
             : null;
 
         await api.put(`/rpk/${id}`, {
-            rombel_id: rombel.value,
+            kelas_id: kelasId.value,
+            rombel_id: selected?.rombel_id ?? null,
             instructor: namaGuru.value?.id,
             tutor: tutor.value,
             hari_tanggal: adjustedDate,
@@ -283,7 +291,7 @@ const back = () => router.back();
                             <div class="w-1/2 space-y-5">
                                 <div class="flex flex-col space-y-2">
                                     <Label> Class </Label>
-                                    <Select v-model="rombel" :options="selectedRombel" option-label="name"
+                                    <Select v-model="kelasId" :options="selectedRombel" option-label="name"
                                         option-value="id" placeholder="-- Select Class --" class="w-full" />
                                 </div>
                                 <div class="flex flex-col space-y-2">

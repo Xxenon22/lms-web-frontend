@@ -15,7 +15,7 @@ const fetchModulePembelajaran = async () => {
     // console.log("Fetching module by ID:", materiId);
 
     try {
-        const res = await api.get(`/module-pembelajaran/by-id/${materiId}`);
+        const res = await api.get(`/module-pembelajaran/by-id/${materiId}?v=${Date.now()}`);
         modulePembelajaran.value = res.data;
         // console.log("Data ditemukan:", res.data);
     } catch (error) {
@@ -40,8 +40,8 @@ const getEmbedUrl = (url) => {
     return videoId ? `https://www.youtube.com/embed/${videoId}` : "";
 };
 
-const bukaPdf = () => {
-    if (!modulePembelajaran.value?.id) {
+const bukaPdf = (modulePembelajaran) => {
+    if (!modulePembelajaran.id) {
         toast.add({
             severity: "warn",
             summary: "File Not Found",
@@ -51,7 +51,7 @@ const bukaPdf = () => {
         return;
     }
 
-    const pdfUrl = `${import.meta.env.VITE_API_URL}api/module-pembelajaran/${modulePembelajaran.value.id}/pdf`;
+    const pdfUrl = `${import.meta.env.VITE_API_URL}api/module-pembelajaran/${modulePembelajaran.id}/pdf`;
 
     window.open(pdfUrl, "_blank");
 };
@@ -101,7 +101,7 @@ onMounted(() => {
                     </div>
 
                     <div class="footer">
-                        <Button icon="pi pi-file-pdf" label="PDF File" @click="bukaPdf" />
+                        <Button icon="pi pi-file-pdf" label="PDF File" @click="bukaPdf(modulePembelajaran)" />
                     </div>
                 </div>
             </template>

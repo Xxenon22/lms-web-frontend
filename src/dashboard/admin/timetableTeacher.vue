@@ -41,7 +41,7 @@ const uploadFile = async () => {
             headers: { "Content-Type": "multipart/form-data" },
         });
 
-        fileUrl.value = `${import.meta.env.VITE_API_URL}/uploads/timetables/${res.data.file_name}`;
+        fileUrl.value = `${import.meta.env.VITE_API_URL}${res.data.file_url}`;
         uploaded.value = true;
 
         toast.add({ severity: "success", summary: "Success", detail: "File Uploaded Successfully.", life: 3000 });
@@ -61,7 +61,7 @@ const fetchFiles = async () => {
         files.value = res.data.map((file) => ({
             id: file.id,
             name: file.file_name,
-            url: `${import.meta.env.VITE_API_URL}api/timetables/${file.id}/file`,
+            url: `${import.meta.env.VITE_API_URL}/api/timetables/${file.id}/file`,
         }));
     } catch (err) {
         toast.add({ severity: "error", summary: "Error", detail: err.message, life: 3000 });

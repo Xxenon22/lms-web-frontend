@@ -30,7 +30,7 @@ const fetchSelectedRombel = async () => {
             id: b.id,
             rombel_id: b.rombel_id,
             nama_mapel: b.nama_mapel,
-            name: `${b.grade_lvl || ''} ${b.major} ${b.name_rombel || ''} - ${b.nama_mapel}`
+            name: `${b.grade_lvl || ''} ${b.major || ''} ${b.name_rombel || ''} ${b.colab_class || ''} - ${b.nama_mapel}`
         }));
     } catch (error) {
         console.error("fetch rombel :", error)

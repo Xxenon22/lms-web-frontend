@@ -71,7 +71,7 @@ const fetchKelas = async () => {
 const kelasOptions = computed(() => {
     return daftarKelas.value.map(k => ({
         id: k.id,
-        label: `${k.grade_lvl} ${k.major} ${k.name_rombel || ''} - ${k.nama_mapel}`
+        label: `${k.grade_lvl || ''} ${k.major || ''} ${k.name_rombel || ''} ${k.colab_class || ''} - ${k.nama_mapel}`
     }));
 });
 
@@ -246,7 +246,7 @@ const getEmbedUrl = (url) => {
 // Buka PDF
 const bukaPdf = (materi) => {
     if (!materi.id) {
-        toast.add({ severity: "warn", summary: "File Not Found", detail: "PDF tidak tersedia", life: 3000 });
+        toast.add({ severity: "warn", summary: "File Not Found", detail: "PDF tidak tersedia!", life: 3000 });
         return;
     }
     const pdfUrl = `${import.meta.env.VITE_API_URL}api/module-pembelajaran/${materi.id}/pdf`;
@@ -280,7 +280,7 @@ onMounted(async () => {
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
                                     <div class="grid gap-3">
                                         <span class="text-xl text-surface-500 dark:text-surface-400">{{ materi.judul
-                                            }}</span>
+                                        }}</span>
                                         <div class="flex space-x-3 text-lg max-h-40 overflow-auto break-words">
                                             <span v-tooltip.bottom="'Link Meeting'">{{ materi.link_zoom }}</span>
                                         </div>

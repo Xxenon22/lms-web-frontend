@@ -32,7 +32,7 @@ const isLoading = ref(true)
 // const selectedFile = ref(null);
 // const fileUrl = ref(null);
 // const uploaded = ref(false);
-
+const API_URL = import.meta.env.VITE_API_URL;
 const isHistory = (materi) => materi?.status_selesai === true;
 
 const uploadedFiles = ref({})
@@ -191,6 +191,11 @@ const fetchSoalByBankSoalId = async (bankSoalId, materiId) => {
     }
 };
 
+const withCacheBuster = (url) => {
+    if (!url) return null;
+    return `${API_URL}${url}?v=${Date.now()}`;
+};
+
 const fetchMateriById = async () => {
     try {
         const res = await api.get(`/module-pembelajaran/siswa/${userId.value}/kelas/${kelasId}`);
@@ -231,15 +236,9 @@ const fetchMateriById = async () => {
             refleksi.value[materi.id] = p?.refleksi ?? "";
 
             materi.pdf_url = `${import.meta.env.VITE_API_URL}api/module-pembelajaran/${materi.id}/pdf`;
-
-            if (materi.guru_id) {
-                materi.guru_foto = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${materi.guru_id}`;
-            } else {
-                materi.guru_foto = null;
-            }
-
-
-
+            materi.guru_foto = materi.guru_foto
+                ? `${API_URL}${materi.guru_foto}?v=${materi.id}-${Date.now()}`
+                : null;
             // jika backend module tidak include soal, tapi punya bank_soal_id -> fetch dari /soal/:id
             // check both shapes: materi.bank_soal_id or materi.bank_soal?.id or materi.bank_soal_id
             const bankSoalId = materi.bank_soal_id ?? (materi.bank_soal && materi.bank_soal.id) ?? null;
@@ -742,6 +741,7 @@ const deleteFile = async (fileId, materiId) => {
 // };
 
 
+
 onMounted(async () => {
     try {
         const res = await api.get("/auth/profile", {
@@ -840,9 +840,11 @@ onMounted(async () => {
                 <template #header>
                     <div class="flex items-center justify-between w-full">
                         <div class="flex items-center gap-2">
-                            <Avatar :image="materi.guru_foto || null" shape="circle">
-                                <i v-if="!materi.guru_foto" class="pi pi-user"></i>
+                            <Avatar v-if="materi.guru_foto" :image="materi.guru_foto" shape="circle" />
+                            <Avatar v-else shape="circle">
+                                <i class="pi pi-user"></i>
                             </Avatar>
+
                             <span class="font-bold">Educational Objectives: {{ materi.judul }}</span>
                             <Tag v-if="materi.status_selesai === true" severity="success" value="Finished"
                                 class="ml-2" />
@@ -1010,9 +1012,9 @@ onMounted(async () => {
                                                             <RadioButton :inputId="`${soal.id}-${key}`"
                                                                 v-model="selectedAnswers[materi.id][soal.id]"
                                                                 :value="key" :name="`soal-${soal.id}`"
-                                                                :disabled="isHistory(materi)" />
+                                                                :disabled="!isHistory(materi)" />
                                                             <label :for="`${soal.id}-${key}`">{{ key }}. {{ opsi
-                                                                }}</label>
+                                                            }}</label>
                                                         </div>
                                                     </div>
 
@@ -1068,7 +1070,7 @@ onMounted(async () => {
                                 <div class="flex flex-col h-full">
                                     <Textarea v-model="refleksi[materi.id]" rows="5" class="w-full"
                                         placeholder="Submit Your Reflection..." @blur="() => simpanProgress(materi.id)"
-                                        :readonly="materi.status_selesai === true" />
+                                        :readonly="isHistory(materi)" />
                                     <div class="flex py-6 gap-2">
                                         <Button label="Back" severity="secondary"
                                             @click="() => activeSteps[materi.id] = '3'" />

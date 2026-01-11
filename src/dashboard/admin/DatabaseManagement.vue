@@ -31,6 +31,11 @@ const editTeacherData = ref({
     name: '',
 })
 
+const isCollabClass = (row) => {
+    return !!row.colab_class;
+};
+
+
 const fetchRomberlNumber = async () => {
     try {
         const res = await api.get("/number-rombel");
@@ -64,10 +69,16 @@ const fetchDataGradeLevel = async (order = "asc") => {
 };
 
 
-const fetchDataKelas = async () => {
+const fetchDataKelas = async (order = "asc") => {
     try {
         const res = await api.get("/rombel")
-        kelas.value = res.data;
+        kelas.value = res.data.sort((a, b) => {
+            if (order === "asc") {
+                return a.id - b.id;  // Urut berdasarkan ID
+            } else {
+                return b.id - a.id;
+            }
+        });
     } catch (err) {
         console.error("Fetch Class:", err)
     }
@@ -236,7 +247,7 @@ const updateTeacher = async () => {
 
 onMounted(async () => {
     await fetchDataGradeLevel()
-    await fetchDataKelas()
+    await fetchDataKelas("asc")
     await fetchJurusan()
     await fetchRomberlNumber()
     await fetchDataSubject()
@@ -259,13 +270,16 @@ onMounted(async () => {
                         <Column field="grade_name" header="Grade Level" style="width: 25%" />
                         <Column field="major" header="Major" style="width: 25%" />
                         <Column field="rombel_number" header="Class" style="width: 25%" />
+                        <Column field="colab_class" header="Collab Class" style="width: 50%" />
 
                         <!-- Action Buttons -->
                         <Column header="Action" style="width: 25%">
                             <template #body="slotProps">
                                 <div class="flex space-x-2">
                                     <Button icon="pi pi-pencil" class="p-button-rounded p-button-info"
+                                        :disabled="isCollabClass(slotProps.data)"
                                         @click="openEditDialog(slotProps.data)" />
+
 
                                     <Dialog v-model:visible="visibleClass" modal header="Edit Class"
                                         :style="{ width: '25rem' }">

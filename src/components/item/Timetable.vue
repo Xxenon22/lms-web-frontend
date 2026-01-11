@@ -14,39 +14,39 @@ const activeTab = ref("0");
             <button class="px-5 py-2 rounded-xl font-medium transition-all" :class="activeTab === '0'
                 ? '!bg-[#008C95] text-white shadow'
                 : '!bg-[#94A4A4] text-white'" @click="activeTab = '0'">
-                Teacher Timetable
+                Teacher's Timetable
             </button>
 
             <button class="px-5 py-2 rounded-xl font-medium transition-all" :class="activeTab === '1'
                 ? '!bg-[#008C95] text-white shadow'
                 : '!bg-[#94A4A4] text-white'" @click="activeTab = '1'">
-                Grade X Timetable
+                Student's Timetable
             </button>
 
-            <button class="px-5 py-2 rounded-xl font-medium transition-all" :class="activeTab === '2'
+            <!-- <button class="px-5 py-2 rounded-xl font-medium transition-all" :class="activeTab === '2'
                 ? '!bg-[#008C95] text-white shadow'
                 : '!bg-[#94A4A4] text-white'" @click="activeTab = '2'">
                 Grade XI Timetable
-            </button>
+            </button> -->
         </div>
 
         <!-- Content Container -->
         <div class="bg-white p-5 border-transparent rounded-lg ">
 
             <div v-if="activeTab === '0'">
-                <h2 class="text-lg font-semibold mb-3">Teacher Timetable</h2>
+                <h2 class="text-lg font-semibold mb-3">Teacher's Timetable</h2>
                 <JadwalGuru />
             </div>
 
             <div v-if="activeTab === '1'">
-                <h2 class="text-lg font-semibold mb-3">Grade X Timetable</h2>
+                <h2 class="text-lg font-semibold mb-3">Student's Timetable</h2>
                 <JadwalSiswa />
             </div>
 
-            <div v-if="activeTab === '2'">
+            <!-- <div v-if="activeTab === '2'">
                 <h2 class="text-lg font-semibold mb-3">Grade XI Timetable</h2>
                 <JadwalSiswa2 />
-            </div>
+            </div> -->
 
         </div>
     </div>

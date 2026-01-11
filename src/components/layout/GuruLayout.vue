@@ -27,14 +27,17 @@ const handleLogout = () => {
 
 const fetchPhotoProfile = async () => {
   try {
-    const res = await api.get("/auth/profile")
-    const data = res.data
-    src.value = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${data.id}`
+    const res = await api.get("/auth/profile");
+    const data = res.data;
 
+    // LANGSUNG PAKAI URL DARI BACKEND
+    src.value = data.photo_url
+      ? `${import.meta.env.VITE_API_URL}${data.photo_url}?v=${Date.now()}`
+      : null;
   } catch (error) {
-    console.error("Error fetch profile :", error)
+    console.error("Error fetch profile :", error);
   }
-}
+};
 
 const confirm = useConfirm();
 const requireConfirmation = (event) => {
@@ -54,13 +57,19 @@ const fetchRombelNum = async () => {
   }
 };
 
-const fetchDataKelas = async () => {
+const fetchDataKelas = async (order = "asc") => {
   try {
     const res = await api.get("/rombel")
     rombel.value = res.data.map(b => ({
       id: b.id,
-      name: `${b.grade_name || ''} ${b.major || ''} ${b.rombel_number || ''} `.trim() // tampilkan gabungan
-    }));
+      name: `${b.grade_name || ''} ${b.major || ''} ${b.rombel_number || ''} ${b.colab_class || ''} `.trim() // tampilkan gabungan
+    })).sort((a, b) => {
+      if (order === "asc") {
+        return a.name.localeCompare(b.name) // A-Z
+      } else {
+        return b.name.localeCompare(a.name) // Z-A
+      }
+    });
   } catch (error) {
     console.error("Fetch data kelas: ", error)
   }
@@ -134,7 +143,7 @@ onMounted(async () => {
 
   await fetchDataMapel();
   await fetchPhotoProfile();
-  await fetchDataKelas();
+  await fetchDataKelas("asc");
   await fetchRombelNum();
 });
 

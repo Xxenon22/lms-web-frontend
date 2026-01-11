@@ -24,10 +24,10 @@ const fetchRpk = async () => {
     if (!userId.value) return console.warn("userId kosong, tidak fetch data")
     try {
         const res = await api.get(`/rpk/all-rpk/${userId.value}`)
+        // console.log("Fetched RPK:", res.data)
         allRpk.value = res.data.sort((a, b) => {
             return new Date(b.hari_tanggal) - new Date(a.hari_tanggal)
         })
-        // console.log("Fetched RPK:", allRpk.value)
 
     } catch (error) {
         console.error("Error fetch RPK :", error)
@@ -70,24 +70,23 @@ const formatDate = (hari_tanggal) => {
 const search = (event) => {
     const query = event.query ? event.query.toLowerCase() : "";
 
-    filteredClass.value = allRpk.value
-        .filter((rpk) => {
-            const grade = String(rpk.name_grade || "").toLowerCase();
-            const major = String(rpk.major || "").toLowerCase();
-            const rombel = String(rpk.name_rombel || "").toLowerCase();
-            const tanggal = formatDate(rpk.hari_tanggal).toLowerCase();
+    filteredClass.value = allRpk.value.filter((rpk) => {
+        const grade = String(rpk.name_grade || "").toLowerCase();
+        const major = String(rpk.major || "").toLowerCase();
+        const rombel = String(rpk.name_rombel || "").toLowerCase();
+        const colab = String(rpk.colab_class || "").toLowerCase();
+        const tanggal = formatDate(rpk.hari_tanggal).toLowerCase();
 
-            return (
-                // mapel.includes(query) 
-                grade.includes(query) ||
-                major.includes(query) ||
-                rombel.includes(query) ||
-                tanggal.includes(query)
-                // guru.includes(query)
-            );
-        })
+        return (
+            grade.includes(query) ||
+            major.includes(query) ||
+            rombel.includes(query) ||
+            colab.includes(query) ||
+            tanggal.includes(query)
+        );
+    })
         .map((rpk) => ({
-            name: `${rpk.name_grade} ${rpk.major} ${rpk.name_rombel} • ${formatDate(rpk.hari_tanggal)}`,
+            name: `${rpk.name_grade || ''} ${rpk.major || ''} ${rpk.name_rombel || ''} ${rpk.colab_class || ''} • ${formatDate(rpk.hari_tanggal)}`,
             id: rpk.id,
         }));
 };
@@ -135,15 +134,19 @@ onMounted(async () => {
                         <div class="flex flex-col sm:flex-row sm:items-center p-6 gap-4">
                             <div class="flex flex-col md:flex-row justify-between md:items-center flex-1 gap-6">
                                 <div class="flex flex-row md:flex-col justify-between items-start gap-2">
-                                    <div>
-                                        <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{
-                                            formatDate(rpk.hari_tanggal) }}</span>
-                                        <div class="text-lg font-medium mt-2">
-                                            <span>
-                                                {{ rpk.name_grade }} {{ rpk.major }} {{ rpk.name_rombel }}
+                                    <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{
+                                        formatDate(rpk.hari_tanggal) }}</span>
+                                    <div class="text-lg font-medium mt-2">
+                                        <span>
+                                            {{ rpk.name_grade || '' }}
+                                            {{ rpk.major || '' }}
+                                            {{ rpk.name_rombel || '' }}
+                                            <span v-if="rpk.colab_class">
+                                                {{ rpk.colab_class }}
                                             </span>
-                                        </div>
+                                        </span>
                                     </div>
+
                                 </div>
                                 <div class="flex flex-col md:items-end gap-8">
                                     <div class="flex flex-row-reverse md:flex-row gap-2">

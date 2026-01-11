@@ -8,7 +8,7 @@ const router = useRouter()
 const studentList = ref([])
 const kelasId = route.params.kelasId
 const currentAssignmentId = route.params.assignmentId
-const photoKey = ref(Date.now());
+// const photoKey = ref(Date.now());
 const src = ref(null);
 const profile = ref({})
 const loading = ref(false)
@@ -56,8 +56,8 @@ const fetchStudentList = async () => {
                 status: hasProgress && hasJawaban ? "Completed" : "Not Completed",
                 assignmentId: jawabanSiswa?.bank_soal_id || null,
                 nilai: jawabanSiswa?.nilai || null,
-                user_photo: student.user_id
-                    ? `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${student.user_id}?t=${photoKey.value}` : null
+                user_photo: student.photo_url
+                    ? `${import.meta.env.VITE_API_URL}${student.photo_url}?v=${Date.now()}` : null
             })
         }
 

@@ -68,6 +68,11 @@ const fetchRombel = async () => {
     }
 };
 
+const buildPhotoUrl = (path) => {
+    if (!path) return null;
+    return `${import.meta.env.VITE_API_URL}${path}?t=${Date.now()}`;
+};
+
 const fetchProfile = async () => {
     try {
 
@@ -77,7 +82,9 @@ const fetchProfile = async () => {
         nama.value = data.username;
         noTelp.value = data.phone_number;
         userId.value = data.id;
-        src.value = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${data.id}?t=${photoKey.value}`;
+        if (!imageFile.value) {
+            src.value = buildPhotoUrl(data.photo_url);
+        }
         kelasId.value = data.grade_id;
         jurusanId.value = data.jurusan_id;
         rombelId.value = data.rombel_id;
@@ -132,19 +139,24 @@ function onFileSelect(event) {
 }
 
 const uploadPhoto = async () => {
-    if (!imageFile.value) return; // tidak upload baru
+    if (!imageFile.value) return;
 
     const formData = new FormData();
     formData.append("profile", imageFile.value);
 
-    const res = await api.put("/uploads/photo-profile", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-    });
+    try {
+        const res = await api.put("/uploads/photo-profile", formData);
 
-    // refresh image (anti cache)
-    photoKey.value = Date.now();
-    src.value = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${userId.value}?t=${photoKey.value}`;
+        photoKey.value = Date.now();
+        src.value = buildPhotoUrl(res.data.path);
+        console.error("Upload failed:", err);
+        throw err; // ⬅️ PENTING
+    } catch (err) {
+        console.error("Upload failed:", err);
+        throw err; // ⬅️ PENTING
+    }
 };
+
 
 // Simpan profile
 const submitProfileStudent = async () => {
@@ -179,7 +191,7 @@ const submitProfileStudent = async () => {
 
         imageFile.value = null;
         hasChanges.value = false;
-        await fetchProfile();
+        // await fetchProfile();
 
     } catch (error) {
         console.error(error)

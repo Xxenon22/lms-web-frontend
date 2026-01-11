@@ -14,12 +14,13 @@ const fetchMateriByUserClass = async () => {
         const { data: userData } = await api.get("/auth/profile");
         userId.value = userData?.id;
 
-        const { data: materiArray } = await api.get(`/module-pembelajaran/siswa/${userId.value}`);
+        const { data: materiArray } = await api.get(
+            `/module-pembelajaran/siswa/${userId.value}`
+        );
+
         const { data: semuaJawaban } = await api.get("/jawaban-siswa");
 
-        const uniqueMateri = new Map();
-
-        for (let m of materiArray) {
+        materiList.value = materiArray.map((m) => {
             const jawabanMatch = semuaJawaban.find(j =>
                 Number(j.user_id) === Number(userId.value) &&
                 m.bank_soal_id &&
@@ -27,29 +28,22 @@ const fetchMateriByUserClass = async () => {
                 Number(m.bank_soal_id) === Number(j.bank_soal_id)
             );
 
+            return {
+                ...m,
+                nilai: jawabanMatch?.nilai ? Number(jawabanMatch.nilai) : 0,
+                guru_foto: m.guru_foto
+                    ? `${import.meta.env.VITE_API_URL}${m.guru_foto}?v=${Date.now()}`
+                    : null
+            };
+        });
 
-            m.nilai = jawabanMatch?.nilai ? Number(jawabanMatch.nilai) : 0;
-            if (m.guru_id) {
-                m.guru_foto = `${import.meta.env.VITE_API_URL}api/uploads/photo-profile/${m.guru_id}`;
-            } else {
-                m.guru_foto = null;
-            }
-
-
-            const key = `${m.kelas_id}-${m.judul_penugasan}`;
-            if (!uniqueMateri.has(key)) {
-                uniqueMateri.set(key, m);
-            }
-        }
-
-        materiList.value = Array.from(uniqueMateri.values());
         isLoading.value = false;
-
     } catch (err) {
         console.error("Fetch Materi Error:", err);
         isLoading.value = false;
     }
 };
+
 
 const isCompleted = (m) => {
     const pdf = m.pdf_selesai ?? m.progress_materi?.[0]?.pdf_selesai;
@@ -84,8 +78,8 @@ onMounted(() => {
                         <Avatar v-else icon="pi pi-user" class="mr-2" style="background-color: #ece9fc; color: #2a1261"
                             shape="circle" size="large" />
                         <div>
-                            <h1 class="font-bold">{{ m.nama_mapel ?? 'No Subject' }}</h1>
-                            <p>{{ m.judul_penugasan }}</p>
+                            <h1 class="font-bold">{{ m.judul }} </h1>
+                            <p>{{ m.nama_mapel ?? 'No Subject' }} - {{ m.grade_lvl }} {{ m.major }} {{ m.number }}</p>
                         </div>
                     </div>
                     <div class="space-x-2">

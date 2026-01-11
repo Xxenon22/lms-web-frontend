@@ -93,7 +93,7 @@ const exportPDF = () => {
         theme: "grid",
         head: [["IDENTITY", ""]],
         body: [
-            ["Class & Subject", `${data.grade_lvl} ${data.major} ${data.name_rombel || ""} - ${data.subject || ""}`],
+            ["Class & Subject", `${data.grade_lvl || ''} ${data.major || ''} ${data.name_rombel || ""} ${data.colab_class || ''} - ${data.subject || ""}`],
             ["Phase", data.phase || ""],
             ["Teacher", data.teacher_name || ""],
             ["Instructor", data.instructor_name || ""],
@@ -221,7 +221,9 @@ onMounted(async () => {
             <div class="w-4/5 grid grid-cols-2 gap-x-4 gap-y-2 p-4">
                 <div class="col-span-1 flex">
                     <span class="font-bold w-32">Class :</span>
-                    <span>{{ rpk.grade_lvl }} {{ rpk.major }} {{ rpk.name_rombel || '' }}</span>
+                    <span>{{ rpk.grade_lvl || '' }} {{ rpk.major || '' }} {{ rpk.name_rombel || '' }} {{ rpk.colab_class
+                        || ''
+                        }}</span>
                 </div>
                 <div class="col-span-1 flex">
                     <span class="font-bold w-32">Subject :</span>

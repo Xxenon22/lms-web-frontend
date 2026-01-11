@@ -127,7 +127,7 @@ const fetchGuruById = async (id) => {
         guruCache.value[id] = {
             ...res.data,
             photo_profile: res.data.photo_url
-                ? `${API_URL}${res.data.photo_url}`
+                ? `${API_URL}${res.data.photo_url}?v=${Date.now()}`
                 : null
         };
         profile.value = guruCache.value[id];
@@ -136,6 +136,11 @@ const fetchGuruById = async (id) => {
     } catch {
         toast.add({ severity: "error", summary: "Failed to load profile" });
     }
+};
+
+const withCacheBuster = (url) => {
+    if (!url) return null;
+    return `${API_URL}${url}?v=${Date.now()}`;
 };
 </script>
 
@@ -175,7 +180,7 @@ const fetchGuruById = async (id) => {
                             <div @click="fetchGuruById(kelasHasilPencarian.guru_id)"
                                 class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
                                 <img v-if="kelasHasilPencarian.guru_photo"
-                                    :src="`${API_URL}${kelasHasilPencarian.guru_photo}`" alt="Photo Profile"
+                                    :src="withCacheBuster(kelasHasilPencarian.guru_photo)" alt="Photo Profile"
                                     class="w-full h-full object-cover" loading="lazy" />
                                 <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
                             </div>
@@ -242,7 +247,7 @@ const fetchGuruById = async (id) => {
                                 class="w-full h-32 object-cover" loading="lazy" />
                             <div @click="fetchGuruById(kelas.guru_id)"
                                 class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
-                                <img v-if="kelas.guru_photo" :src="`${API_URL}${kelas.guru_photo}`"
+                                <img v-if="kelas.guru_photo" :src="withCacheBuster(kelas.guru_photo)"
                                     class="w-full h-full object-cover" />
                                 <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
                             </div>
@@ -276,8 +281,8 @@ const fetchGuruById = async (id) => {
                                 class="w-full h-32 object-cover" loading="lazy" />
                             <div @click="fetchGuruById(kelas.guru_id)"
                                 class="absolute bottom-[-1.5rem] right-4 w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-gray-200 border-2 border-white shadow cursor-pointer">
-                                <img v-if="kelas.guru_photo" :src="`${API_URL}${kelas.guru_photo}`" alt="Photo Profile"
-                                    class="w-full h-full object-cover" loading="lazy" />
+                                <img v-if="kelas.guru_photo" :src="withCacheBuster(kelas.guru_photo)"
+                                    alt="Photo Profile" class="w-full h-full object-cover" loading="lazy" />
                                 <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem"></i>
                             </div>
                         </div>

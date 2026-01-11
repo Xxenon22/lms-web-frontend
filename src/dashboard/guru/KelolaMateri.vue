@@ -35,7 +35,7 @@ const fetchDaftarKelas = async () => {
   const res = await api.get("/kelas");
   daftarKelas.value = (res.data || []).map(k => ({
     id: k.id,
-    name: `${k.grade_lvl || ""} ${k.major || ""} ${k.name_rombel || ""} - ${k.nama_mapel || ""}`
+    name: `${k.grade_lvl || ""} ${k.major || ""} ${k.name_rombel || ""} ${k.colab_class || ''} - ${k.nama_mapel || ""}`
   }));
 };
 

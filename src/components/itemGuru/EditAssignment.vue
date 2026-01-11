@@ -12,6 +12,8 @@ const soalId = route.params.id;
 const judulBaru = ref("");
 const listSoal = ref([]);
 const listEssai = ref([]);
+const loading = ref(false);
+
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 /* ================= FETCH DATA ================= */
@@ -35,8 +37,7 @@ const fetchSoalDariAssignment = async () => {
                 e: d.pg_e
             },
             kunci: d.kunci_jawaban,
-
-            gambar: d.gambar, // SIMPAN PATH
+            gambar: d.gambar,
             previewUrl: d.gambar ? `${BASE_URL}${d.gambar}` : null
         }));
 
@@ -52,20 +53,15 @@ const fetchSoalDariAssignment = async () => {
         }));
 };
 
+/* ================= ADD ================= */
+
 const tambahSoal = () => {
     listSoal.value.push({
         id: null,
         pertanyaan: "",
-        jawaban: {
-            a: "",
-            b: "",
-            c: "",
-            d: "",
-            e: ""
-        },
+        jawaban: { a: "", b: "", c: "", d: "", e: "" },
         kunci: "",
         gambar: null,
-        gambar_mimetype: null,
         previewUrl: null
     });
 };
@@ -75,11 +71,9 @@ const tambahSoalEssai = () => {
         id: null,
         pertanyaan_essai: "",
         gambar_soal_essai: null,
-        gambar_essai_mimetype: null,
         previewUrlEssai: null
     });
 };
-
 
 /* ================= FILE HANDLER ================= */
 
@@ -91,15 +85,11 @@ const onFileSelect = async (e, index) => {
     formData.append("gambar", file);
 
     try {
-        const res = await api.post(
-            `/gambar-soal/pg/${listSoal.value[index].id}`,
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-        );
+        const res = await api.post("/gambar-soal/pg", formData);
 
         listSoal.value[index].gambar = res.data.path;
         listSoal.value[index].previewUrl = `${BASE_URL}${res.data.path}`;
-    } catch (err) {
+    } catch {
         toast.add({
             severity: "error",
             summary: "Upload gagal",
@@ -107,6 +97,8 @@ const onFileSelect = async (e, index) => {
         });
     }
 };
+
+
 const onFileSelectEssai = async (e, index) => {
     const file = e.files?.[0];
     if (!file) return;
@@ -115,27 +107,25 @@ const onFileSelectEssai = async (e, index) => {
     formData.append("gambar", file);
 
     try {
-        const res = await api.post(
-            `/gambar-soal/essai/${listEssai.value[index].id}`,
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-        );
+        const res = await api.post("/gambar-soal/essai", formData);
 
         listEssai.value[index].gambar_soal_essai = res.data.path;
-        listEssai.value[index].previewUrlEssai =
-            `${BASE_URL}${res.data.path}`;
-    } catch (err) {
+        listEssai.value[index].previewUrlEssai = `${BASE_URL}${res.data.path}`;
+    } catch {
         toast.add({
             severity: "error",
             summary: "Upload gagal",
-            detail: "Failed to upload essai image"
+            detail: "Gambar essai gagal diupload"
         });
     }
 };
 
+
 /* ================= SUBMIT ================= */
 
 const submitSemuaSoal = async () => {
+    loading.value = true;
+
     const soal_list = [];
 
     listSoal.value.forEach(s => {
@@ -148,8 +138,7 @@ const submitSemuaSoal = async () => {
             pg_d: s.jawaban.d,
             pg_e: s.jawaban.e,
             kunci_jawaban: s.kunci,
-            gambar: s.gambar,
-            gambar_mimetype: s.gambar_mimetype
+            gambar: s.gambar
         });
     });
 
@@ -157,8 +146,7 @@ const submitSemuaSoal = async () => {
         soal_list.push({
             id: e.id,
             pertanyaan_essai: e.pertanyaan_essai,
-            gambar_soal_essai: e.gambar_soal_essai,
-            gambar_essai_mimetype: e.gambar_essai_mimetype
+            gambar_soal_essai: e.gambar_soal_essai
         });
     });
 
@@ -167,8 +155,10 @@ const submitSemuaSoal = async () => {
         soal_list
     });
 
-    toast.add({ severity: "success", summary: "Success", detail: "saved assignment" });
+    loading.value = false;
+    toast.add({ severity: "success", summary: "Success", detail: "Assignment saved" });
 };
+
 const back = () => router.back();
 
 onMounted(fetchSoalDariAssignment);
@@ -222,11 +212,27 @@ onMounted(fetchSoalDariAssignment);
                 <template #content>
                     <div class="grid gap-4">
                         <div class="pilgan flex flex-col space-y-4">
-                            <InputText v-model="soal.jawaban.a" placeholder="Option A" />
-                            <InputText v-model="soal.jawaban.b" placeholder="Option B" />
-                            <InputText v-model="soal.jawaban.c" placeholder="Option C" />
-                            <InputText v-model="soal.jawaban.d" placeholder="Option D" />
-                            <InputText v-model="soal.jawaban.e" placeholder="Option E" />
+                            <div class="flex items-center space-x-3">
+                                <h1>A.</h1>
+                                <InputText v-model="soal.jawaban.a" placeholder="Option A" class="w-full" />
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <h1>B.</h1>
+                                <InputText v-model="soal.jawaban.b" placeholder="Option B" class="w-full" />
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <h1>C.</h1>
+                                <InputText v-model="soal.jawaban.c" placeholder="Option C" class="w-full" />
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <h1>D.</h1>
+                                <InputText v-model="soal.jawaban.d" placeholder="Option D" class="w-full" />
+                            </div>
+                            <div class="flex items-center space-x-3">
+                                <h1>E.</h1>
+                                <InputText v-model="soal.jawaban.e" placeholder="Option E" class="w-full" />
+                            </div>
+
                             <Select v-model="soal.kunci" :options="['A', 'B', 'C', 'D', 'E']"
                                 placeholder="Answer Key" />
                         </div>

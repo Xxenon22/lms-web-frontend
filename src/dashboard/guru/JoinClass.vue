@@ -32,22 +32,16 @@ const fetchGuruProfile = async () => {
 
 // ✅ ambil materi guru berdasarkan guruId & kelasId
 const fetchMateriGuru = async () => {
-  if (!guruId.value || !targetKelasId) {
-    console.warn("Teacher ID or class ID is not available yet.");
-    return;
-  }
+  if (!guruId.value || !targetKelasId) return;
 
   try {
     const res = await api.get(`/module-pembelajaran/kelas/${targetKelasId}`);
-    materiGuru.value = res.data || [];
+
+    materiGuru.value = (res.data || []).sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
   } catch (error) {
-    console.error("Error retrieving teacher materials.:", error);
-    toast.add({
-      severity: "error",
-      summary: "Failed",
-      detail: "Could not load teacher's materials.",
-      life: 3000,
-    });
+    console.error("Error retrieving teacher materials:", error);
   } finally {
     isLoading.value = false;
   }
@@ -146,7 +140,21 @@ onMounted(() => {
     <div class="relative z-10 space-y-8 pl-10">
       <div class="flex flex-col">
         <h1 class="text-2xl font-semibold">{{ classroom.nama_mapel }}</h1>
-        <h2 class="text-lg">{{ classroom.grade_lvl }} {{ classroom.major }} {{ classroom.name_rombel }}</h2>
+        <h2 class="text-lg">
+          <template v-if="classroom.rombel?.type === 'regular'">
+            {{ classroom.rombel.grade_lvl }}
+            {{ classroom.rombel.major }}
+            {{ classroom.rombel.name_rombel }}
+          </template>
+
+          <template v-else-if="classroom.rombel?.type === 'collab'">
+            {{ classroom.rombel.colab_class }}
+          </template>
+
+          <template v-else>
+            -
+          </template>
+        </h2>
       </div>
       <p>{{ classroom.guru_name }}</p>
     </div>

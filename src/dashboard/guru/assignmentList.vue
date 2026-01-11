@@ -80,7 +80,21 @@ onMounted(() => {
         <div class="relative z-10 space-y-8 pl-10">
             <div class="flex flex-col">
                 <h1 class="text-2xl font-semibold">{{ classroom.nama_mapel }}</h1>
-                <h2 class="text-lg">{{ classroom.grade_lvl }} {{ classroom.major }} {{ classroom.name_rombel }}</h2>
+                <h2 class="text-lg">
+                    <template v-if="classroom.rombel?.type === 'regular'">
+                        {{ classroom.rombel.grade_lvl }}
+                        {{ classroom.rombel.major }}
+                        {{ classroom.rombel.name_rombel }}
+                    </template>
+
+                    <template v-else-if="classroom.rombel?.type === 'collab'">
+                        {{ classroom.rombel.colab_class }}
+                    </template>
+
+                    <template v-else>
+                        -
+                    </template>
+                </h2>
             </div>
             <p>{{ classroom.guru_name }}</p>
         </div>

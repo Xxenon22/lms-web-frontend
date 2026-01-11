@@ -105,6 +105,40 @@ const fetchJawabanSiswa = async () => {
     loading.value = false
 }
 
+const submitNilai = async () => {
+    try {
+        isSubmitting.value = true;
+
+        await api.put("/jawaban-siswa/nilai", {
+            user_id: Number(userId),
+            bank_soal_id: Number(assignmentId),
+            nilai: nilai.value,
+        });
+
+        toast.add({
+            severity: "success",
+            summary: "Success",
+            detail: "Score saved successfully",
+            life: 3000,
+        });
+
+        initialNilai.value = nilai.value;
+        hasChanges.value = false;
+
+    } catch (err) {
+        console.error("Submit nilai error:", err);
+        toast.add({
+            severity: "error",
+            summary: "Error",
+            detail: "Failed to submit score",
+            life: 3000,
+        });
+    } finally {
+        isSubmitting.value = false;
+    }
+};
+
+
 // ======================
 // FETCH NILAI
 // ======================
@@ -124,6 +158,7 @@ const fetchNilai = async () => {
         console.error('Fetch Nilai:', err)
     }
 }
+
 
 watch(nilai, () => {
     hasChanges.value = nilai.value !== initialNilai.value
@@ -152,9 +187,13 @@ const fetchFileJawabanSiswa = async () => {
                 nama_file: file.file_name,
                 file_mime: file.file_mime,
                 created_at: file.created_at,
-                url: file.url,
                 isPdf: file.file_mime === "application/pdf",
+
+                // 🔥 PISAH JELAS
+                url: file.url,                   // STATIC
+                download_url: file.download_url, // API
             }));
+
 
         // console.log("FILE JAWABAN SISWA (MAPPED):", fileJawabanSiswa.value);
 
@@ -167,22 +206,28 @@ const fetchFileJawabanSiswa = async () => {
 // ======================
 // DOWNLOAD
 // ======================
-const downloadFile = (url, filename) => {
-    const a = document.createElement("a");
-    a.href = `${url}?download=1`;
-    a.download = filename || "";
-    a.target = "_self";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+const downloadFile = (downloadUrl) => {
+    if (!downloadUrl) {
+        toast.add({
+            severity: "warn",
+            summary: "File not available",
+            detail: "Download link not found",
+            life: 3000,
+        });
+        return;
+    }
+
+    window.open(downloadUrl, "_blank");
 };
+
+
 
 
 // ======================
 // OPEN FILE
 // ======================   
 const openFile = (url) => {
-    window.open(url, '_blank');
+    window.open(url, "_blank");
 };
 
 // ======================
@@ -345,7 +390,7 @@ const summaryPilgan = computed(() => {
                             <Button icon="pi pi-external-link" severity="secondary" size="small"
                                 @click="openFile(file.url)" />
                             <Button icon="pi pi-download" severity="info" size="small"
-                                @click="downloadFile(file.url, file.nama_file)" />
+                                @click="downloadFile(file.download_url)" />
                         </div>
                     </div>
                 </div>
@@ -379,7 +424,7 @@ const summaryPilgan = computed(() => {
                             <Button icon="pi pi-external-link" severity="secondary" size="small"
                                 @click="openFile(file.url)" />
                             <Button icon="pi pi-download" severity="info" size="small"
-                                @click="downloadFile(file.url, file.nama_file)" />
+                                @click="downloadFile(file.download_url, file.nama_file)" />
                         </div>
                     </div>
                 </div>

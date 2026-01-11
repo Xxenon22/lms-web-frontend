@@ -49,7 +49,7 @@ const fetchRombel = async () => {
         const res = await api.get("/rombel")
         rombel.value = res.data.map(b => ({
             id: b.id,
-            name: `${b.grade_name || ''} ${b.major || ''} ${b.rombel_number || ''} `, // tampilkan gabungan
+            name: `${b.grade_name || ''} ${b.major || ''} ${b.rombel_number || ''} ${b.colab_class || ''} `, // tampilkan gabungan
         }));
     } catch (error) {
         console.error("error fetching rombel :", error)
@@ -219,8 +219,15 @@ const deleteKelas = async (id) => {
                                         <span class="font-medium text-surface-500 dark:text-surface-400 text-sm">{{
                                             kelas.nama_mapel }}</span>
                                         <div class="text-lg font-medium mt-2">
-                                            {{ kelas.grade_lvl }} {{ kelas.major }} {{ kelas.name_rombel }}
+                                            <template v-if="kelas.colab_class">
+                                                {{ kelas.colab_class }}
+                                            </template>
+
+                                            <template v-else>
+                                                {{ kelas.grade_lvl }} {{ kelas.major }} {{ kelas.name_rombel }}
+                                            </template>
                                         </div>
+
                                     </div>
                                 </div>
                                 <div class="flex flex-col md:items-end gap-8">
