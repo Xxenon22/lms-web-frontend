@@ -14,12 +14,12 @@ const fetchRpkReflection = async () => {
     try {
         const res = await api.get(`/rpk-refleksi/${id}`)
         if (!res || !res.data) {
-            console.warn("⚠️ Response kosong:", res);
+            // console.warn("⚠️ Response kosong:", res);
             clpRefleksi.value = {};
             return;
         }
         const item = res.data;
-        console.log("Fetched RPK Data:", item);
+        // console.log("Fetched RPK Data:", item);
         if (typeof item !== "object" || Array.isArray(item)) {
             console.error("Invalid Data:", item);
             clpRefleksi.value = {};

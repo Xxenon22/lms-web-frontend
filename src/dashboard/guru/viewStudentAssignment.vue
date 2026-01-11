@@ -5,19 +5,17 @@ import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute()
 const router = useRouter()
+
 const studentList = ref([])
-const kelasId = route.params.kelasId
-const currentAssignmentId = route.params.assignmentId
-// const photoKey = ref(Date.now());
-const src = ref(null);
-const profile = ref({})
+const materiKelas = ref([])
 const loading = ref(false)
 
+const kelasId = route.params.kelasId
+const currentAssignmentId = route.params.assignmentId
 
-
-// daftar materi di kelas ini
-const materiKelas = ref([])
-
+// =========================
+// FETCH MATERI KELAS
+// =========================
 const fetchMateriKelas = async () => {
     try {
         const res = await api.get(`/module-pembelajaran/kelas/${kelasId}`)
@@ -28,41 +26,59 @@ const fetchMateriKelas = async () => {
     }
 }
 
+// =========================
+// FETCH STUDENT LIST
+// =========================
 const fetchStudentList = async () => {
     try {
-        // Ambil daftar siswa
+        // 1️⃣ SELALU ambil murid kelas
         const { data: students } = await api.get(`/kelas/students/${kelasId}`)
 
-        // Ambil jawaban siswa untuk assignment ini (semua siswa)
-        const { data: jawabanList } = await api.get(`/jawaban-siswa/all`, {
-            params: { bank_soal_id: currentAssignmentId }
-        })
+        // 2️⃣ Jawaban assignment → OPSIONAL
+        let jawabanList = []
+        if (currentAssignmentId) {
+            const res = await api.get(`/jawaban-siswa/all`, {
+                params: { bank_soal_id: currentAssignmentId }
+            })
+            jawabanList = res.data || []
+        }
 
         const updatedList = []
+
         for (const student of students) {
-            // Ambil progress siswa
-            const { data: progresList } = await api.get(`/progress-materi/${student.user_id}`)
+            // 3️⃣ Progress materi
+            const { data: progresList } = await api.get(
+                `/progress-materi/${student.user_id}`
+            )
+
             const progresKelas = progresList.filter(p =>
                 materiKelas.value.includes(Number(p.materi_id))
             )
-            const hasProgress = progresKelas.length > 0 && progresKelas.every(p => p.status_selesai === true)
 
-            // Cek jawaban assignment
-            const jawabanSiswa = jawabanList.find(j => j.user_id === student.user_id)
-            const hasJawaban = !!jawabanSiswa
+            const hasProgress =
+                progresKelas.length > 0 &&
+                progresKelas.every(p => p.status_selesai === true)
+
+            // 4️⃣ Jawaban siswa (boleh null)
+            const jawabanSiswa = jawabanList.find(
+                j => j.user_id === student.user_id
+            )
 
             updatedList.push({
                 ...student,
-                status: hasProgress && hasJawaban ? "Completed" : "Not Completed",
+                status:
+                    currentAssignmentId && hasProgress && jawabanSiswa
+                        ? "Completed"
+                        : "Not Completed",
                 assignmentId: jawabanSiswa?.bank_soal_id || null,
                 nilai: jawabanSiswa?.nilai || null,
                 user_photo: student.photo_url
-                    ? `${import.meta.env.VITE_API_URL}${student.photo_url}?v=${Date.now()}` : null
+                    ? `${import.meta.env.VITE_API_URL}${student.photo_url}?v=${Date.now()}`
+                    : null
             })
         }
 
         studentList.value = updatedList
-        // console.log("Fetched student list:", studentList.value)
     } catch (err) {
         console.error("Error fetching student list:", err)
     } finally {
@@ -70,16 +86,22 @@ const fetchStudentList = async () => {
     }
 }
 
+// =========================
+// NAVIGATION
+// =========================
 const back = () => {
     router.back()
 }
 
+// =========================
+// MOUNTED
+// =========================
 onMounted(async () => {
     loading.value = true
     await fetchMateriKelas()
     await fetchStudentList()
-    loading.value = false
 })
+
 </script>
 
 <template>

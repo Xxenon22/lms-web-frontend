@@ -6,7 +6,7 @@ import { useToast } from 'primevue';
 
 const route = useRoute()
 const router = useRouter()
-// const soalId = route.params.id
+const soalId = route.params.id
 const kelasId = route.params.kelasId
 const kelas = ref({})
 const soalPembelajaran = ref([])
