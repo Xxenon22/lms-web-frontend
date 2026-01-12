@@ -56,57 +56,6 @@ const fetchStudentList = async () => {
     }
 }
 
-try {
-    loading.value = true
-
-    // 1️⃣ Ambil siswa kelas
-    const { data: students } = await api.get(`/kelas/students/${kelasId}`)
-
-    // 2️⃣ Ambil progress per siswa
-    const progressMap = {}
-
-    for (const student of students) {
-        const { data } = await api.get(`/progress-materi/${student.user_id}`)
-        progressMap[student.user_id] = data || []
-    }
-
-    // 3️⃣ Ambil jawaban assignment (opsional)
-    let jawabanList = []
-    if (bankSoalId) {
-        const res = await api.get(`/jawaban-siswa/all`, {
-            params: { bank_soal_id: bankSoalId }
-        })
-        jawabanList = res.data || []
-    }
-
-    // 4️⃣ Mapping final
-    studentList.value = students.map(student => {
-        const progressUser = progressMap[student.user_id] || []
-
-        const isCompleted =
-            progressUser.length > 0 &&
-            progressUser.every(p => p.status_selesai === true)
-
-        const jawaban = jawabanList.find(
-            j => j.user_id === student.user_id
-        )
-
-        return {
-            ...student,
-            status: isCompleted ? 'Completed' : 'Not Completed',
-            bankSoalId: jawaban?.bank_soal_id ?? null,
-            nilai: jawaban?.nilai ?? null,
-            user_photo: student.photo_url
-                ? `${import.meta.env.VITE_API_URL}${student.photo_url}?v=${Date.now()}`
-                : null
-        }
-    })
-} catch (err) {
-    console.error('Error fetch student list:', err)
-} finally {
-    loading.value = false
-}
-
 
 // =========================
 // NAVIGATION

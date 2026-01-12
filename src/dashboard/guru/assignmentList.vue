@@ -19,7 +19,7 @@ const fetchClassroom = async () => {
         const res = await api.get(`/kelas/${kelasId}`)
         classroom.value = res.data
         modules.value = res.data.modules || []
-        console.log(modules.value)
+        // console.log(modules.value)
     } catch (err) {
         toast.add({
             severity: 'error',
@@ -42,9 +42,17 @@ const formatDate = (created_at) => {
     }).format(new Date(created_at));
 };
 
+const formatRombel = (rombel) => {
+    // if (!rombel) return "Kelas Umum";
+
+    if (rombel.type === "collab") {
+        return rombel.colab_class || "Kelas Kolaborasi";
+    }
+
+    return `${rombel.grade_lvl || ""} ${rombel.major || ""} ${rombel.name_rombel || ""}`.trim();
+};
+
 onMounted(() => {
-    // fetchSoalPembelajaran()
-    // fetchKelas()
     fetchClassroom()
 })
 
@@ -73,15 +81,7 @@ onMounted(() => {
             <div class="flex flex-col">
                 <h1 class="text-2xl font-semibold">{{ classroom.nama_mapel }}</h1>
                 <h2 class="text-lg">
-                    <template v-if="classroom.rombel?.type === 'regular'">
-                        {{ classroom.rombel.grade_lvl }}
-                        {{ classroom.rombel.major }}
-                        {{ classroom.rombel.name_rombel }}
-                    </template>
-
-                    <template v-else-if="classroom.rombel?.type === 'collab'">
-                        {{ classroom.rombel.colab_class }}
-                    </template>
+                    {{ formatRombel(classroom.rombel) }}
                 </h2>
             </div>
             <p>{{ classroom.guru_name }}</p>
@@ -110,20 +110,16 @@ onMounted(() => {
                     </div>
                     <div class="flex space-x-5">
                         <!-- <div class=""><Button icon="pi pi-check" label="Completed" severity="success" outlined /></div> -->
-                        <Button v-if="soal.bank_soal_id" label="View Answer" :to="{
+                        <router-link v-if="soal.bank_soal_id" :to="{
                             name: 'View-Student-Assignment',
                             params: {
                                 kelasId: soal.kelas_id,
                                 bankSoalId: soal.bank_soal_id
                             }
-                        }" />
-
+                        }">
+                            <Button label="View Answer" />
+                        </router-link>
                         <Button v-else label="View Answer" disabled outlined />
-
-                        <div class="text-red-500 text-xs ml-5">
-                            bank_soal_id: {{ soal.bank_soal_id }}
-                        </div>
-
                     </div>
                 </div>
             </template>

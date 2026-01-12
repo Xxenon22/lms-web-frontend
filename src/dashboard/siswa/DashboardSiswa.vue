@@ -39,7 +39,7 @@ const loadDashboard = async () => {
             ? res.data.other
             : [];
 
-        console.log(kelasLainnya.value.map(k => k.rombel));
+        // console.log(kelasLainnya.value.map(k => k.rombel));
 
     } catch (err) {
         console.error(err);

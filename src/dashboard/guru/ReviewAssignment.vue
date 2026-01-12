@@ -13,7 +13,7 @@ const hasChanges = ref(false)
 const initialNilai = ref(null)
 
 const userId = route.params.userId
-const assignmentId = route.params.assignmentId
+const bankSoalId = route.params.bankSoalId
 
 // ======================
 // STATE DATA
@@ -48,9 +48,7 @@ function getImageUrl(filename) {
 // ======================
 const fetchJawabanSiswa = async () => {
     try {
-        const res = await api.get('/jawaban-siswa/all-with-soal', {
-            params: { bank_soal_id: assignmentId }
-        })
+        const res = await api.get(`/jawaban-siswa/by-bank-soal/${bankSoalId}`)
 
         const data = (res.data || [])
             .filter(d => d.user_id === Number(userId)) // 🔥 WAJIB
@@ -113,7 +111,7 @@ const submitNilai = async () => {
 
         await api.put("/jawaban-siswa/nilai", {
             user_id: Number(userId),
-            bank_soal_id: Number(assignmentId),
+            bank_soal_id: Number(bankSoalId),
             nilai: nilai.value,
         });
 
@@ -145,9 +143,7 @@ const submitNilai = async () => {
 // FETCH NILAI
 // ======================
 const fetchNilai = async () => {
-    const res = await api.get('/jawaban-siswa/all-with-soal', {
-        params: { bank_soal_id: assignmentId }
-    })
+    const res = await api.get(`/jawaban-siswa/by-bank-soal/${bankSoalId}`)
 
     const row = res.data.find(
         r => r.user_id === Number(userId) && r.nilai !== null
@@ -167,7 +163,7 @@ watch(nilai, () => {
 const fetchFileJawabanSiswa = async () => {
     try {
         const res = await api.get(
-            `/jawaban-siswa/files-by-bank-guru/${assignmentId}`,
+            `/jawaban-siswa/files-by-bank-guru/${bankSoalId}`,
             {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -202,23 +198,27 @@ const fetchFileJawabanSiswa = async () => {
 
 // ======================
 // DOWNLOAD
-// ======================
-const downloadFile = (downloadUrl) => {
-    if (!downloadUrl) {
-        toast.add({
-            severity: "warn",
-            summary: "File not available",
-            detail: "Download link not found",
-            life: 3000,
-        });
-        return;
-    }
+// // ======================
+// const downloadFile = async (url, filename) => {
+//     try {
+//         const res = await api.get(url, { responseType: "blob" });
 
-    window.open(downloadUrl, "_blank");
-};
+//         const blob = new Blob([res.data]);
+//         const link = document.createElement("a");
+//         link.href = URL.createObjectURL(blob);
+//         link.download = filename;
+//         link.click();
 
-
-
+//         URL.revokeObjectURL(link.href);
+//     } catch (err) {
+//         toast.add({
+//             severity: "error",
+//             summary: "Download failed",
+//             detail: "Unauthorized or file missing",
+//             life: 3000,
+//         });
+//     }
+// };
 
 // ======================
 // OPEN FILE
@@ -305,8 +305,11 @@ const summaryPilgan = computed(() => {
     </div>
 
     <div v-if="loading">Loading...</div>
-    <div v-else-if="errorMessage" class="text-red-500">{{ errorMessage }}</div>
-
+    <div v-if="!loading && !jawabanPilgan.length && !jawabanEssai.length && !jawabanRefleksi">
+        <p class="flex justify-center text-gray-500 italic">
+            Student has not submitted this assignment yet.
+        </p>
+    </div>
     <div v-else class="space-y-4 m-10">
         <!-- Soal pilihan ganda -->
         <Card v-for="item in jawabanPilgan" :key="item.nomor">
@@ -387,7 +390,7 @@ const summaryPilgan = computed(() => {
                             <Button icon="pi pi-external-link" severity="secondary" size="small"
                                 @click="openFile(file.url)" />
                             <Button icon="pi pi-download" severity="info" size="small"
-                                @click="downloadFile(file.download_url)" />
+                                @click="downloadFile(file.download_url, file.nama_file)" />
                         </div>
                     </div>
                 </div>
@@ -420,8 +423,8 @@ const summaryPilgan = computed(() => {
                         <div class="flex gap-2">
                             <Button icon="pi pi-external-link" severity="secondary" size="small"
                                 @click="openFile(file.url)" />
-                            <Button icon="pi pi-download" severity="info" size="small"
-                                @click="downloadFile(file.download_url, file.nama_file)" />
+                            <!-- <Button icon="pi pi-download" severity="info" size="small"
+                                @click="downloadFile(file.url, file.file_name)" /> -->
                         </div>
                     </div>
                 </div>

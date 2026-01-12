@@ -279,7 +279,7 @@ const routes = [
         }
     },
     {
-        path: "/assignment-review/:userId/:assignmentId",
+        path: "/assignment-review/:userId/:bankSoalId",
         name: "Assignment-Review",
         component: () => import("./dashboard/guru/ReviewAssignment.vue"),
         meta: {
