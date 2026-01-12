@@ -49,28 +49,29 @@ function getImageUrl(filename) {
 const fetchJawabanSiswa = async () => {
     try {
         const res = await api.get('/jawaban-siswa/all-with-soal', {
-            params: { bank_soal_id: assignmentId },
-
+            params: { bank_soal_id: assignmentId }
         })
 
-        // 🔍 DEBUG RAW RESPONSE
-        // console.log('RAW JAWABAN SISWA:', res.data)
-
-        const data = res.data.filter(item => item.user_id === Number(userId))
-
+        const data = (res.data || [])
+            .filter(d => d.user_id === Number(userId)) // 🔥 WAJIB
 
         if (!data.length) {
-            loading.value = false
+            jawabanPilgan.value = []
+            jawabanEssai.value = []
+            jawabanRefleksi.value = null
             return
         }
 
+        // ================= PILGAN =================
         jawabanPilgan.value = data
-            .filter(item => item.pertanyaan && item.jawaban !== undefined)
+            .filter(item => item.pg_a !== null && item.jawaban !== null)
             .map((item, idx) => ({
                 id: item.jawaban_id,
                 nomor: idx + 1,
                 jawaban: item.jawaban,
-                benar: item.jawaban?.toUpperCase() === item.kunci_jawaban?.toUpperCase(),
+                benar:
+                    item.jawaban?.toUpperCase() ===
+                    item.kunci_jawaban?.toUpperCase(),
                 soal: {
                     pertanyaan: item.pertanyaan,
                     pg_a: item.pg_a,
@@ -83,26 +84,27 @@ const fetchJawabanSiswa = async () => {
                 },
             }))
 
+        // ================= ESSAI =================
         jawabanEssai.value = data
-            .filter(item => item.pertanyaan_essai)
+            .filter(item => item.pertanyaan_essai && item.jawaban_essai)
             .map((item, idx) => ({
                 id: item.jawaban_id,
                 nomor: idx + 1,
                 jawaban_essai: item.jawaban_essai,
-                refleksi_siswa: item.refleksi_siswa,
                 soal: {
                     pertanyaan_essai: item.pertanyaan_essai,
                     gambar_soal_essai: getImageUrl(item.gambar_soal_essai),
                 },
             }))
 
-        jawabanRefleksi.value = data[0]?.refleksi_siswa || null
+        jawabanRefleksi.value = data[0]?.refleksi_siswa ?? null
 
     } catch (err) {
-        console.error('Error fetch jawaban siswa:', err)
-        errorMessage.value = 'Gagal mengambil data jawaban.'
+        console.error(err)
+        errorMessage.value = 'Failed to retrieve student answer'
+    } finally {
+        loading.value = false
     }
-    loading.value = false
 }
 
 const submitNilai = async () => {
@@ -143,22 +145,17 @@ const submitNilai = async () => {
 // FETCH NILAI
 // ======================
 const fetchNilai = async () => {
-    try {
-        const res = await api.get('/jawaban-siswa/all-with-soal', {
-            params: { bank_soal_id: assignmentId },
-        })
+    const res = await api.get('/jawaban-siswa/all-with-soal', {
+        params: { bank_soal_id: assignmentId }
+    })
 
-        const data = res.data.filter(item => item.user_id === Number(userId))
-        const itemWithNilai = data.find(d => d.nilai !== null)
+    const row = res.data.find(
+        r => r.user_id === Number(userId) && r.nilai !== null
+    )
 
-        nilai.value = itemWithNilai?.nilai ?? null
-        initialNilai.value = itemWithNilai?.nilai ?? null
-
-    } catch (err) {
-        console.error('Fetch Nilai:', err)
-    }
+    nilai.value = row?.nilai ?? null
+    initialNilai.value = nilai.value
 }
-
 
 watch(nilai, () => {
     hasChanges.value = nilai.value !== initialNilai.value

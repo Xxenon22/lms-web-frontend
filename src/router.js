@@ -235,8 +235,7 @@ const routes = [
         }
     },
     {
-        // path: "/view-student-assignment/:kelasId/:assignmentId",
-        path: "/kelas/:kelasId/assignment/:assignmentId?",
+        path: "/kelas/:kelasId/bank-soal/:bankSoalId",
         name: "View-Student-Assignment",
         component: () => import("./dashboard/guru/viewStudentAssignment.vue"),
         meta: {

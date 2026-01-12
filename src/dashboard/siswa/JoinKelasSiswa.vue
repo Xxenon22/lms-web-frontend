@@ -40,6 +40,8 @@ const uploadedFiles = ref({})
 // map soal_id -> jawaban (dari jawaban_siswa) untuk user ini
 const existingJawabanPGMap = {};
 const existingJawabanEssayMap = {};
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
 
 // computed: cek setiap materi apakah semua soal telah terjawab (mengandalkan selectedAnswers)
 const semuaSoalTerjawabPerMateri = computed(() => {
@@ -152,11 +154,11 @@ const fetchSoalByBankSoalId = async (bankSoalId, materiId) => {
         const mapped = (data || []).map(s => ({
             ...s,
             gambar_url: s.gambar
-                ? `data:${s.gambar_mimetype};base64,${s.gambar}`
+                ? `${BASE_URL}${s.gambar}`
                 : null,
 
             gambarEssai_url: s.gambar_soal_essai
-                ? `data:${s.gambar_essai_mimetype};base64,${s.gambar_soal_essai}`
+                ? `${BASE_URL}${s.gambar_soal_essai}`
                 : null,
         }));
 
@@ -247,8 +249,8 @@ const fetchMateriById = async () => {
                 // jika backend sudah menyertakan soal di response module
                 const mapped = materi.soal.map(s => ({
                     ...s,
-                    gambar_url: s.gambar ? `${import.meta.env.VITE_API_URL}/uploads/gambar-soal/${s.gambar}` : null,
-                    gambarEssai_url: s.gambar_soal_essai ? `${import.meta.env.VITE_API_URL}/uploads/gambar-soal/${s.gambar_soal_essai}` : null,
+                    gambar_url: s.gambar ? `${import.meta.env.VITE_API_URL}${s.gambar}` : null,
+                    gambarEssai_url: s.gambar_soal_essai ? `${import.meta.env.VITE_API_URL}${s.gambar_soal_essai}` : null,
                 }));
 
                 soalList.value[materi.id] = {
@@ -307,33 +309,61 @@ const fetchLinkGroupById = async () => {
 
 };
 
+// const simpanProgress = async (materiId) => {
+//     try {
+//         const materiSelesai =
+//             (videoSelesai.value[materiId] || !materi.video_url) &&
+//             (pdfSelesai.value[materiId] || !materi.pdf_url) &&
+//             String(refleksi.value[materiId] || "").trim() !== "" &&
+//             canActivateNextStep(materiId, '4') // semua soal terjawab
+
+//         const payload = {
+//             user_id: userId.value,
+//             materi_id: materiId,
+//             video_selesai: Boolean(videoSelesai.value[materiId]),
+//             pdf_selesai: Boolean(pdfSelesai.value[materiId]),
+//             langkah_aktif: activeSteps.value[materiId] ?? "1",
+//             refleksi: refleksi.value[materiId] ?? "",
+//             status_selesai: Boolean(materiSelesai),
+//             updated_at: new Date().toISOString(),
+//         };
+
+//         const { data } = await api.post("/progress-materi", payload, {
+//             headers: {
+//                 Authorization: `Bearer ${localStorage.getItem("token")}`,
+//                 "Content-Type": "application/json"
+//             }
+//         });
+
+//     } catch (err) {
+//         console.error("Saved progress", err);
+//         toast.add({
+//             severity: "error",
+//             summary: "Failed to save progress",
+//             detail: err.response?.data?.message || err.message,
+//             life: 3000,
+//         });
+//     }
+// };
+
 const simpanProgress = async (materiId) => {
     try {
         const payload = {
-            user_id: userId.value,
             materi_id: materiId,
             video_selesai: Boolean(videoSelesai.value[materiId]),
             pdf_selesai: Boolean(pdfSelesai.value[materiId]),
             langkah_aktif: activeSteps.value[materiId] ?? "1",
             refleksi: refleksi.value[materiId] ?? "",
-            updated_at: new Date().toISOString(),
         };
 
-        const { data } = await api.post("/progress-materi", payload, {
+        await api.post("/progress-materi", payload, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
-                "Content-Type": "application/json"
             }
         });
 
     } catch (err) {
-        console.error("Saved progress", err);
-        toast.add({
-            severity: "error",
-            summary: "Failed to save progress",
-            detail: err.response?.data?.message || err.message,
-            life: 3000,
-        });
+        console.error("simpanProgress ERROR:", err);
     }
 };
 
@@ -1012,7 +1042,8 @@ onMounted(async () => {
                                                             <RadioButton :inputId="`${soal.id}-${key}`"
                                                                 v-model="selectedAnswers[materi.id][soal.id]"
                                                                 :value="key" :name="`soal-${soal.id}`"
-                                                                :disabled="!isHistory(materi)" />
+                                                                :disabled="isHistory(materi)"
+                                                                :readonly="isHistory(materi)" />
                                                             <label :for="`${soal.id}-${key}`">{{ key }}. {{ opsi
                                                             }}</label>
                                                         </div>

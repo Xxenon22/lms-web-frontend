@@ -1,28 +1,35 @@
 <script setup>
 import api from '../../services/api';
-import { useRouter, useRoute } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { onMounted, ref } from 'vue';
 import { useToast } from 'primevue';
 
 const route = useRoute()
-const router = useRouter()
-const soalId = route.params.id
-const kelasId = route.params.kelasId
-const kelas = ref({})
-const soalPembelajaran = ref([])
 const toast = useToast()
-const isLoading = ref(true)
-const classroom = ref(null)
 
-const fetchKelas = async () => {
-    const { data, error } = await api.get(`/kelas/${kelasId}`)
-    if (error) {
-        console.log('cant retrieve class list :', error)
-    } else {
-        kelas.value = data
-        soalPembelajaran.value = data.modules || []
+const kelasId = route.params.kelasId
+
+const classroom = ref(null)
+const modules = ref([])
+const isLoading = ref(true)
+
+
+const fetchClassroom = async () => {
+    try {
+        const res = await api.get(`/kelas/${kelasId}`)
+        classroom.value = res.data
+        modules.value = res.data.modules || []
+        console.log(modules.value)
+    } catch (err) {
+        toast.add({
+            severity: 'error',
+            summary: 'Failed to load class',
+            life: 3000
+        })
+        console.error(err)
+    } finally {
+        isLoading.value = false
     }
-    isLoading.value = false
 }
 
 const formatDate = (created_at) => {
@@ -35,24 +42,9 @@ const formatDate = (created_at) => {
     }).format(new Date(created_at));
 };
 
-const fetchClassroom = async () => {
-    try {
-        const res = await api.get(`/kelas/${kelasId}`);
-        classroom.value = res.data;
-        // console.log("Classroom data:", classroom.value);
-        if (!res) {
-            toast.add({ severity: "error", summary: "Classroom not found!", life: 3000 });
-            return;
-        }
-
-    } catch (err) {
-        console.error('fetchClassroom', err);
-    }
-}
-
 onMounted(() => {
     // fetchSoalPembelajaran()
-    fetchKelas()
+    // fetchKelas()
     fetchClassroom()
 })
 
@@ -99,11 +91,11 @@ onMounted(() => {
         <ProgressSpinner />
     </div>
 
-    <div class="flex justify-center mt-10" v-else-if="soalPembelajaran.length === 0">
+    <div class="flex justify-center mt-10" v-else-if="modules.length === 0">
         <span>There are no questions at the moment.</span>
     </div>
     <div v-else>
-        <Card class="mb-5 m-5" v-for="soal in soalPembelajaran" :key="soal.id">
+        <Card class="mb-5 m-5" v-for="soal in modules" :key="soal.id">
             <template #header>
                 <div class="flex m-5">
                     <Icon icon="material-symbols:assignment" width="24" height="24" class="mr-2" />
@@ -118,10 +110,20 @@ onMounted(() => {
                     </div>
                     <div class="flex space-x-5">
                         <!-- <div class=""><Button icon="pi pi-check" label="Completed" severity="success" outlined /></div> -->
-                        <router-link
-                            :to="{ name: 'View-Student-Assignment', params: { kelasId: soal.kelas_id, assignmentId: soal.bank_soal?.id } }">
-                            <Button label="View Answer" />
-                        </router-link>
+                        <Button v-if="soal.bank_soal_id" label="View Answer" :to="{
+                            name: 'View-Student-Assignment',
+                            params: {
+                                kelasId: soal.kelas_id,
+                                bankSoalId: soal.bank_soal_id
+                            }
+                        }" />
+
+                        <Button v-else label="View Answer" disabled outlined />
+
+                        <div class="text-red-500 text-xs ml-5">
+                            bank_soal_id: {{ soal.bank_soal_id }}
+                        </div>
+
                     </div>
                 </div>
             </template>
