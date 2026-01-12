@@ -38,6 +38,9 @@ const loadDashboard = async () => {
         kelasLainnya.value = Array.isArray(res.data.other)
             ? res.data.other
             : [];
+
+        console.log(kelasLainnya.value.map(k => k.rombel));
+
     } catch (err) {
         console.error(err);
         toast.add({
@@ -51,6 +54,17 @@ const loadDashboard = async () => {
     }
 };
 
+const formatRombel = (rombel) => {
+    if (!rombel) return "Kelas Umum";
+
+    if (rombel.type === "collab") {
+        return rombel.colab_class || "Kelas Kolaborasi";
+    }
+
+    return `${rombel.grade_lvl || ""} ${rombel.major || ""} ${rombel.name_rombel || ""} ${rombel.colab_class || ""}`.trim();
+};
+
+
 onMounted(loadDashboard);
 
 /* ================= SEARCH ================= */
@@ -62,12 +76,12 @@ const search = (event) => {
         .filter(k =>
             k.nama_mapel?.toLowerCase().includes(q) ||
             k.teacher?.username?.toLowerCase().includes(q) ||
-            k.rombel?.name_rombel?.toLowerCase().includes(q)
+            formatRombel(k.rombel).toLowerCase().includes(q)
         )
         .slice(0, 10)
         .map(k => ({
             id: k.id,
-            name: `${k.nama_mapel} - ${k.rombel?.grade_lvl || ""} ${k.rombel?.major || ""} ${k.rombel?.name_rombel || ""} | ${k.guru_name || "No Teacher"}`,
+            name: `${k.nama_mapel} - ${k.rombel?.grade_lvl || ""} ${k.rombel?.major || ""} ${k.rombel?.name_rombel || ""} ${k.rombel?.colab_class} | ${k.guru_name || "No Teacher"}`,
         }));
 };
 
@@ -191,9 +205,8 @@ const withCacheBuster = (url) => {
                     <template #subtitle>
                         <div class="flex justify-between">
                             <div class="">
-                                {{ kelasHasilPencarian.rombel?.grade_lvl || "" }}
-                                {{ kelasHasilPencarian.rombel?.major || "" }}
-                                {{ kelasHasilPencarian.rombel?.name_rombel || "" }}
+                                {{ formatRombel(kelasHasilPencarian.rombel) }}
+
                             </div>
 
                             <div class="flex gap-4 mt-1 text-white">
@@ -256,8 +269,7 @@ const withCacheBuster = (url) => {
 
                     <template #title>{{ kelas.nama_mapel }}</template>
                     <template #subtitle>
-                        {{ kelas.rombel?.grade_lvl || "" }} {{ kelas.rombel?.major }} {{ kelas.rombel?.name_rombel || ""
-                        }}
+                        {{ formatRombel(kelas.rombel) }}
 
                         <div class="flex justify-end gap-4 mt-1 ">
                             <Button v-tooltip.bottom="'Following a Class'" class="no-border-btn button-join"
@@ -292,7 +304,7 @@ const withCacheBuster = (url) => {
                     <template #subtitle>
                         <div class="flex justify-between">
                             <div class="">
-                                {{ kelas.rombel?.grade_lvl }} {{ kelas.rombel?.major }} {{ kelas.rombel?.name_rombel }}
+                                {{ formatRombel(kelas.rombel) }}
                             </div>
                             <div class="flex gap-4 mt-1 text-white">
                                 <Button :label="kelas.sudahDiikuti ? 'Following' : 'Add'"

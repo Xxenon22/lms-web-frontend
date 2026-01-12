@@ -1,63 +1,73 @@
-<script setup>
-import { ref, onMounted } from "vue";
-import api from "../../services/api";
-import { useRouter } from "vue-router";
+    <script setup>
+    import { ref, onMounted } from "vue";
+    import api from "../../services/api";
+    import { useRouter } from "vue-router";
 
-const router = useRouter();
-const materiList = ref([]);
-const userId = ref(null);
-const isLoading = ref(true);
+    const router = useRouter();
+    const materiList = ref([]);
+    const userId = ref(null);
+    const isLoading = ref(true);
 
-// Ambil materi berdasarkan user login
-const fetchMateriByUserClass = async () => {
-    try {
-        const { data: userData } = await api.get("/auth/profile");
-        userId.value = userData?.id;
+    // Ambil materi berdasarkan user login
+    const fetchMateriByUserClass = async () => {
+        try {
+            const { data: userData } = await api.get("/auth/profile");
+            userId.value = userData?.id;
 
-        const { data: materiArray } = await api.get(
-            `/module-pembelajaran/siswa/${userId.value}`
-        );
-
-        const { data: semuaJawaban } = await api.get("/jawaban-siswa");
-
-        materiList.value = materiArray.map((m) => {
-            const jawabanMatch = semuaJawaban.find(j =>
-                Number(j.user_id) === Number(userId.value) &&
-                m.bank_soal_id &&
-                j.bank_soal_id &&
-                Number(m.bank_soal_id) === Number(j.bank_soal_id)
+            const { data: materiArray } = await api.get(
+                `/module-pembelajaran/siswa/${userId.value}`
             );
 
-            return {
-                ...m,
-                nilai: jawabanMatch?.nilai ? Number(jawabanMatch.nilai) : 0,
-                guru_foto: m.guru_foto
-                    ? `${import.meta.env.VITE_API_URL}${m.guru_foto}?v=${Date.now()}`
-                    : null
-            };
-        });
+            const { data: semuaJawaban } = await api.get("/jawaban-siswa");
 
-        isLoading.value = false;
-    } catch (err) {
-        console.error("Fetch Materi Error:", err);
-        isLoading.value = false;
-    }
-};
+            materiList.value = materiArray.map((m) => {
+                const jawabanMatch = semuaJawaban.find(j =>
+                    Number(j.user_id) === Number(userId.value) &&
+                    m.bank_soal_id &&
+                    j.bank_soal_id &&
+                    Number(m.bank_soal_id) === Number(j.bank_soal_id)
+                );
+
+                return {
+                    ...m,
+                    nilai: jawabanMatch?.nilai ? Number(jawabanMatch.nilai) : 0,
+                    guru_foto: m.guru_foto
+                        ? `${import.meta.env.VITE_API_URL}${m.guru_foto}?v=${Date.now()}`
+                        : null
+                };
+            });
+
+            isLoading.value = false;
+        } catch (err) {
+            console.error("Fetch Materi Error:", err);
+            isLoading.value = false;
+        }
+    };
+
+    const formatRombel = (rombel) => {
+        if (!rombel) return "Kelas Umum";
+
+        if (rombel.type === "collab") {
+            return rombel.colab_class || "Kelas Kolaborasi";
+        }
+
+        return `${rombel.grade_lvl || ""} ${rombel.major || ""} ${rombel.name_rombel || ""}`.trim();
+    };
 
 
-const isCompleted = (m) => {
-    const pdf = m.pdf_selesai ?? m.progress_materi?.[0]?.pdf_selesai;
-    const vid = m.video_selesai ?? m.progress_materi?.[0]?.video_selesai;
-    return pdf === true && vid === true;
-};
+    const isCompleted = (m) => {
+        const pdf = m.pdf_selesai ?? m.progress_materi?.[0]?.pdf_selesai;
+        const vid = m.video_selesai ?? m.progress_materi?.[0]?.video_selesai;
+        return pdf === true && vid === true;
+    };
 
-const goToMateri = (kelasId) => {
-    router.push({ name: "Join-Class", params: { id: kelasId } });
-};
+    const goToMateri = (kelasId) => {
+        router.push({ name: "Join-Class", params: { id: kelasId } });
+    };
 
-onMounted(() => {
-    fetchMateriByUserClass();
-});
+    onMounted(() => {
+        fetchMateriByUserClass();
+    });
 </script>
 
 <template>
@@ -79,7 +89,10 @@ onMounted(() => {
                             shape="circle" size="large" />
                         <div>
                             <h1 class="font-bold">{{ m.judul }} </h1>
-                            <p>{{ m.nama_mapel ?? 'No Subject' }} - {{ m.grade_lvl }} {{ m.major }} {{ m.number }}</p>
+                            <p>
+                                {{ m.nama_mapel ?? 'No Subject' }} -
+                                {{ formatRombel(m.rombel) }}
+                            </p>
                         </div>
                     </div>
                     <div class="space-x-2">
