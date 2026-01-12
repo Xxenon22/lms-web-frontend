@@ -154,7 +154,7 @@ const validateForm = () => {
     if (!selectedKelas.value) errors.push("Class");
     if (!tanggal.value) errors.push("Day / Date");
     if (!studyTime.value.trim()) errors.push("Study Time");
-    if (!namaGuru.value) errors.push("Instructor");
+    // if (!namaGuru.value) errors.push("Instructor");
     if (!fase.value) errors.push("Phase");
 
     if (!tujuanPemb.value.trim()) errors.push("Learning Objective");
@@ -230,7 +230,7 @@ const submitRPK = async () => {
             tutor: tutor.value,
             hari_tanggal: formatDateOnly(tanggal.value),
             phase_id: fase.value,
-            instructor: namaGuru.value?.id,
+            instructor: namaGuru.value ? namaGuru.value.id : null,
             waktu: studyTime.value,
             tujuan_pembelajaran: tujuanPemb.value,
             lintas_disiplin_ilmu: lintasDis.value,

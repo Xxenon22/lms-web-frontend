@@ -99,7 +99,7 @@ const submitRPK = async () => {
             kelas_id: selectedKelas.value.id,
             rombel_id: selectedKelas.value.rombel_id,
             hari_tanggal: formatDateOnly(tanggal.value),
-            instructor: namaGuru.value.id,
+            instructor: namaGuru.value ? namaGuru.value.id : null,
             waktu: studyTime.value,
             refleksi_siswa: refleksiSiswa.value,
             refleksi_guru: refleksiGuru.value,

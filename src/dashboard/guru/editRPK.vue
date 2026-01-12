@@ -109,7 +109,7 @@ const fetchExistingRPK = async () => {
 
         const res = await api.get(`/rpk/${id}`);
         const data = res.data;
-        console.log("Existing RPK data:", data);
+        // console.log("Existing RPK data:", data);
         // === Parent table ===
         kelasId.value = data.kelas_id;
         rombel.value = data.rombel_id;
@@ -214,7 +214,8 @@ const updateRPK = async () => {
         await api.put(`/rpk/${id}`, {
             kelas_id: kelasId.value,
             rombel_id: selected?.rombel_id ?? null,
-            instructor: namaGuru.value?.id,
+            // instructor: namaGuru.value?.id,
+            instructor: namaGuru.value ? namaGuru.value.id : null,
             tutor: tutor.value,
             hari_tanggal: adjustedDate,
             phase_id: fase.value,
@@ -430,43 +431,43 @@ const back = () => router.back();
                             <div class="flex flex-col space-y-2 ">
                                 <div class="flex space-x-1 items-center">
                                     <Checkbox v-model="berkesadaranMemahami" :binary="true" inputId="pm1" />
-                                    <label for="gpd8">Berkesadaran</label>
+                                    <label for="berkesadaranMemahami">Berkesadaran</label>
                                 </div>
                                 <div class="flex space-x-1 items-center">
                                     <Checkbox v-model="bermaknaMemahami" :binary="true" inputId="pm2" />
-                                    <label for="gpd8">Bermakna</label>
+                                    <label for="bermaknaMemahami">Bermakna</label>
                                 </div>
                                 <div class="flex space-x-1 items-center mb-2">
                                     <Checkbox v-model="menggembirakanMemahami" :binary="true" inputId="pm3" />
-                                    <label for="gpd8">Menggembirakan</label>
+                                    <label for="menggembirakanMemahami">Menggembirakan</label>
                                 </div>
                             </div>
                             <div class="flex flex-col space-y-2">
                                 <div class="flex space-x-1 items-center">
                                     <Checkbox v-model="berkesadaranMengaplikasikan" :binary="true" inputId="pm4" />
-                                    <label for="gpd8">Berkesadaran</label>
+                                    <label for="berkesadaranMengaplikasikan">Berkesadaran</label>
                                 </div>
                                 <div class="flex space-x-1 items-center">
                                     <Checkbox v-model="bermaknaMengaplikasikan" :binary="true" inputId="pm5" />
-                                    <label for="gpd8">Bermakna</label>
+                                    <label for="bermaknaMengaplikasikan">Bermakna</label>
                                 </div>
                                 <div class="flex space-x-1 items-center mb-3">
                                     <Checkbox v-model="menggembirakanMengaplikasikan" :binary="true" inputId="pm6" />
-                                    <label for="gpd8">Menggembirakan</label>
+                                    <label for="menggembirakanMengaplikasikan">Menggembirakan</label>
                                 </div>
                             </div>
                             <div class="flex flex-col space-y-2">
                                 <div class="flex space-x-1 items-center">
                                     <Checkbox v-model="berkesadaranMerefleksi" :binary="true" inputId="pm7" />
-                                    <label for="gpd8">Berkesadaran</label>
+                                    <label for="berkesadaranMerefleksi">Berkesadaran</label>
                                 </div>
                                 <div class="flex space-x-1 items-center">
                                     <Checkbox v-model="bermaknaMerefleksi" :binary="true" inputId="pm8" />
-                                    <label for="gpd8">Bermakna</label>
+                                    <label for="bermaknaMerefleksi">Bermakna</label>
                                 </div>
                                 <div class="flex space-x-1 items-center">
                                     <Checkbox v-model="menggembirakanMerefleksi" :binary="true" inputId="pm9" />
-                                    <label for="gpd8">Menggembirakan</label>
+                                    <label for="menggembirakanMerefleksi">Menggembirakan</label>
                                 </div>
                             </div>
                         </div>
