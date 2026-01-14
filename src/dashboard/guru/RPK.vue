@@ -305,7 +305,8 @@ onMounted(() => {
                         <div class="flex flex-col space-y-2">
                             <Label> Class </Label>
                             <MultiSelect v-model="selectedKelas" :options="selectedRombel" option-label="name"
-                                option-value="id" display="chip" placeholder="-- Select Class --" class="w-full" />
+                                option-value="id" display="chip" placeholder="Select one or more classes"
+                                class="w-full" />
 
                         </div>
                         <div class="flex flex-col space-y-2">
