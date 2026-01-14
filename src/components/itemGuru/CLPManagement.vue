@@ -86,7 +86,7 @@ const search = (event) => {
         );
     })
         .map((rpk) => ({
-            name: `${rpk.name_grade || ''} ${rpk.major || ''} ${rpk.name_rombel || ''} ${rpk.colab_class || ''} • ${formatDate(rpk.hari_tanggal)}`,
+            name: `${rpk.grade_lvl || ''} ${rpk.major || ''} ${rpk.name_rombel || ''} ${rpk.colab_class || ''} • ${formatDate(rpk.hari_tanggal)}`,
             id: rpk.id,
         }));
 };
@@ -138,7 +138,7 @@ onMounted(async () => {
                                         formatDate(rpk.hari_tanggal) }}</span>
                                     <div class="text-lg font-medium mt-2">
                                         <span>
-                                            {{ rpk.name_grade || '' }}
+                                            {{ rpk.grade_lvl || '' }}
                                             {{ rpk.major || '' }}
                                             {{ rpk.name_rombel || '' }}
                                             <span v-if="rpk.colab_class">

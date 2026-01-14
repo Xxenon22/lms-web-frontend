@@ -20,7 +20,7 @@ const notes = ref("")
 const selectedRombel = ref([])
 const selectedInstructor = ref([])
 const filteredInstructor = ref([])
-const selectedKelas = ref(null)
+const selectedKelas = ref([])
 
 
 const fetchSelectedRombel = async () => {
@@ -96,8 +96,8 @@ const submitRPK = async () => {
 
         // Data yang akan dikirim ke backend
         const insertData = {
-            kelas_id: selectedKelas.value.id,
-            rombel_id: selectedKelas.value.rombel_id,
+            kelas_ids: selectedKelas.value,
+            // rombel_id: selectedKelas.value.rombel_id,
             hari_tanggal: formatDateOnly(tanggal.value),
             instructor: namaGuru.value ? namaGuru.value.id : null,
             waktu: studyTime.value,
@@ -126,7 +126,7 @@ const submitRPK = async () => {
         notes.value = "";
         rombel.value = "";
         namaGuru.value = null;
-        selectedKelas.value = null;
+        selectedKelas.value = [];
 
     } catch (err) {
         console.error("Submit RPK error:", err);
@@ -168,8 +168,9 @@ onMounted(async () => {
                     <div class="w-1/2 space-y-5">
                         <div class="flex flex-col space-y-2">
                             <Label> Class </Label>
-                            <Select v-model="selectedKelas" :options="selectedRombel" option-label="name"
-                                placeholder="-- Select Class --" class="w-full" />
+                            <MultiSelect v-model="selectedKelas" :options="selectedRombel" option-label="name" filter
+                                option-value="id" display="chip" placeholder="Select one or more classes"
+                                class="w-full" />
                         </div>
                         <div class="flex flex-col space-y-2">
                             <Label> Study Time</Label>
