@@ -65,7 +65,8 @@ const selectedSoal = computed(() =>
 );
 
 // ================= SUBMIT =================
-const submitMateri = async () => {
+const submitMateri = async (
+) => {
   try {
     loading.value = true;
 

@@ -49,7 +49,7 @@ const selectedRombel = ref([])
 const selectedInstructor = ref([])
 const selectedSubject = ref([])
 const filteredInstructor = ref([])
-const selectedKelas = ref(null)
+const selectedKelas = ref([])
 
 
 // fungsi resetForm
@@ -95,7 +95,7 @@ const resetForm = () => {
     asesmenMengaplikasikan.value = ""
     asesmenMerefleksi.value = ""
 
-    selectedKelas.value = null
+    selectedKelas.value = []
 }
 
 const fetchSelectedFase = async (order = "asc") => {
@@ -116,18 +116,15 @@ const fetchSelectedFase = async (order = "asc") => {
 
 const fetchSelectedRombel = async () => {
     try {
-        const res = await api.get("/kelas", {
-            headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-        });
-        selectedRombel.value = res.data.map(b => ({
-            id: b.id,
-            rombel_id: b.rombel_id,
-            name: `${b.grade_lvl || ''} ${b.major || ''} ${b.name_rombel || ''} ${b.colab_class || ''} - ${b.nama_mapel}`
+        const res = await api.get("/kelas");
+        selectedRombel.value = (res.data || []).map(k => ({
+            id: k.id,
+            name: `${k.grade_lvl || ""} ${k.major || ""} ${k.name_rombel || ""} ${k.colab_class || ""} - ${k.nama_mapel || ""}`
         }));
     } catch (error) {
-        console.error("fetch rombel :", error)
+        console.error("fetch kelas :", error);
     }
-}
+};
 
 const fetchSelectedInstructor = async (order = "asc") => {
     try {
@@ -151,7 +148,7 @@ const fetchSelectedInstructor = async (order = "asc") => {
 const validateForm = () => {
     const errors = [];
 
-    if (!selectedKelas.value) errors.push("Class");
+    if (!selectedKelas.value.length) errors.push("Class");
     if (!tanggal.value) errors.push("Day / Date");
     if (!studyTime.value.trim()) errors.push("Study Time");
     // if (!namaGuru.value) errors.push("Instructor");
@@ -225,8 +222,7 @@ const submitRPK = async () => {
         // --- 4. Insert ke rpk_db (hubungkan semuanya) ---
         // Catatan: `guru_id` nanti ambil dari token JWT
         const { data: rpkRes } = await api.post("/rpk", {
-            kelas_id: selectedKelas.value.id,
-            rombel_id: selectedKelas.value.rombel_id,
+            kelas_ids: selectedKelas.value,
             tutor: tutor.value,
             hari_tanggal: formatDateOnly(tanggal.value),
             phase_id: fase.value,
@@ -308,8 +304,9 @@ onMounted(() => {
                     <div class="w-1/2 space-y-5">
                         <div class="flex flex-col space-y-2">
                             <Label> Class </Label>
-                            <Select v-model="selectedKelas" :options="selectedRombel" option-label="name"
-                                placeholder="-- Select Class --" class="w-full" />
+                            <MultiSelect v-model="selectedKelas" :options="selectedRombel" option-label="name"
+                                option-value="id" display="chip" placeholder="-- Select Class --" class="w-full" />
+
                         </div>
                         <div class="flex flex-col space-y-2">
                             <Label> Day / Date</Label>

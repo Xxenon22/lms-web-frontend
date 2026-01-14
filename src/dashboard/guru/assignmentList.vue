@@ -43,7 +43,7 @@ const formatDate = (created_at) => {
 };
 
 const formatRombel = (rombel) => {
-    // if (!rombel) return "Kelas Umum";
+    if (!rombel) return "Kelas Umum";
 
     if (rombel.type === "collab") {
         return rombel.colab_class || "Kelas Kolaborasi";

@@ -81,7 +81,7 @@ const search = (event) => {
         .slice(0, 10)
         .map(k => ({
             id: k.id,
-            name: `${k.nama_mapel} - ${k.rombel?.grade_lvl || ""} ${k.rombel?.major || ""} ${k.rombel?.name_rombel || ""} ${k.rombel?.colab_class} | ${k.guru_name || "No Teacher"}`,
+            name: `${k.nama_mapel} - ${k.rombel?.grade_lvl || ""} ${k.rombel?.major || ""} ${k.rombel?.name_rombel || ""} ${k.rombel?.colab_class || ""} | ${k.guru_name || "No Teacher"}`,
         }));
 };
 

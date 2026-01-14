@@ -66,24 +66,23 @@ const formatDate = (hari_tanggal) => {
 const search = (event) => {
     const query = event.query ? event.query.toLowerCase() : "";
 
-    filteredClass.value = allLr.value
-        .filter((rpk) => {
-            const grade = String(rpk.name_grade || "").toLowerCase();
-            const major = String(rpk.major || "").toLowerCase();
-            const rombel = String(rpk.name_rombel || "").toLowerCase();
-            const colab = String(lr.colab_class ?? "").toLowerCase();
-            const tanggal = formatDate(rpk.hari_tanggal).toLowerCase();
+    filteredClass.value = allLr.value.filter((rpk) => {
+        const grade = String(rpk.name_grade || "").toLowerCase();
+        const major = String(rpk.major || "").toLowerCase();
+        const rombel = String(rpk.name_rombel || "").toLowerCase();
+        const colab = String(rpk.colab_class ?? "").toLowerCase();
+        const tanggal = formatDate(rpk.hari_tanggal).toLowerCase();
 
-            return (
-                // mapel.includes(query) 
-                grade.includes(query) ||
-                major.includes(query) ||
-                rombel.includes(query) ||
-                tanggal.includes(query) ||
-                colab.includes(query)
-                // guru.includes(query)
-            );
-        })
+        return (
+            // mapel.includes(query) 
+            grade.includes(query) ||
+            major.includes(query) ||
+            rombel.includes(query) ||
+            tanggal.includes(query) ||
+            colab.includes(query)
+            // guru.includes(query)
+        );
+    })
         .map((rpk) => ({
             name: `${rpk.name_grade || ''} ${rpk.major || ''} ${rpk.name_rombel || ''} ${rpk.colab_class || ''} • ${formatDate(rpk.hari_tanggal)}`,
             id: rpk.id,
@@ -136,7 +135,7 @@ onMounted(async () => {
                                             {{ lr.major || '' }}
                                             {{ lr.name_rombel || '' }}
                                             <span v-if="lr.colab_class">
-                                                {{ lr.colab_class }}
+                                                {{ lr.colab_class || '' }}
                                             </span>
                                         </span>
                                     </div>
