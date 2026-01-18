@@ -64,9 +64,12 @@ onMounted(async () => {
                 </ConfirmPopup>
 
                 <!-- profile admin -->
-                <img src="../../assets/Logo.png" alt="Foto Profil"
-                    class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center border-1 bg-gray-200 cursor-pointer"
-                    @click="requireConfirmation($event)" />
+                <div class="flex gap-5 items-center">
+                    <img src="../../assets/Logo.png" alt="Foto Profil"
+                        class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center border-1 bg-gray-200 cursor-pointer"
+                        @click="requireConfirmation($event)" />
+                    <img src="../../assets/PUSDALITBANGJAR-WHITE.png" class="w-25 h-20" alt="">
+                </div>
             </div>
         </nav>
     </div>
@@ -110,6 +113,13 @@ onMounted(async () => {
                         <span class="nav-item">Learning Reflection</span>
                     </li>
                 </RouterLink>
+                <RouterLink to="/teacher-management">
+                    <li>
+                        <Icon class="icon" icon="la:chalkboard-teacher" />
+                        <span class="nav-item">Teacher's Management</span>
+                    </li>
+                </RouterLink>
+
                 <RouterLink to="/add-timetable">
                     <li>
                         <Icon class="icon" icon="uis:schedule" /><span class="nav-item">Timetable</span>

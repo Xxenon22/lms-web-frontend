@@ -70,7 +70,7 @@ onMounted(fetchStudentList)
 
 <template>
     <div class="m-5 flex justify-between">
-        <Button icon="pi pi-arrow-left" label="Back" @click="back" />
+        <Button icon="pi pi-chevron-left" label="Back" @click="back" />
     </div>
 
     <div class="space-y-3 m-10">

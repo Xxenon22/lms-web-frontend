@@ -146,7 +146,7 @@ onMounted(() => {
 <template>
     <div class="space-y-8">
         <div class="flex justify-between items-center">
-            <Button label="back" icon="pi pi-arrow-left" @click="back" />
+            <Button label="back" icon="pi pi-chevron-left" @click="back" />
             <div class="">
                 <Select v-model="selectedTitle" :options="title" option-value="id" option-label="judul_penugasan"
                     placeholder="Select a Title" class="w-full md:w-56" />

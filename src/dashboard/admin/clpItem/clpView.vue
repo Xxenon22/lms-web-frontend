@@ -207,7 +207,7 @@ onMounted(async () => {
 <template>
     <div v-if="Object.keys(rpk).length">
         <div class="m-5 flex justify-between">
-            <Button icon="pi pi-arrow-left" label="Back" @click="back" />
+            <Button icon="pi pi-chevron-left" label="Back" @click="back" />
             <Button icon="pi pi-file-pdf" label="Export PDF" @click="exportPDF" />
         </div>
 

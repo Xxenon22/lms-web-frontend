@@ -218,10 +218,13 @@ onMounted(async () => {
         </ConfirmPopup>
 
         <!-- Photo Profile -->
-        <div @click="requireConfirmation($event)"
-          class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center border-1 bg-gray-200 cursor-pointer">
-          <img v-if="src" :src="src" alt="Photo Profile" class="w-full h-full object-cover" />
-          <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem;"></i>
+        <div class="flex gap-5 items-center">
+          <div @click="requireConfirmation($event)"
+            class="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center border-1 bg-gray-200 cursor-pointer">
+            <img v-if="src" :src="src" alt="Photo Profile" class="w-full h-full object-cover" />
+            <i v-else class="pi pi-user text-gray-500" style="font-size: 1.5rem;"></i>
+          </div>
+          <img src="../../assets/PUSDALITBANGJAR-WHITE.png" class="w-25 h-20" alt="">
         </div>
       </div>
     </nav>

@@ -275,7 +275,7 @@ const back = () => router.back();
 
 <template>
     <div class="m-5">
-        <Button icon="pi pi-arrow-left" label="Back" @click="back" />
+        <Button icon="pi pi-chevron-left" label="Back" @click="back" />
     </div>
     <Card>
         <template #header>

@@ -202,7 +202,7 @@ onMounted(async () => {
 <template>
     <div v-if="Object.keys(rpk).length" class="m-5">
         <div class="m-5 flex justify-between">
-            <Button icon="pi pi-arrow-left" label="Back" @click="back" />
+            <Button icon="pi pi-chevron-left" label="Back" @click="back" />
             <Button icon="pi pi-file-pdf" label="Export PDF" @click="exportPDF" />
         </div>
 
@@ -223,7 +223,7 @@ onMounted(async () => {
                     <span class="font-bold w-32">Class :</span>
                     <span>{{ rpk.grade_lvl || '' }} {{ rpk.major || '' }} {{ rpk.name_rombel || '' }} {{ rpk.colab_class
                         || ''
-                        }}</span>
+                    }}</span>
                 </div>
                 <div class="col-span-1 flex">
                     <span class="font-bold w-32">Subject :</span>

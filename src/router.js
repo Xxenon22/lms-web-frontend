@@ -399,7 +399,39 @@ const routes = [
             title: 'Class Learning Plan - Metschoo Integrated Learning System'
         }
     },
-
+    {
+        path: "/teacher-management",
+        name: "Teacher-Management",
+        component: () => import("./dashboard/admin/TeacherManagement.vue"),
+        meta: {
+            requiresAuth: true,
+            role: "admin",
+            layout: "admin",
+            title: 'Teacher Management - Metschoo Integrated Learning System'
+        }
+    },
+    {
+        path: "/teacher-class/:id",
+        name: "Teacher-Class",
+        component: () => import("./dashboard/admin/TeachersClass.vue"),
+        meta: {
+            requiresAuth: true,
+            role: "admin",
+            layout: "admin",
+            title: "Teacher's Class - Metschoo Integrated Learning System"
+        }
+    },
+    {
+        path: "/teacher-material/:id",
+        name: "Teacher-Material",
+        component: () => import("./dashboard/admin/TeacherMaterial.vue"),
+        meta: {
+            requiresAuth: true,
+            role: "admin",
+            layout: "admin",
+            title: "Teacher's Material - Metschoo Integrated Learning System"
+        }
+    },
     {
         path: "/mobile-unavailable",
         name: "Mobile-Unavailable",

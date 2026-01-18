@@ -77,7 +77,7 @@ onMounted(() => {
 <template>
     <div class="space-y-5 m-5" v-if="modulePembelajaran">
         <div class="flex justify-between">
-            <Button icon="pi pi-arrow-left" label="Back" @click="kembali" class="bg-[#008C95]" />
+            <Button icon="pi pi-chevron-left" label="Back" @click="kembali" class="bg-[#008C95]" />
             <Button label="Join Meeting" @click="bukaLinkZoom(modulePembelajaran)" rounded class="bg-[#008C95]" />
         </div>
 

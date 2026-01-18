@@ -12,8 +12,8 @@ const fetchProfiles = async () => {
         const res = await api.get("/auth/teacher")
         profileGuru.value = (res.data.profiles || []).map(data => ({
             ...data,
-            photo_profiles_user: data.photo_profiles_user
-                ? `${import.meta.env.VITE_API_URL}${data.photo_profiles_user}`
+            photo_url: data.photo_url
+                ? `${import.meta.env.VITE_API_URL}${data.photo_url}`
                 : null
         }));
         filteredGuru.value = profileGuru.value;

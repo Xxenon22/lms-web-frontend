@@ -168,7 +168,7 @@ onMounted(fetchSoalDariAssignment);
     <div class="space-y-8">
         <!-- Dropdown pilih penugasan -->
         <div class="m-5">
-            <Button icon="pi pi-arrow-left" class="mb-3" label="Back" @click="back"></Button>
+            <Button icon="pi pi-chevron-left" class="mb-3" label="Back" @click="back"></Button>
         </div>
 
         <!-- Judul penugasan (bisa diedit) -->
