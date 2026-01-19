@@ -411,7 +411,7 @@ const routes = [
         }
     },
     {
-        path: "/teacher-class/:id",
+        path: "/teacher-class/:kelasId",
         name: "Teacher-Class",
         component: () => import("./dashboard/admin/TeachersClass.vue"),
         meta: {
@@ -433,6 +433,28 @@ const routes = [
         }
     },
     {
+        path: "/teacher-assignment/:kelasId",
+        name: "Teacher-Assignment",
+        component: () => import("./dashboard/admin/TeacherAssignment.vue"),
+        meta: {
+            requiresAuth: true,
+            role: "admin",
+            layout: "admin",
+            title: "Teacher's Assignment - Metschoo Integrated Learning System"
+        }
+    },
+    {
+        path: "/student-progress-review/:kelasId/:bankSoalId",
+        name: "Student-Progress-Review",
+        component: () => import("./dashboard/admin/StudentProgressReview.vue"),
+        meta: {
+            requiresAuth: true,
+            role: "admin",
+            layout: "admin",
+            title: "Student's Progress Review - Metschoo Integrated Learning System"
+        }
+    },
+    {
         path: "/mobile-unavailable",
         name: "Mobile-Unavailable",
         component: () => import("./views/MobileUnavailable.vue")
@@ -446,6 +468,17 @@ const routes = [
             role: "admin",
             layout: "admin",
             title: 'Add Teacher Account - Metschoo Integrated Learning System'
+        }
+    },
+    {
+        path: "/teacher-review/:userId/:bankSoalId",
+        name: "Teacher-Review",
+        component: () => import("./dashboard/admin/TeacherReviewAssignment.vue"),
+        meta: {
+            requiresAuth: true,
+            role: "admin",
+            layout: "admin",
+            title: "Teacher Review Assignment - Metschoo Integrated Learning System"
         }
     },
     {

@@ -75,10 +75,10 @@ const search = (event) => {
     filteredClass.value = source
         .filter(k =>
             k.nama_mapel?.toLowerCase().includes(q) ||
-            k.teacher?.username?.toLowerCase().includes(q) ||
+            k.guru_name?.toLowerCase().includes(q) ||
             formatRombel(k.rombel).toLowerCase().includes(q)
         )
-        .slice(0, 10)
+        // .slice(0, 10)
         .map(k => ({
             id: k.id,
             name: `${k.nama_mapel} - ${k.rombel?.grade_lvl || ""} ${k.rombel?.major || ""} ${k.rombel?.name_rombel || ""} ${k.rombel?.colab_class || ""} | ${k.guru_name || "No Teacher"}`,

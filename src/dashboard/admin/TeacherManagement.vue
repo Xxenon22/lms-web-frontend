@@ -15,7 +15,7 @@ const fetchDataGuru = async () => {
                 ? `${API_URL}${data.photo_url}?v=${Date.now()}`
                 : null
         }));
-        console.log(profileGuru.value);
+        // console.log(profileGuru.value);
         guru.value = profileGuru.value;
     } catch (error) {
         console.error("Error Fetch profile :", error)
@@ -32,9 +32,9 @@ onMounted(async () => {
     <div class="header">
         <h1 class="font-bold m-5 text-2xl">Teacher Management</h1>
     </div>
-    <div class="m-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-12">
+    <div class="m-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 space-x-10 gap-6">
         <div class="" v-for="dataGuru in guru" :key="dataGuru.id">
-            <Card style="width: 25rem; overflow: hidden">
+            <Card style="width: 25rem; overflow: hidden; height: 15rem;">
                 <template #title>
                     <div class="flex items-center justify-between">
                         <h1>{{ dataGuru.username }}</h1>
@@ -54,7 +54,7 @@ onMounted(async () => {
                 </template>
                 <template #footer>
                     <div class="flex gap-4 mt-1">
-                        <router-link :to="{ name: 'Teacher-Class', params: { id: dataGuru.id } }" class="w-full">
+                        <router-link :to="{ name: 'Teacher-Class', params: { kelasId: dataGuru.id } }" class="w-full">
                             <Button label="See Class" severity="secondary" variant="outlined" class="w-full" />
                         </router-link>
                         <router-link :to="{ name: 'Teacher-Material', params: { id: dataGuru.id } }" class="w-full">

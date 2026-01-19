@@ -77,32 +77,38 @@ onMounted(async () => {
             </div>
         </div>
     </section>
-    <div class="m-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-12">
-        <div class="" v-for="m in materiUnique" :key="m.id">
-            <Card style="width: 25rem; overflow: hidden">
+    <div class="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-8 m-10">
+        <div v-for="m in materiUnique" :key="m.id" class="mb-8 break-inside-avoid">
+            <Card class="w-full overflow-hidden shadow-md">
                 <template #header>
-                    <div class="m-5 flex justify-center">
-                        <iframe width="160" height="80" :src="getEmbedUrl(m.video_url)" title="YouTube video player"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
-                        </iframe>
+                    <div class="p-4 flex justify-center bg-gray-100">
+                        <iframe class="rounded-md" width="100%" height="160" :src="getEmbedUrl(m.video_url)"
+                            title="YouTube video player" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen />
                     </div>
                 </template>
-                <template #title>{{ m.judul }}</template>
-                <template #subtitle>{{ m.link_zoom }}</template>
+
+                <template #title>
+                    <h2 class="text-lg font-semibold line-clamp-2">
+                        {{ m.judul }}
+                    </h2>
+                </template>
+
+                <template #subtitle>
+                    <span class="text-sm text-gray-500 truncate">
+                        {{ m.link_zoom }}
+                    </span>
+                </template>
+
                 <template #content>
-                    <p class="m-0">
+                    <p class="text-sm text-gray-600 line-clamp-4">
                         {{ m.deskripsi }}
                     </p>
                 </template>
+
                 <template #footer>
-                    <div class="flex gap-4 mt-1">
-                        <!-- <router-link :to="{ name: 'Teacher-Assignment', params: { id: m.bank_soal_id } }">
-                            <Button label="See Assignment" severity="secondary" variant="outlined" class="w-full" />
-                        </router-link> -->
-                        <Button label="See Pdf" class="w-full" @click="bukaPdf(m)" />
-                    </div>
+                    <Button label="See PDF" class="w-full mt-3" @click="bukaPdf(m)" />
                 </template>
             </Card>
         </div>

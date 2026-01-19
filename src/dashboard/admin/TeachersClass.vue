@@ -12,11 +12,11 @@ const gradeLvl = ref([]);
 const guru = ref([]);
 const route = useRoute();
 const router = useRouter();
-const id = route.params.id;
+const kelasId = route.params.kelasId;
 
 const fetchRuangKelas = async () => {
     try {
-        const res = await api.get(`/kelas/admin/${id}`)
+        const res = await api.get(`/kelas/admin/${kelasId}`)
         kelas.value = res.data
     } catch (error) {
         console.error("Fetch Class:", error)
@@ -25,7 +25,7 @@ const fetchRuangKelas = async () => {
 
 const fetchGuru = async () => {
     try {
-        const res = await api.get(`/auth/teacher/${id}`)
+        const res = await api.get(`/auth/teacher/${kelasId}`)
         guru.value = res.data
     } catch (error) {
         console.error("Fetch teacher:", error)
@@ -53,7 +53,7 @@ const back = () => router.back();
 
 
 onMounted(async () => {
-    // await fetchUserId(); // ambil user ID dulu
+    // await fetchUserid(); // ambil user ID dulu
     await fetchDataSubject();
     await fetchDataGradeLevel();
     await fetchGuru();
@@ -108,12 +108,12 @@ onMounted(async () => {
                 </template>
                 <template #footer>
                     <div class="flex gap-4 mt-1">
-                        <router-link :to="{ name: 'Assignment-List', params: { kelasId: kls.id } }" class="w-full">
+                        <router-link :to="{ name: 'Teacher-Assignment', params: { kelasId: kls.id } }" class="w-full">
                             <Button label="Assignment List" severity="secondary" outlined class="w-full" />
                         </router-link>
-                        <router-link :to="{ path: `/enter-to-the-class/${kls.id}` }" class="w-full">
+                        <!-- <router-link :to="{ path: `/enter-to-the-class/${kls.id}` }" class="w-full">
                             <Button label="Access Class" class="w-full button-join" />
-                        </router-link>
+                        </router-link> -->
                     </div>
                 </template>
             </Card>
