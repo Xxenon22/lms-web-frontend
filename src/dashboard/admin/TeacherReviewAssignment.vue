@@ -24,7 +24,7 @@ const errorMessage = ref(null)
 const jawabanPilgan = ref([])
 const jawabanEssai = ref([])
 const jawabanRefleksi = ref(null)
-
+const profileSiswa = ref([])
 const nilai = ref(null)
 
 // FILE JAWABAN
@@ -105,43 +105,53 @@ const fetchJawabanSiswa = async () => {
     }
 }
 
-const submitNilai = async () => {
-    try {
-        isSubmitting.value = true;
+// const submitNilai = async () => {
+//     try {
+//         isSubmitting.value = true;
 
-        await api.put("/jawaban-siswa/nilai", {
-            user_id: Number(userId),
-            bank_soal_id: Number(bankSoalId),
-            nilai: nilai.value,
-        });
+//         await api.put("/jawaban-siswa/nilai", {
+//             user_id: Number(userId),
+//             bank_soal_id: Number(bankSoalId),
+//             nilai: nilai.value,
+//         });
 
-        toast.add({
-            severity: "success",
-            summary: "Success",
-            detail: "Score saved successfully",
-            life: 3000,
-        });
+//         toast.add({
+//             severity: "success",
+//             summary: "Success",
+//             detail: "Score saved successfully",
+//             life: 3000,
+//         });
 
-        initialNilai.value = nilai.value;
-        hasChanges.value = false;
+//         initialNilai.value = nilai.value;
+//         hasChanges.value = false;
 
-    } catch (err) {
-        console.error("Submit nilai error:", err);
-        toast.add({
-            severity: "error",
-            summary: "Error",
-            detail: "Failed to submit score",
-            life: 3000,
-        });
-    } finally {
-        isSubmitting.value = false;
-    }
-};
+//     } catch (err) {
+//         console.error("Submit nilai error:", err);
+//         toast.add({
+//             severity: "error",
+//             summary: "Error",
+//             detail: "Failed to submit score",
+//             life: 3000,
+//         });
+//     } finally {
+//         isSubmitting.value = false;
+//     }
+// };
 
 
 // ======================
 // FETCH NILAI
 // ======================
+
+const profile = async () => {
+    try {
+        const res = await api.get(`/auth/student/${userId}`);
+        profileSiswa.value = res.data;
+    } catch (err) {
+        console.error("Fetch profile siswa error:", err);
+    }
+};
+
 const fetchNilai = async () => {
     const res = await api.get(`/jawaban-siswa/by-bank-soal/${bankSoalId}`)
 
@@ -271,6 +281,7 @@ onMounted(async () => {
     await fetchJawabanSiswa()
     await fetchNilai()
     await fetchFileJawabanSiswa()
+    await profile()
 })
 
 // ======================
@@ -300,8 +311,9 @@ const summaryPilgan = computed(() => {
 
 
 <template>
-    <div class="m-5">
+    <div class="flex justify-between m-5">
         <Button icon="pi pi-chevron-left" label="Back" @click="back" />
+        <h1 class="text-xl font-semibold" v-if="profileSiswa">{{ profileSiswa.username }}</h1>
     </div>
 
     <div v-if="loading">Loading...</div>

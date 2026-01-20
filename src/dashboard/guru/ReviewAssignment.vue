@@ -11,6 +11,7 @@ const toast = useToast()
 const isSubmitting = ref(false)
 const hasChanges = ref(false)
 const initialNilai = ref(null)
+const profileSiswa = ref([])
 
 const userId = route.params.userId
 const bankSoalId = route.params.bankSoalId
@@ -195,30 +196,16 @@ const fetchFileJawabanSiswa = async () => {
     }
 };
 
-
-// ======================
-// DOWNLOAD
-// // ======================
-// const downloadFile = async (url, filename) => {
-//     try {
-//         const res = await api.get(url, { responseType: "blob" });
-
-//         const blob = new Blob([res.data]);
-//         const link = document.createElement("a");
-//         link.href = URL.createObjectURL(blob);
-//         link.download = filename;
-//         link.click();
-
-//         URL.revokeObjectURL(link.href);
-//     } catch (err) {
-//         toast.add({
-//             severity: "error",
-//             summary: "Download failed",
-//             detail: "Unauthorized or file missing",
-//             life: 3000,
-//         });
-//     }
-// };
+const profile = async () => {
+    try {
+        const res = await api.get(`/auth/student/${userId}`);
+        profileSiswa.value = res.data;
+        // console.log("PROFILE SISWA:", profileSiswa.value);
+    } catch (err) {
+        console.error("Fetch profile error:", err);
+        return null;
+    }
+}
 
 // ======================
 // OPEN FILE
@@ -271,6 +258,7 @@ onMounted(async () => {
     await fetchJawabanSiswa()
     await fetchNilai()
     await fetchFileJawabanSiswa()
+    await profile()
 })
 
 // ======================
@@ -300,11 +288,14 @@ const summaryPilgan = computed(() => {
 
 
 <template>
-    <div class="m-5">
+    <div class="m-5 flex justify-between items-center">
         <Button icon="pi pi-chevron-left" label="Back" @click="back" />
+        <h1 class="text-xl font-semibold" v-if="profileSiswa">{{ profileSiswa.username }}</h1>
     </div>
 
-    <div v-if="loading">Loading...</div>
+    <div v-if="loading" class="flex justify-center ">
+        <ProgressSpinner />
+    </div>
     <div v-if="!loading && !jawabanPilgan.length && !jawabanEssai.length && !jawabanRefleksi">
         <p class="flex justify-center text-gray-500 italic">
             Student has not submitted this assignment yet.
@@ -317,7 +308,7 @@ const summaryPilgan = computed(() => {
                 <Tag value="Multiple Choice" severity="success" class="mb-3" />
                 <div class="flex items-center space-x-2 mb-2">
                     <Tag :value="`${item.nomor}`" severity="info" />
-                    <span class="font-bold" v-html="item.soal.pertanyaan"></span>
+                    <span class="soal-html font-bold" v-html="item.soal.pertanyaan"></span>
                 </div>
 
                 <div v-if="item.soal.gambar" class="mb-3 flex justify-center">
@@ -345,7 +336,7 @@ const summaryPilgan = computed(() => {
                 <Tag value="Essay" severity="info" class="mb-3" />
                 <div class="flex items-center space-x-2 mb-2">
                     <Tag :value="`${essai.nomor}`" severity="info" />
-                    <span class="font-bold" v-html="essai.soal.pertanyaan_essai"></span>
+                    <span class="soal-essay font-bold" v-html="essai.soal.pertanyaan_essai"></span>
                 </div>
                 <div v-if="essai.soal.gambar_soal_essai" class="mb-3 flex justify-center">
                     <Image :src="essai.soal.gambar_soal_essai" alt="Gambar Soal" image-class="w-64 h-auto rounded" />
@@ -448,3 +439,11 @@ const summaryPilgan = computed(() => {
 
     <Toast />
 </template>
+<style scoped>
+.soal-html,
+.soal-essay {
+    max-width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+</style>

@@ -1,10 +1,11 @@
 <script setup>
 import api from '../../services/api';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { onMounted, ref } from 'vue';
 import { useToast } from 'primevue';
 
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 
 const kelasId = route.params.kelasId
@@ -52,6 +53,10 @@ const formatRombel = (rombel) => {
     return `${rombel.grade_lvl || ""} ${rombel.major || ""} ${rombel.name_rombel || ""}`.trim();
 };
 
+const back = () => {
+    router.back()
+}
+
 onMounted(() => {
     fetchClassroom()
 })
@@ -87,6 +92,11 @@ onMounted(() => {
             <p>{{ classroom.guru_name }}</p>
         </div>
     </section>
+    <div class="m-5 flex justify-between items-center">
+        <Button icon="pi pi-chevron-left" label="Back" @click="back" />
+        <span class="text-xl font-semibold" v-if="classroom">Number Of Student : <Tag>{{ classroom.student_count }}
+            </Tag></span>
+    </div>
     <div v-if="isLoading" class="flex justify-center py-10">
         <ProgressSpinner />
     </div>

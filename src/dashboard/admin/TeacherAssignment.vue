@@ -20,7 +20,7 @@ const fetchClassroom = async () => {
         const res = await api.get(`/kelas/${kelasId}`)
         classroom.value = res.data
         modules.value = res.data.modules || []
-        // console.log(modules.value)
+        console.log(modules.value)
     } catch (err) {
         toast.add({
             severity: 'error',
@@ -93,8 +93,10 @@ onMounted(() => {
         </div>
     </section>
 
-    <div class="m-5 flex justify-between">
+    <div class="m-5 flex justify-between items-center">
         <Button icon="pi pi-chevron-left" label="Back" @click="back" />
+        <span class="text-xl font-semibold" v-if="classroom">Number Of Student : <Tag>{{ classroom.student_count }}
+            </Tag></span>
     </div>
 
     <div v-if="isLoading" class="flex justify-center py-10">
