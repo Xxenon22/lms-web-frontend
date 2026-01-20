@@ -34,6 +34,9 @@ const isLoading = ref(true)
 // const uploaded = ref(false);
 const API_URL = import.meta.env.VITE_API_URL;
 const isHistory = (materi) => materi?.status_selesai === true;
+const finalSubmittedMap = ref({});
+const isInitializing = ref(true);
+
 
 const uploadedFiles = ref({})
 
@@ -74,71 +77,194 @@ const fetchProgressMateri = async () => {
 };
 
 /** Kirim semua jawaban + refleksi; validasi lengkap, lalu upsert jawaban dan simpan progress */
+// const kirimSemuaData = async (materiId) => {
+
+//     try {
+
+//         const materi = daftarMateri.value.find(m => Number(m.id) === Number(materiId));
+//         if (!materi) return;
+
+//         if (!canActivateNextStep(materiId, '4')) {
+//             toast.add({
+//                 severity: 'warn',
+//                 summary: 'Assignment belum lengkap',
+//                 detail: 'Selesaikan semua soal terlebih dahulu.',
+//                 life: 3000
+//             });
+//             return;
+//         }
+
+//         if (!String(refleksi.value[materiId] || "").trim()) {
+//             toast.add({
+//                 severity: 'warn',
+//                 summary: 'Refleksi wajib diisi',
+//                 life: 3000
+//             });
+//             return;
+//         }
+
+//         const soalPG = soalList.value[materiId]?.pg || [];
+//         const soalEssai = soalList.value[materiId]?.essai || [];
+
+//         // const soalArray = [...soalPG, ...soalEssai];
+
+//         // const jawabanObj = selectedAnswers.value[materiId] || {};
+//         // const essaiObj = jawabanEssaiSiswa.value[materiId] || {};
+//         // const refleksiText = String(refleksi.value[materiId] || "").trim();
+
+//         // const jawabanArray = soalArray.map(s => ({
+//         //     soal_id: s.id,
+//         //     jawaban: String(jawabanObj[s.id] || ""),
+//         //     jawaban_essai: String(essaiObj[s.id] || ""),
+//         //     user_id: userId.value,
+//         //     bank_soal_id: materi.bank_soal_id || null,
+//         //     refleksi_siswa: refleksiText
+//         // }));
+
+//         const jawabanArray = [...soalPG, ...soalEssai].map(s => ({
+//             soal_id: s.id,
+//             jawaban: selectedAnswers.value[materiId]?.[s.id] || "",
+//             jawaban_essai: jawabanEssaiSiswa.value[materiId]?.[s.id] || "",
+//             user_id: userId.value,
+//             bank_soal_id: materi.bank_soal_id,
+//             refleksi_siswa: refleksi.value[materiId]
+//         }));
+
+//         // Hilangkan duplikat
+//         const uniqueJawaban = Object.values(
+//             jawabanArray.reduce((acc, curr) => {
+//                 const key = `${curr.user_id}-${curr.soal_id}`;
+//                 acc[key] = curr;
+//                 return acc;
+//             }, {})
+//         );
+
+//         // 🔹 Kirim ke backend
+//         const { data } = await api.post("/jawaban-siswa", uniqueJawaban, {
+//             headers: {
+//                 Authorization: `Bearer ${localStorage.getItem("token")}`,
+//                 "Content-Type": "application/json"
+//             }
+//         });
+
+//         await api.post("/progress-materi", {
+//             materi_id: materiId,
+//             video_selesai: true,
+//             pdf_selesai: true,
+//             refleksi: refleksi.value[materiId],
+//             langkah_aktif: "4",
+//             status_selesai: true, // 🔥 HANYA DI SINI
+//         }, {
+//             headers: {
+//                 Authorization: `Bearer ${localStorage.getItem("token")}`,
+//             }
+//         });
+
+//         // console.log("Jawaban tersimpan:", data);
+
+//         activeSteps.value[materiId] = '4';
+//         await simpanProgress(materiId);
+
+//         const numericId = Number(materiId);
+//         // if (!selesaiMateri.value.includes(numericId)) {
+//         //     selesaiMateri.value.push(numericId);
+//         // }
+
+//         await simpanProgress(materiId);
+//         await fetchMateriById();
+
+//         // refresh ulang dari backend (optional tapi paling aman)
+//         await fetchMateriById();
+
+//         toast.add({ severity: 'success', summary: 'The answer has been successfully saved!', life: 3000 });
+//         // console.log("selesaiMateri setelah kirimSemuaData:", selesaiMateri.value);
+//     } catch (err) {
+//         console.error('All Data', err);
+//         toast.add({
+//             severity: 'error',
+//             summary: 'Failed to save answer',
+//             detail: err.response?.data?.message || err.message,
+//             life: 3000
+//         });
+//     }
+// };
+
 const kirimSemuaData = async (materiId) => {
-
     try {
-
         const materi = daftarMateri.value.find(m => Number(m.id) === Number(materiId));
         if (!materi) return;
 
+        // 🔒 VALIDASI KETAT
+        if (!canActivateNextStep(materiId, '4')) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Assignment belum lengkap',
+                detail: 'Selesaikan semua soal terlebih dahulu.',
+                life: 3000
+            });
+            return;
+        }
+
+        if (!String(refleksi.value[materiId] || "").trim()) {
+            toast.add({
+                severity: 'warn',
+                summary: 'Refleksi wajib diisi',
+                life: 3000
+            });
+            return;
+        }
+
+        // =============================
+        // SIMPAN JAWABAN
+        // =============================
         const soalPG = soalList.value[materiId]?.pg || [];
         const soalEssai = soalList.value[materiId]?.essai || [];
-        const soalArray = [...soalPG, ...soalEssai];
 
-        const jawabanObj = selectedAnswers.value[materiId] || {};
-        const essaiObj = jawabanEssaiSiswa.value[materiId] || {};
-        const refleksiText = String(refleksi.value[materiId] || "").trim();
-
-        const jawabanArray = soalArray.map(s => ({
+        const jawabanArray = [...soalPG, ...soalEssai].map(s => ({
             soal_id: s.id,
-            jawaban: String(jawabanObj[s.id] || ""),
-            jawaban_essai: String(essaiObj[s.id] || ""),
+            jawaban: selectedAnswers.value[materiId]?.[s.id] || "",
+            jawaban_essai: jawabanEssaiSiswa.value[materiId]?.[s.id] || "",
             user_id: userId.value,
-            bank_soal_id: materi.bank_soal_id || null,
-            refleksi_siswa: refleksiText
+            bank_soal_id: materi.bank_soal_id,
+            refleksi_siswa: refleksi.value[materiId]
         }));
 
-        // Hilangkan duplikat
-        const uniqueJawaban = Object.values(
-            jawabanArray.reduce((acc, curr) => {
-                const key = `${curr.user_id}-${curr.soal_id}`;
-                acc[key] = curr;
-                return acc;
-            }, {})
-        );
-
-        // 🔹 Kirim ke backend
-        const { data } = await api.post("/jawaban-siswa", uniqueJawaban, {
+        await api.post("/jawaban-siswa", jawabanArray, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
-                "Content-Type": "application/json"
             }
         });
 
-        // console.log("Jawaban tersimpan:", data);
+        // =============================
+        // FINAL SUBMIT PROGRESS
+        // =============================
+        await api.post("/progress-materi", {
+            materi_id: materiId,
+            video_selesai: true,
+            pdf_selesai: true,
+            is_submitted: true,
+            refleksi: refleksi.value[materiId],
+            langkah_aktif: "4",
+        }, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            }
+        });
+        finalSubmittedMap.value[materiId] = true; // 🔥 KUNCI DI FE
 
-        activeSteps.value[materiId] = '4';
-        await simpanProgress(materiId);
+        toast.add({
+            severity: 'success',
+            summary: 'Assignment berhasil dikirim',
+            life: 3000
+        });
 
-        const numericId = Number(materiId);
-        // if (!selesaiMateri.value.includes(numericId)) {
-        //     selesaiMateri.value.push(numericId);
-        // }
-
-        await simpanProgress(materiId);
         await fetchMateriById();
 
-        // refresh ulang dari backend (optional tapi paling aman)
-        await fetchMateriById();
-
-        toast.add({ severity: 'success', summary: 'The answer has been successfully saved!', life: 3000 });
-        // console.log("selesaiMateri setelah kirimSemuaData:", selesaiMateri.value);
     } catch (err) {
-        console.error('All Data', err);
+        console.error(err);
         toast.add({
             severity: 'error',
-            summary: 'Failed to save answer',
-            detail: err.response?.data?.message || err.message,
+            summary: 'Gagal submit',
             life: 3000
         });
     }
@@ -229,12 +355,12 @@ const fetchMateriById = async () => {
         for (const materi of materiData) {
             const p = progressMateriMap[materi.id];
 
-            // 🔥 FIX UTAMA
-            materi.status_selesai = Boolean(materi.status_selesai);
-
+            finalSubmittedMap.value[materi.id] = Boolean(p?.is_submitted);
+            materi.status_selesai = Boolean(p?.is_submitted);
             videoSelesai.value[materi.id] = p?.video_selesai ?? false;
             pdfSelesai.value[materi.id] = p?.pdf_selesai ?? false;
             activeSteps.value[materi.id] = p?.langkah_aktif ?? "1";
+            finalSubmittedMap.value[materi.id] = Boolean(p?.status_selesai);
             refleksi.value[materi.id] = p?.refleksi ?? "";
 
             materi.pdf_url = `${import.meta.env.VITE_API_URL}api/module-pembelajaran/${materi.id}/pdf`;
@@ -347,23 +473,23 @@ const fetchLinkGroupById = async () => {
 // };
 
 const simpanProgress = async (materiId) => {
+    if (isInitializing.value) return;
+
+    if (isFinalSubmitted(materiId)) return; // 🔒 JANGAN OVERWRITE
+
     try {
-        const payload = {
+        await api.post("/progress-materi", {
             materi_id: materiId,
             video_selesai: Boolean(videoSelesai.value[materiId]),
             pdf_selesai: Boolean(pdfSelesai.value[materiId]),
-            langkah_aktif: activeSteps.value[materiId] ?? "1",
-            refleksi: refleksi.value[materiId] ?? "",
-        };
-
-        await api.post("/progress-materi", payload, {
+            langkah_aktif: activeSteps.value[materiId] ?? "1"
+        }, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
             }
         });
-
     } catch (err) {
-        console.error("simpanProgress ERROR:", err);
+        console.error("autosave error", err);
     }
 };
 
@@ -401,7 +527,8 @@ const setupYouTubePlayers = () => {
                                             if (
                                                 duration &&
                                                 watched >= duration * 0.9 &&
-                                                !videoSelesai.value[materi.id]
+                                                !videoSelesai.value[materi.id] &&
+                                                !isFinalSubmitted(materi.id)
                                             ) {
                                                 videoSelesai.value[materi.id] = true;
                                                 clearInterval(watchIntervalIds.value[materi.id]);
@@ -474,7 +601,7 @@ const handleScroll = (materiId) => {
 
     const bottomReached = el.scrollTop + el.clientHeight >= el.scrollHeight - 5;
 
-    if (bottomReached && !pdfSelesai.value[materiId]) {
+    if (bottomReached && !pdfSelesai.value[materiId] && !isFinalSubmitted(materiId)) {
         pdfSelesai.value[materiId] = true;
         simpanProgress(materiId);
         toast.add({
@@ -770,7 +897,9 @@ const deleteFile = async (fileId, materiId) => {
 //     }
 // };
 
-
+const isFinalSubmitted = (materiId) => {
+    return finalSubmittedMap.value[materiId] === true;
+};
 
 onMounted(async () => {
     try {
@@ -791,6 +920,7 @@ onMounted(async () => {
         await fetchProgressMateri();
         await fetchClassroom();
         await fetchMateriById();
+        isInitializing.value = false;
         // for (const materi of daftarMateri.value) {
         //     await fetchUploadedFiles(materi);
         // }
@@ -1045,7 +1175,7 @@ onMounted(async () => {
                                                                 :disabled="isHistory(materi)"
                                                                 :readonly="isHistory(materi)" />
                                                             <label :for="`${soal.id}-${key}`">{{ key }}. {{ opsi
-                                                            }}</label>
+                                                                }}</label>
                                                         </div>
                                                     </div>
 

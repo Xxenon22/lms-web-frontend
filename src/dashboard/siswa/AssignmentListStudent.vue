@@ -19,17 +19,22 @@
             );
 
             const { data: semuaJawaban } = await api.get("/jawaban-siswa");
+            const { data: progressList } = await api.get(`/progress-materi/${userId.value}`);
 
             materiList.value = materiArray.map((m) => {
+                const progress = progressList.find(p =>
+                    Number(p.materi_id) === Number(m.id) &&
+                    Number(p.user_id) === Number(userId.value)
+                );
+
                 const jawabanMatch = semuaJawaban.find(j =>
                     Number(j.user_id) === Number(userId.value) &&
-                    m.bank_soal_id &&
-                    j.bank_soal_id &&
-                    Number(m.bank_soal_id) === Number(j.bank_soal_id)
+                    Number(j.bank_soal_id) === Number(m.bank_soal_id)
                 );
 
                 return {
                     ...m,
+                    progress_materi: progress ? [progress] : [],
                     nilai: jawabanMatch?.nilai ? Number(jawabanMatch.nilai) : 0,
                     guru_foto: m.guru_foto
                         ? `${import.meta.env.VITE_API_URL}${m.guru_foto}?v=${Date.now()}`
@@ -56,9 +61,7 @@
 
 
     const isCompleted = (m) => {
-        const pdf = m.pdf_selesai ?? m.progress_materi?.[0]?.pdf_selesai;
-        const vid = m.video_selesai ?? m.progress_materi?.[0]?.video_selesai;
-        return pdf === true && vid === true;
+        return !!m.progress_materi?.[0]?.is_submitted;
     };
 
     const goToMateri = (kelasId) => {
@@ -98,8 +101,8 @@
                     <div class="space-x-2">
                         <Tag severity="secondary" :value="`${m.nilai} / 100`" />
                         <Tag :value="isCompleted(m) ? 'Task Completed' : 'Not Completed'"
-                            :severity="isCompleted(m) ? 'success' : 'danger'"
-                            @click="!isCompleted(m) && goToMateri(m.kelas_id)" class="cursor-pointer" />
+                            :severity="isCompleted(m) ? 'success' : 'danger'" @click="goToMateri(m.kelas_id)"
+                            class="cursor-pointer" />
                     </div>
                 </div>
             </template>
