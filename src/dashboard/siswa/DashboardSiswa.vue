@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from "vue";
 import api from "../../services/api";
 import { useToast } from "primevue/usetoast";
+import Swal from "sweetalert2";
 
 const toast = useToast();
 
@@ -112,8 +113,22 @@ const ikutiKelas = async (id) => {
 };
 
 const batalIkutiKelas = async (id) => {
+    const result = await Swal.fire({
+        title: "Unfollow Class?",
+        text: "All your progress and submitted tasks in this class will be deleted!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, unfollow",
+        cancelButtonText: "Cancel",
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
         await api.delete(`/kelas/unfollow/${id}`);
+
         const kelas = kelasDiikuti.value.find(k => k.id === id);
         if (!kelas) return;
 
@@ -121,11 +136,22 @@ const batalIkutiKelas = async (id) => {
         kelasLainnya.value.unshift(kelas);
         kelasDiikuti.value = kelasDiikuti.value.filter(k => k.id !== id);
 
-        toast.add({ severity: "info", summary: "Unfollowed", life: 2000 });
-    } catch {
-        toast.add({ severity: "error", summary: "Failed", life: 2000 });
+        Swal.fire({
+            icon: "success",
+            title: "Unfollowed",
+            text: "Your class progress has been removed.",
+            timer: 2000,
+            showConfirmButton: false,
+        });
+    } catch (err) {
+        Swal.fire({
+            icon: "error",
+            title: "Failed",
+            text: "Failed to unfollow class",
+        });
     }
 };
+
 
 /* ================= TEACHER PROFILE ================= */
 const fetchGuruById = async (id) => {
