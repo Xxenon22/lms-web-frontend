@@ -296,11 +296,18 @@ const summaryPilgan = computed(() => {
     <div v-if="loading" class="flex justify-center ">
         <ProgressSpinner />
     </div>
-    <div v-if="!loading && !jawabanPilgan.length && !jawabanEssai.length && !jawabanRefleksi">
+    <div v-if="
+        !loading &&
+        !jawabanPilgan.length &&
+        !jawabanEssai.length &&
+        !jawabanRefleksi &&
+        !fileJawabanSiswa.length
+    ">
         <p class="flex justify-center text-gray-500 italic">
             Student has not submitted this assignment yet.
         </p>
     </div>
+
     <div v-else class="space-y-4 m-10">
         <!-- Soal pilihan ganda -->
         <Card v-for="item in jawabanPilgan" :key="item.nomor">

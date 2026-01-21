@@ -19,6 +19,7 @@
             );
 
             const { data: semuaJawaban } = await api.get("/jawaban-siswa");
+            console.log("Semua Jawaban:", semuaJawaban);
             const { data: progressList } = await api.get(`/progress-materi/${userId.value}`);
 
             materiList.value = materiArray.map((m) => {
@@ -28,10 +29,11 @@
                 );
 
                 const jawabanMatch = semuaJawaban.find(j =>
-                    Number(j.user_id) === Number(userId.value) &&
+                    // Number(j.user_id) === Number(userId.value) &&
                     Number(j.bank_soal_id) === Number(m.bank_soal_id)
                 );
 
+                console.log("Jawaban Match:", jawabanMatch);
                 return {
                     ...m,
                     progress_materi: progress ? [progress] : [],
@@ -40,6 +42,7 @@
                         ? `${import.meta.env.VITE_API_URL}${m.guru_foto}?v=${Date.now()}`
                         : null
                 };
+
             });
 
             isLoading.value = false;
