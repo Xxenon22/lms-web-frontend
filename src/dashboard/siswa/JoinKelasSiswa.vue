@@ -1165,10 +1165,7 @@ onMounted(async () => {
                                                                 alt="Gambar Soal" class="w-64 rounded" />
                                                         </div>
                                                         <div v-for="(opsi, key) in { A: soal.pg_a, B: soal.pg_b, C: soal.pg_c, D: soal.pg_d, E: soal.pg_e }"
-                                                            :key="key" class="flex items-center gap-2" :class="{
-                                                                'bg-green-100': isHistory(materi) && key === soal.kunci_jawaban,
-                                                                'bg-red-100': isHistory(materi) && key === selectedAnswers[materi.id][soal.id] && key !== soal.kunci_jawaban
-                                                            }">
+                                                            :key="key" class="flex items-center gap-2">
                                                             <RadioButton :inputId="`${soal.id}-${key}`"
                                                                 v-model="selectedAnswers[materi.id][soal.id]"
                                                                 :value="key" :name="`soal-${soal.id}`"
