@@ -19,7 +19,6 @@
             );
 
             const { data: semuaJawaban } = await api.get("/jawaban-siswa");
-            console.log("Semua Jawaban:", semuaJawaban);
             const { data: progressList } = await api.get(`/progress-materi/${userId.value}`);
 
             materiList.value = materiArray.map((m) => {
@@ -33,7 +32,6 @@
                     Number(j.bank_soal_id) === Number(m.bank_soal_id)
                 );
 
-                console.log("Jawaban Match:", jawabanMatch);
                 return {
                     ...m,
                     progress_materi: progress ? [progress] : [],
