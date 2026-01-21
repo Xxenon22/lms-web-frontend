@@ -42,7 +42,7 @@ const exportPDF = () => {
             ["Subject", data.subject || ""],
             ["Teacher", data.teacher_name || ""],
             ["Instructor", data.instructor_name || ""],
-            ["Grade", `${data.name_grade || ""} ${data.name_rombel || ""}`],
+            ["Grade", `${data.name_grade || ""} ${data.major || ""} ${data.name_rombel || ""} ${data.colab_class || ""}`],
             ["Day / Date", formattedDate], // tanggal diformat
             ["Time", data.waktu || ""],
             ["Student's Reflection", data.refleksi_siswa || ""],
@@ -151,7 +151,8 @@ onMounted(async () => {
                 </div>
                 <div class="w-2/3 space-y-5 m-4">
                     <div class="flex items-center space-x-2">
-                        <span>{{ clpRefleksi.name_grade }} {{ clpRefleksi.name_rombel }}</span>
+                        <span>{{ clpRefleksi.name_grade || "" }} {{ clpRefleksi.major || "" }} {{
+                            clpRefleksi.name_rombel || "" }} {{ clpRefleksi.colab_class || "" }}</span>
                     </div>
                 </div>
             </div>

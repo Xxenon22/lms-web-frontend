@@ -26,7 +26,7 @@ const DPL_LABELS = {
 const fetchRpk = async () => {
     try {
         const res = await api.get(`/rpk/${id}`);
-
+        console.log("Fetch RPK Response:", res);
         if (!res || !res.data) {
             console.warn("⚠️ Response kosong:", res);
             rpk.value = {};
@@ -95,9 +95,9 @@ const exportPDF = () => {
         theme: "grid",
         head: [["Field", "Value"]],
         body: [
-            ["Class & Subject", `${data.name_rombel || ""} - ${data.subject || ""}`],
+            ["Class", `${data.grade_lvl || ""} ${data.major || ""} ${data.name_rombel || ""} ${data.colab_class || ""}`],
             ["Phase", data.phase || ""],
-            ["Grade", data.grade_lvl || ""],
+            ["Subject", data.subject || ""],
             ["Teacher", data.teacher_name || ""],
             ["Instructor", data.instructor_name || ""],
             ["Tutor", data.tutor || ""],
@@ -226,7 +226,8 @@ onMounted(async () => {
             <div class="w-4/5 grid grid-cols-2 gap-x-4 gap-y-2 p-4">
                 <div class="col-span-1 flex">
                     <span class="font-bold w-32">Class :</span>
-                    <span>{{ rpk.name_rombel || '-' }}</span>
+                    <span> {{ rpk.grade_lvl }} {{ rpk.major || "" }} {{ rpk.name_rombel || "" }} {{ rpk.colab_class
+                        || "" }}</span>
                 </div>
                 <div class="col-span-1 flex">
                     <span class="font-bold w-32">Subject :</span>
@@ -237,10 +238,10 @@ onMounted(async () => {
                     <span class="font-bold w-32">Phase :</span>
                     <span>{{ rpk.phase || '-' }}</span>
                 </div>
-                <div class="col-span-1 flex">
+                <!-- <div class="col-span-1 flex">
                     <span class="font-bold w-32">Grade :</span>
                     <span>{{ rpk.grade_lvl || '-' }}</span>
-                </div>
+                </div> -->
 
                 <div class="col-span-1 flex">
                     <span class="font-bold w-32">Teacher :</span>

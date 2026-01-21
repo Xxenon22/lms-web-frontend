@@ -14,7 +14,6 @@ const classroom = ref(null)
 const modules = ref([])
 const isLoading = ref(true)
 
-
 const fetchClassroom = async () => {
     try {
         const res = await api.get(`/kelas/${kelasId}`)
